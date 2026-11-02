@@ -1,6 +1,6 @@
 // Sidebar Component - Exact Screenshot Match: Deep Midnight Navy (#0a1626) & Solid Electric Blue (#1d68e4)
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { MODULES_CONFIG, USER_ROLES } from '../utils/constants';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,30 @@ import { useAuth } from '../context/AuthContext';
 export const Sidebar = ({ isOpen, onClose }) => {
   const { currentUser, logout } = useAuth();
   const currentRole = currentUser?.role || USER_ROLES.EMPLOYEE;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Track expanded state for modules with subcategories (auto-open if current route)
+  const [expandedModules, setExpandedModules] = useState({
+    hrms: location.pathname.startsWith('/hrms')
+  });
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/hrms')) {
+      setExpandedModules(prev => ({ ...prev, hrms: true }));
+    }
+  }, [location.pathname]);
+
+  const toggleModuleExpand = (moduleId, defaultPath) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleId]: !prev[moduleId]
+    }));
+    // If navigating to the module
+    if (!location.pathname.startsWith(defaultPath)) {
+      navigate(defaultPath);
+    }
+  };
 
   // Filter modules based on user's authorized role (Super Admin sees all modules)
   const accessibleModules = MODULES_CONFIG.filter(mod => {
@@ -19,6 +43,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const initials = currentUser?.name
     ? currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
     : 'SA';
+
+  // Helper to parse query param
+  const currentSearch = new URLSearchParams(location.search);
+  const currentTab = currentSearch.get('tab') || 'records';
 
   return (
     <>
@@ -75,33 +103,91 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </span>
         </div>
 
-        {/* Navigation Menu Items */}
+        {/* Navigation Menu Items with Subcategories */}
         <div className="flex-1 overflow-y-auto px-2.5 py-1 space-y-1 custom-scrollbar">
           {accessibleModules.map((item) => {
             const IconComponent = Icons[item.icon] || Icons.CircleDot;
+            const hasSubcategories = Boolean(item.subcategories && item.subcategories.length > 0);
+            const isExpanded = Boolean(expandedModules[item.id]);
+            const isParentActive = location.pathname.startsWith(item.path);
+
             return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                onClick={onClose}
-                className={({ isActive }) => `group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
-                  isActive
-                    ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5 font-normal'
-                }`}
-              >
-                {({ isActive }) => (
-                  <>
+              <div key={item.id} className="space-y-0.5">
+                {hasSubcategories ? (
+                  // Module with Subcategories (Clickable toggle & link)
+                  <div
+                    onClick={() => toggleModuleExpand(item.id, item.path)}
+                    className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer ${
+                      isParentActive
+                        ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5 font-normal'
+                    }`}
+                  >
                     <div className="flex items-center gap-3 min-w-0">
-                      <IconComponent className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                      <IconComponent className={`w-4 h-4 flex-shrink-0 ${isParentActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
                       <span className="truncate">{item.name}</span>
                     </div>
-                    <Icons.ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
-                      isActive ? 'text-white opacity-90' : 'text-slate-500 opacity-60 group-hover:text-slate-300'
-                    }`} />
-                  </>
+                    {isExpanded ? (
+                      <Icons.ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
+                        isParentActive ? 'text-white' : 'text-slate-400'
+                      }`} />
+                    ) : (
+                      <Icons.ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
+                        isParentActive ? 'text-white opacity-90' : 'text-slate-500 opacity-60 group-hover:text-slate-300'
+                      }`} />
+                    )}
+                  </div>
+                ) : (
+                  // Standard NavLink
+                  <NavLink
+                    to={item.path}
+                    onClick={onClose}
+                    className={({ isActive }) => `group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
+                      isActive
+                        ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
+                        : 'text-slate-300 hover:text-white hover:bg-white/5 font-normal'
+                    }`}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <IconComponent className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                          <span className="truncate">{item.name}</span>
+                        </div>
+                        <Icons.ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
+                          isActive ? 'text-white opacity-90' : 'text-slate-500 opacity-60 group-hover:text-slate-300'
+                        }`} />
+                      </>
+                    )}
+                  </NavLink>
                 )}
-              </NavLink>
+
+                {/* Subcategories Dropdown List */}
+                {hasSubcategories && isExpanded && (
+                  <div className="ml-4 pl-3.5 border-l border-blue-900/40 space-y-1 pt-1 pb-1">
+                    {item.subcategories.map((sub) => {
+                      const SubIcon = Icons[sub.icon] || Icons.CircleDot;
+                      const isSubActive = isParentActive && currentTab === sub.tab;
+
+                      return (
+                        <NavLink
+                          key={sub.id}
+                          to={sub.path}
+                          onClick={onClose}
+                          className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] transition-all ${
+                            isSubActive
+                              ? 'bg-[#122e57] text-cyan-300 font-semibold border-l-2 border-cyan-400 shadow-2xs'
+                              : 'text-slate-400 hover:text-white hover:bg-white/5 font-normal'
+                          }`}
+                        >
+                          <SubIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isSubActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span className="truncate">{sub.name}</span>
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

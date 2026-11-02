@@ -40,7 +40,19 @@ export const MODULES_CONFIG = [
   { id: 'gst', name: 'GST & Taxation', path: '/gst', icon: 'Percent', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ACCOUNTANT] },
   { id: 'tally', name: 'Tally Integration', path: '/tally', icon: 'ArrowLeftRight', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.ACCOUNTANT] },
   { id: 'geotracking', name: 'GPS Tracking & Geofence', path: '/geotracking', icon: 'MapPin', roles: Object.values(USER_ROLES) },
-  { id: 'hrms', name: 'HRMS & Payroll', path: '/hrms', icon: 'UserCheck', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.HR_MANAGER, USER_ROLES.EMPLOYEE] },
+  { 
+    id: 'hrms', 
+    name: 'HRMS & Payroll', 
+    path: '/hrms', 
+    icon: 'UserCheck', 
+    roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.HR_MANAGER, USER_ROLES.EMPLOYEE],
+    subcategories: [
+      { id: 'records', name: 'i. Employee records', path: '/hrms?tab=records', icon: 'Users', tab: 'records' },
+      { id: 'attendance', name: 'ii. Attendance management', path: '/hrms?tab=attendance', icon: 'Calendar', tab: 'attendance' },
+      { id: 'salary', name: 'iii. Salary calculation', path: '/hrms?tab=salary', icon: 'Calculator', tab: 'salary' },
+      { id: 'payslips', name: 'iv. Payslip generation', path: '/hrms?tab=payslips', icon: 'FileText', tab: 'payslips' }
+    ]
+  },
   { id: 'approvals', name: 'Approval Workflows', path: '/approvals', icon: 'CheckSquare', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.PROJECT_MANAGER, USER_ROLES.PURCHASE_MANAGER, USER_ROLES.HR_MANAGER] },
   { id: 'bi', name: 'Business Intelligence', path: '/bi', icon: 'TrendingUp', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.PROJECT_MANAGER] },
   { id: 'mis', name: 'MIS Reports', path: '/mis', icon: 'BarChart3', roles: [USER_ROLES.SUPER_ADMIN, USER_ROLES.PROJECT_MANAGER, USER_ROLES.ACCOUNTANT] },

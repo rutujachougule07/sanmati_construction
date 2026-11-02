@@ -5,7 +5,8 @@
 //  iii. Salary calculation
 //  iv.  Payslip generation
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Users, Calendar, CheckCircle2, DollarSign, Download, Plus, FileText, 
   MapPin, Clock, ShieldCheck, Printer, Eye, Calculator, RefreshCw, 
@@ -21,13 +22,27 @@ import { COMPANY_DETAILS } from '../../utils/constants';
 
 export const HRMSModule = () => {
   const { hrmsEmployees, setHrmsEmployees, projects, gpsLogs } = useERPData();
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  // 4 Required Subsections:
+  // 4 Required Subsections matching sidebar subcategories:
   // 'records'    -> i. Employee records
   // 'attendance' -> ii. Attendance management
   // 'salary'     -> iii. Salary calculation
   // 'payslips'   -> iv. Payslip generation
-  const [activeTab, setActiveTab] = useState('records');
+  const tabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabFromUrl || 'records');
+
+  // Keep active tab in sync with URL search params when clicked from sidebar
+  useEffect(() => {
+    if (tabFromUrl && ['records', 'attendance', 'salary', 'payslips'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
+
+  const handleTabChange = (tabKey) => {
+    setActiveTab(tabKey);
+    setSearchParams({ tab: tabKey });
+  };
 
   // Selected Employee & Modals
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -285,14 +300,14 @@ export const HRMSModule = () => {
           </p>
         </div>
 
-        {/* 4 Required Subsection Tabs */}
+        {/* 4 Required Subsection Tabs matching Sidebar Subcategories */}
         <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
           <button
-            onClick={() => setActiveTab('records')}
+            onClick={() => handleTabChange('records')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'records'
-                ? 'bg-gold-400 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -300,11 +315,11 @@ export const HRMSModule = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('attendance')}
+            onClick={() => handleTabChange('attendance')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'attendance'
-                ? 'bg-gold-400 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -312,11 +327,11 @@ export const HRMSModule = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('salary')}
+            onClick={() => handleTabChange('salary')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'salary'
-                ? 'bg-gold-400 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <Calculator className="w-3.5 h-3.5" />
@@ -324,11 +339,11 @@ export const HRMSModule = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('payslips')}
+            onClick={() => handleTabChange('payslips')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
               activeTab === 'payslips'
-                ? 'bg-gold-400 text-slate-950 shadow-sm font-bold'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
