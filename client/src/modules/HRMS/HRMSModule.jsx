@@ -286,69 +286,25 @@ export const HRMSModule = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Subsections Navigation Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold-600 mb-0.5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1d68e4] mb-0.5">
             <span>SANMATI CONSTRUCTIONS</span>
             <span>•</span>
             <span>Module 6</span>
+            <span>•</span>
+            <span className="bg-blue-50 text-[#1d68e4] font-bold px-2 py-0.5 rounded border border-blue-200/70 text-[11px]">
+              {activeTab === 'records' && 'i. Employee Records'}
+              {activeTab === 'attendance' && 'ii. Attendance Management'}
+              {activeTab === 'salary' && 'iii. Salary Calculation'}
+              {activeTab === 'payslips' && 'iv. Payslip Generation'}
+            </span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900 font-heading">HRMS & Payroll Management</h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Comprehensive human resource suite: Employee records, attendance, salary calculations, and official payslips.
           </p>
-        </div>
-
-        {/* 4 Required Subsection Tabs matching Sidebar Subcategories */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-          <button
-            onClick={() => handleTabChange('records')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              activeTab === 'records'
-                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>i. Employee records ({hrmsEmployees.length})</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('attendance')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              activeTab === 'attendance'
-                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-            }`}
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            <span>ii. Attendance management</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('salary')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              activeTab === 'salary'
-                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-            }`}
-          >
-            <Calculator className="w-3.5 h-3.5" />
-            <span>iii. Salary calculation</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('payslips')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-              activeTab === 'payslips'
-                ? 'bg-[#1d68e4] text-white shadow-xs font-bold'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>iv. Payslip generation</span>
-          </button>
         </div>
       </div>
 
