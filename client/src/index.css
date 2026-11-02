@@ -1,0 +1,290 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-app-base: #f4f7fb;
+  --color-app-card: #ffffff;
+  --color-app-border: #e2e8f0;
+  --color-sidebar-navy: #0a1626;
+  --color-brand-blue: #1d68e4;
+  --color-brand-navy-header: #103a6c;
+  --color-text-main: #0f172a;
+  --color-text-muted: #64748b;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f4f7fb;
+  background-image: radial-gradient(at 0% 0%, rgba(226, 242, 255, 0.45) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(238, 246, 255, 0.4) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #0f172a;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Modern Card Styling (Exact Screenshot Theme) */
+.erp-card {
+  background: #ffffff;
+  border: 1px solid #e5eaf2;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+.erp-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Screenshot Table Header: Deep Royal Navy Blue with Crisp Pure White Headings */
+table thead,
+table thead tr,
+.erp-table-th {
+  background-color: #103a6c !important;
+  color: #ffffff !important;
+}
+
+table thead th,
+table thead th *,
+table thead th span,
+table thead th div,
+.erp-table-th,
+.erp-table-th * {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+}
+
+table thead th svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.erp-table-th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #0c2d54;
+}
+
+.erp-table-td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  font-size: 0.8125rem;
+}
+
+.erp-input {
+  background-color: #ffffff;
+  border: 1px solid #dce3ed;
+  color: #0f172a;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8125rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.erp-input:focus {
+  outline: none;
+  border-color: #1d68e4;
+  box-shadow: 0 0 0 2px rgba(29, 104, 228, 0.2);
+}
+
+/* Screenshot Action Buttons: Solid Electric Blue */
+.erp-btn-primary {
+  background-color: #1d68e4;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem 1.15rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(29, 104, 228, 0.3);
+}
+
+.erp-btn-primary:hover {
+  background-color: #1552b8;
+  box-shadow: 0 2px 6px rgba(29, 104, 228, 0.4);
+}
+
+.erp-btn-secondary {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.erp-btn-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.erp-btn-copper {
+  background: linear-gradient(135deg, #b87333 0%, #9e5a20 100%);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.erp-btn-copper:hover {
+  background: linear-gradient(135deg, #c88344 0%, #b06728 100%);
+}
+
+/* =========================================================
+   ENTERPRISE WHITE THEME WITH DARK BLUE SIDEBAR
+   ========================================================= */
+
+/* Main content cards & panels: White background */
+main .bg-\[\#181d25\],
+main .bg-\[\#181d24\],
+main .bg-\[\#1a1f27\],
+main .bg-\[\#1a1f26\],
+main .bg-\[\#161a22\],
+main .bg-\[\#12151a\],
+main .bg-\[\#202630\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Secondary nested containers: Light slate background */
+main .bg-\[\#14181f\],
+main .bg-\[\#13161c\],
+main .bg-\[\#1b222d\],
+main .bg-\[\#161f1c\],
+main .bg-\[\#1c222b\],
+main .bg-\[\#202732\],
+main .bg-\[\#222a36\],
+main .bg-\[\#202734\] {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+/* Card & panel borders: Clean light slate borders */
+main [class*="border-[#"],
+.modal [class*="border-[#"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Typography contrast for white theme (strictly excludes all table headers, buttons, and dark navy containers) */
+main .text-white:not(
+  .erp-btn-primary *,
+  .erp-btn-copper *,
+  .bg-gold-400 *,
+  .bg-emerald-500 *,
+  .bg-emerald-600 *,
+  .bg-rose-500 *,
+  .bg-rose-600 *,
+  .bg-blue-600 *,
+  .bg-blue-700 *,
+  thead *,
+  th *,
+  tr.bg-\[\#103a6c\] *,
+  .erp-table-th *,
+  [class*="bg-[#103a6c]"] *,
+  [class*="bg-[#0a1626]"] *
+),
+.modal .text-white:not(
+  .erp-btn-primary *,
+  .erp-btn-copper *,
+  .bg-gold-400 *,
+  .bg-emerald-500 *,
+  .bg-emerald-600 *,
+  thead *,
+  th *,
+  .erp-table-th *
+) {
+  color: #0f172a !important;
+}
+
+/* Ensure all table headings across all modules stay crisp pure white */
+main thead,
+main thead *,
+main thead th,
+main thead th span,
+main thead th div,
+.modal thead,
+.modal thead *,
+.modal thead th,
+.modal thead th span {
+  color: #ffffff !important;
+}
+
+main .text-slate-200,
+.modal .text-slate-200 {
+  color: #1e293b !important;
+}
+
+main .text-slate-300,
+.modal .text-slate-300 {
+  color: #334155 !important;
+}
+
+main .text-slate-400,
+.modal .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Inputs & selects inside modals and modules */
+select {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* Print styles for RA Bills, Quotations, Invoices */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
