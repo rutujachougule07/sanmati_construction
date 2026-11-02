@@ -1,6 +1,10 @@
-// MODULE 7: GEOTRACKING AND GEOFENCING
+// MODULE 7: GEOTRACKING AND GEOFENCING - Active Subcategories Implementation
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, ShieldCheck, AlertTriangle, Clock, RefreshCw, CheckCircle2, History, Compass, Sliders } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { 
+  MapPin, Navigation, ShieldCheck, AlertTriangle, Clock, RefreshCw, 
+  CheckCircle2, History, Compass, Sliders, Shield, Users 
+} from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { getCurrentGPSPosition, verifyGeofence } from '../../services/geofenceService';
@@ -13,6 +17,8 @@ import { formatDate } from '../../utils/formatters';
 export const GeotrackingModule = () => {
   const { projects, gpsLogs, recordGPSCheckIn, updateProject } = useERPData();
   const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'tracking';
 
   const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || 'PRJ-KLP-001');
   const [deviceLocation, setDeviceLocation] = useState(null);
@@ -20,7 +26,6 @@ export const GeotrackingModule = () => {
   const [locationError, setLocationError] = useState(null);
   const [checkInNotes, setCheckInNotes] = useState('');
   const [attendanceType, setAttendanceType] = useState('Project Site');
-  const [activeTab, setActiveTab] = useState('map'); // map, history, config
 
   // Active Project Reference
   const activeProject = projects.find(p => p.id === selectedProjectId) || projects[0];
@@ -59,114 +64,100 @@ export const GeotrackingModule = () => {
 
   // Perform GPS Check-In
   const handleExecuteCheckIn = () => {
-    if (!deviceLocation) {
-      alert("Please acquire your GPS location first.");
-      return;
-    }
+    if (!deviceLocation || !activeProject) return;
+
+    const verification = verifyGeofence(
+      deviceLocation.latitude,
+      deviceLocation.longitude,
+      activeProject.latitude,
+      activeProject.longitude,
+      activeProject.geofenceRadius || 250
+    );
 
     recordGPSCheckIn({
-      userId: currentUser?.id || 'usr_se',
-      userName: currentUser?.name || 'Er. Amit Deshmukh',
       projectId: activeProject.id,
+      projectName: activeProject.name,
+      userId: currentUser?.id || 'usr_demo',
+      userName: currentUser?.name || 'Sanmati Engineer',
+      userRole: currentUser?.role || 'Site Engineer',
       latitude: deviceLocation.latitude,
       longitude: deviceLocation.longitude,
-      accuracy: deviceLocation.accuracy,
-      notes: checkInNotes,
-      type: attendanceType
+      accuracy: Math.round(deviceLocation.accuracy || 5),
+      distanceMeters: verification.distanceMeters,
+      locationType: attendanceType,
+      attendanceStatus: verification.isInside ? 'Verified On-Site' : 'Outside Geofence',
+      notes: checkInNotes || `${attendanceType} verified at ${activeProject.name}`
     });
 
     setCheckInNotes('');
-    alert("GPS Attendance & Geofence check-in successfully logged!");
+    alert(verification.isInside 
+      ? `✅ GPS Verified! You are within ${verification.distanceMeters}m of ${activeProject.name}. Check-in recorded.`
+      : `⚠️ Caution: You are ${verification.distanceMeters}m away from the geofenced site (${activeProject.geofenceRadius}m radius allowed). Flagged for review.`
+    );
   };
 
-  const handleSaveGeofenceConfig = (e) => {
-    e.preventDefault();
+  // Save new geofence radius
+  const handleSaveRadius = () => {
     updateProject(activeProject.id, { geofenceRadius: Number(configRadius) });
-    alert(`Geofence radius updated to ${configRadius}m for ${activeProject.name}`);
+    alert(`Geofence perimeter for ${activeProject.name} updated to ${configRadius} meters.`);
   };
 
-  const logColumns = [
-    { key: 'timestamp', header: 'Timestamp', render: (row) => <span className="font-mono text-slate-300 text-[11px]">{formatDate(row.timestamp, true)}</span> },
-    { key: 'userName', header: 'Staff / User', render: (row) => <span className="font-bold text-white">{row.userName}</span> },
-    { key: 'projectName', header: 'Project Site', render: (row) => <span className="text-slate-300">{row.projectName}</span> },
+  const logsColumns = [
+    { key: 'timestamp', header: 'Timestamp', render: (row) => <span className="font-mono text-slate-700 text-xs">{formatDate(row.timestamp, true)}</span> },
+    { key: 'userName', header: 'Engineer / Staff', render: (row) => <div><span className="font-bold text-slate-900 block">{row.userName}</span><span className="text-[10px] text-slate-500">{row.userRole}</span></div> },
+    { key: 'projectName', header: 'Target Site', render: (row) => <span className="font-semibold text-slate-800">{row.projectName}</span> },
     {
       key: 'coords',
       header: 'GPS Coordinates',
-      render: (row) => <span className="font-mono text-[11px] text-slate-400">{row.latitude?.toFixed(4)}, {row.longitude?.toFixed(4)} (±{row.accuracy}m)</span>
+      render: (row) => <span className="font-mono text-[11px] text-slate-600">{row.latitude?.toFixed(4)}, {row.longitude?.toFixed(4)} (±{row.accuracy}m)</span>
     },
-    { key: 'locationType', header: 'Type', render: (row) => <span className="text-gold-400 font-semibold text-[11px]">{row.locationType}</span> },
-    { key: 'attendanceStatus', header: 'Geofence Verification', render: (row) => <StatusBadge status={row.attendanceStatus} /> },
-    { key: 'notes', header: 'Site Remarks', render: (row) => <span className="text-slate-400 text-xs italic">{row.notes || '—'}</span> }
+    { key: 'locationType', header: 'Type', render: (row) => <span className="text-[#1d68e4] font-semibold text-[11px]">{row.locationType}</span> },
+    { 
+      key: 'attendanceStatus', 
+      header: 'Geofence Verification', 
+      render: (row) => (
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+          row.attendanceStatus === 'Verified On-Site' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+        }`}>
+          {row.attendanceStatus}
+        </span>
+      )
+    },
+    { key: 'notes', header: 'Site Remarks', render: (row) => <span className="text-slate-600 text-xs italic">{row.notes || '—'}</span> }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white font-heading">GPS Geotracking & Geofencing</h2>
-          <p className="text-xs text-slate-400">
-            Mandatory location attendance verification for authorized engineers, site visits, and project boundaries.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('map')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'map' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Live Site Map
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'history' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            GPS Attendance Logs ({gpsLogs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('config')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'config' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Geofence Radius Settings
-          </button>
-        </div>
-      </div>
-
-      {/* Main Map & Check-In Console */}
-      {activeTab === 'map' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Interactive Geofence Map */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-4 shadow-lg flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-400 font-medium">Select Site:</label>
-                <select
-                  value={selectedProjectId}
-                  onChange={(e) => setSelectedProjectId(e.target.value)}
-                  className="erp-input font-bold text-xs py-1.5 w-64"
-                >
-                  {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+      {/* SUBSECTION 1: LOCATION TRACKING FOR EVERY USER */}
+      {activeTab === 'tracking' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+                7. Geotracking & Geofencing • Subsection (i)
               </div>
-
-              <button
-                onClick={handleAcquireGPS}
-                disabled={isLocating}
-                className="erp-btn-secondary text-xs flex items-center gap-1.5"
-              >
-                <Navigation className={`w-3.5 h-3.5 text-sky-400 ${isLocating ? 'animate-spin' : ''}`} />
-                <span>{deviceLocation ? 'Refresh Device GPS' : 'Acquire My GPS'}</span>
-              </button>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Location Tracking For Every User
+              </h2>
+              <p className="text-xs text-slate-500">Live satellite map of field engineers, supervisors, and Kolhapur site locations.</p>
             </div>
 
-            {locationError && (
-              <div className="p-2.5 bg-amber-950/40 border border-amber-800/50 rounded-lg text-amber-300 text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                <span>{locationError}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-slate-600 font-semibold">Select Site:</label>
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                className="erp-input font-bold text-xs py-1.5 w-60"
+              >
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
+          {/* Interactive Geofence Map */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm space-y-4">
             <GeofenceMap
               projectLat={activeProject?.latitude || 16.7028}
               projectLng={activeProject?.longitude || 74.2405}
@@ -178,49 +169,77 @@ export const GeotrackingModule = () => {
               accuracy={deviceLocation?.accuracy || 5}
             />
           </div>
+        </div>
+      )}
 
-          {/* GPS Check-In Action Card */}
-          <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-5 shadow-lg flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#242b37] pb-3">
-                <h3 className="text-base font-bold text-white font-heading">Site Check-In Action</h3>
-                <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded font-mono">
-                  {currentUser?.role}
-                </span>
+      {/* SUBSECTION 2: GPS-BASED ATTENDANCE */}
+      {activeTab === 'gps-attendance' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+              7. Geotracking & Geofencing • Subsection (ii)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              GPS-Based Attendance Verification
+            </h2>
+            <p className="text-xs text-slate-500">Acquire satellite fix and punch-in within project geofenced boundaries.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* GPS Status Card */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900">Device Satellite Position</h3>
+                <button
+                  onClick={handleAcquireGPS}
+                  disabled={isLocating}
+                  className="erp-btn-primary text-xs flex items-center gap-1.5"
+                >
+                  <Navigation className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
+                  <span>{isLocating ? 'Acquiring...' : 'Acquire My GPS'}</span>
+                </button>
               </div>
 
               {deviceLocation ? (
-                <div className="p-3 bg-[#13161c] rounded-xl border border-[#232a35] space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>GPS Coordinates:</span>
-                    <span className="font-mono text-white font-semibold">
-                      {deviceLocation.latitude.toFixed(5)}°, {deviceLocation.longitude.toFixed(5)}°
-                    </span>
+                <div className="p-4 bg-slate-50 rounded-xl space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Coordinates:</span>
+                    <span className="font-mono font-bold text-slate-900">{deviceLocation.latitude.toFixed(5)}°, {deviceLocation.longitude.toFixed(5)}°</span>
                   </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Satellite Accuracy:</span>
-                    <span className="font-mono text-emerald-400 font-semibold">±{deviceLocation.accuracy} meters</span>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Satellite Accuracy:</span>
+                    <span className="font-mono font-bold text-emerald-600">±{deviceLocation.accuracy} meters</span>
                   </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Fix Time:</span>
-                    <span className="font-mono text-slate-300">{formatDate(deviceLocation.timestamp, true)}</span>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Timestamp:</span>
+                    <span className="font-mono text-slate-700">{formatDate(deviceLocation.timestamp, true)}</span>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-[#13161c] rounded-xl border border-dashed border-[#2d3644] text-center text-xs text-slate-400 space-y-2">
-                  <Compass className="w-8 h-8 text-gold-400 mx-auto" />
-                  <p>Click "Acquire My GPS" to scan satellite position.</p>
-                  <button
-                    onClick={handleAcquireGPS}
-                    className="erp-btn-primary text-xs"
-                  >
-                    Scan GPS Satellite Fix
-                  </button>
+                <div className="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 space-y-2">
+                  <Compass className="w-8 h-8 text-[#1d68e4] mx-auto" />
+                  <p>Click "Acquire My GPS" to calculate live satellite coordinates.</p>
                 </div>
               )}
+            </div>
 
+            {/* Check-In Submission */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Record Site Punch-In</h3>
               <div>
-                <label className="block text-slate-300 font-medium mb-1 text-xs">Attendance / Activity Type</label>
+                <label className="block text-slate-600 font-semibold mb-1 text-xs">Select Assigned Site</label>
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="erp-input text-xs"
+                >
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.location})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-slate-600 font-semibold mb-1 text-xs">Activity Type</label>
                 <select
                   value={attendanceType}
                   onChange={(e) => setAttendanceType(e.target.value)}
@@ -232,59 +251,38 @@ export const GeotrackingModule = () => {
                   <option value="Survey Execution">Total Station / Leveling Survey</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-slate-300 font-medium mb-1 text-xs">Inspection Notes / Activity</label>
-                <textarea
-                  rows={3}
-                  placeholder="e.g. 3rd floor slab steel binding inspection completed with RCC contractor."
-                  value={checkInNotes}
-                  onChange={(e) => setCheckInNotes(e.target.value)}
-                  className="erp-input text-xs"
-                />
-              </div>
+              <button
+                onClick={handleExecuteCheckIn}
+                disabled={!deviceLocation}
+                className="w-full erp-btn-primary py-2.5 text-xs font-bold disabled:opacity-50"
+              >
+                Punch-In With GPS Verification
+              </button>
             </div>
-
-            <button
-              onClick={handleExecuteCheckIn}
-              disabled={!deviceLocation}
-              className="mt-6 w-full erp-btn-primary text-xs py-2.5 font-bold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Record GPS Verified Attendance</span>
-            </button>
           </div>
         </div>
       )}
 
-      {/* History Tab */}
-      {activeTab === 'history' && (
-        <DataTable
-          columns={logColumns}
-          data={gpsLogs}
-          searchKey="userName"
-          searchPlaceholder="Search GPS logs by staff name, project, attendance status..."
-          exportFileName="Sanmati_GPS_Logs"
-        />
-      )}
+      {/* SUBSECTION 3: GEOFENCE AREA CONFIGURATION */}
+      {activeTab === 'geofence' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-purple-600 uppercase tracking-wider">
+              7. Geotracking & Geofencing • Subsection (iii)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Geofence Area Configuration
+            </h2>
+            <p className="text-xs text-slate-500">Configure virtual boundaries and radius for Tarabai Park, Bawada Bridge, and MIDC sites.</p>
+          </div>
 
-      {/* Geofence Configuration Tab */}
-      {activeTab === 'config' && (
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-6 shadow-xl max-w-2xl space-y-4">
-          <h3 className="text-base font-bold text-white font-heading">
-            Configure Project Geofence Perimeter ({activeProject.name})
-          </h3>
-          <p className="text-xs text-slate-400">
-            Set the authorized circular boundary in meters from site center. Check-ins beyond this radius are marked as unverified for audit.
-          </p>
-
-          <form onSubmit={handleSaveGeofenceConfig} className="space-y-4 text-xs">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4 max-w-2xl">
             <div>
-              <label className="block text-slate-300 font-medium mb-1">Target Project</label>
+              <label className="block text-slate-600 font-semibold mb-1 text-xs">Select Project Site</label>
               <select
                 value={selectedProjectId}
                 onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="erp-input font-bold"
+                className="erp-input text-xs font-bold"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -292,31 +290,10 @@ export const GeotrackingModule = () => {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Latitude Center</label>
-                <input
-                  type="text"
-                  readOnly
-                  value={activeProject.latitude}
-                  className="erp-input font-mono bg-[#12151b] text-slate-400"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">Longitude Center</label>
-                <input
-                  type="text"
-                  readOnly
-                  value={activeProject.longitude}
-                  className="erp-input font-mono bg-[#12151b] text-slate-400"
-                />
-              </div>
-            </div>
-
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-slate-300 font-medium">Permitted Geofence Radius (Meters)</label>
-                <span className="font-bold text-gold-400 font-mono text-sm">{configRadius} m</span>
+              <div className="flex justify-between text-xs text-slate-600 font-medium mb-1.5">
+                <span>Geofence Perimeter Radius:</span>
+                <strong className="text-[#1d68e4] font-mono">{configRadius} meters</strong>
               </div>
               <input
                 type="range"
@@ -325,22 +302,44 @@ export const GeotrackingModule = () => {
                 step="25"
                 value={configRadius}
                 onChange={(e) => setConfigRadius(e.target.value)}
-                className="w-full accent-gold-400 cursor-pointer"
+                className="w-full accent-[#1d68e4] cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-                <span>50m (Strict)</span>
-                <span>250m (Standard)</span>
-                <span>1000m (Large Yard / Infrastructure)</span>
+              <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+                <span>50m (Strict Entrance)</span>
+                <span>250m (Standard Site)</span>
+                <span>1000m (Broad Zone)</span>
               </div>
             </div>
 
             <button
-              type="submit"
+              onClick={handleSaveRadius}
               className="erp-btn-primary text-xs"
             >
-              Update Geofence Radius
+              Update Geofence Boundary
             </button>
-          </form>
+          </div>
+        </div>
+      )}
+
+      {/* SUBSECTION 4: LOCATION HISTORY & REPORTS */}
+      {activeTab === 'history' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-cyan-600 uppercase tracking-wider">
+              7. Geotracking & Geofencing • Subsection (iv)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Location History & Attendance Logs
+            </h2>
+            <p className="text-xs text-slate-500">Audit trail of all engineer punch-ins, distances from site center, and compliance.</p>
+          </div>
+
+          <DataTable
+            columns={logsColumns}
+            data={gpsLogs}
+            searchKey="userName"
+            searchPlaceholder="Search logs by engineer name or site..."
+          />
         </div>
       )}
     </div>

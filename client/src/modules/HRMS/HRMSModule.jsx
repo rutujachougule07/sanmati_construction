@@ -19,6 +19,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { formatCurrency, formatNumber, formatDate, numberToWordsIndian } from '../../utils/formatters';
 import { generatePayslipPDF, exportToExcel } from '../../services/exportService';
 import { COMPANY_DETAILS } from '../../utils/constants';
+import { DatePicker } from '../../components/DatePicker';
 
 export const HRMSModule = () => {
   const { hrmsEmployees, setHrmsEmployees, projects, gpsLogs } = useERPData();
@@ -353,11 +354,9 @@ export const HRMSModule = () => {
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
                   Attendance Register Date
                 </label>
-                <input
-                  type="date"
+                <DatePicker
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-gold-500"
+                  onChange={setSelectedDate}
                 />
               </div>
 

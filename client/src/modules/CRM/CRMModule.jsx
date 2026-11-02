@@ -1,6 +1,10 @@
-// MODULE 1: CRM MANAGEMENT
+// MODULE 1: CRM MANAGEMENT - Active Subcategories Implementation
 import React, { useState } from 'react';
-import { Plus, Users, Phone, Mail, MapPin, Building, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { 
+  Plus, Users, Phone, Mail, MapPin, Building, Calendar, CheckCircle2, Clock, 
+  Briefcase, History, AlertCircle, ArrowRight, UserCheck 
+} from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
 import { Modal } from '../../components/Modal';
@@ -9,9 +13,11 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export const CRMModule = () => {
   const { clients, setClients, projects } = useERPData();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'customers';
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [activeTab, setActiveTab] = useState('clients'); // clients or enquiries
 
   // Sample Leads / Enquiries
   const [enquiries, setEnquiries] = useState([
@@ -42,6 +48,20 @@ export const CRMModule = () => {
       status: "Quotation Sent",
       nextFollowUp: "2026-11-08",
       notes: "Commercial quotation submitted, awaiting board approval."
+    },
+    {
+      id: "ENQ-2026-083",
+      clientName: "Panchaganga Agro Tech Hub",
+      contactPerson: "Vikram Mane",
+      phone: "+91 98901 22334",
+      email: "vikram@panchagangaagro.com",
+      projectType: "Commercial Processing Facility",
+      estimatedValue: 38000000,
+      location: "Gandhinagar, Kolhapur",
+      assignedTo: "Er. Rajesh Kulkarni",
+      status: "Site Inspection Completed",
+      nextFollowUp: "2026-11-04",
+      notes: "Soil testing report submitted, preparing structural quotation."
     }
   ]);
 
@@ -73,14 +93,14 @@ export const CRMModule = () => {
   };
 
   const clientColumns = [
-    { key: 'id', header: 'Client ID', render: (row) => <span className="font-bold text-gold-400">{row.id}</span> },
+    { key: 'id', header: 'Client ID', render: (row) => <span className="font-bold text-[#1d68e4]">{row.id}</span> },
     {
       key: 'name',
       header: 'Client / Company',
       render: (row) => (
         <div>
-          <span className="font-bold text-white block">{row.name}</span>
-          <span className="text-[11px] text-slate-400">{row.category}</span>
+          <span className="font-bold text-slate-900 block">{row.name}</span>
+          <span className="text-[11px] text-slate-500">{row.category}</span>
         </div>
       )
     },
@@ -89,14 +109,14 @@ export const CRMModule = () => {
       header: 'Contact Person',
       render: (row) => (
         <div className="text-xs">
-          <p className="text-slate-200">{row.contactPerson}</p>
-          <p className="text-slate-400 text-[11px]">{row.phone}</p>
+          <p className="text-slate-800 font-medium">{row.contactPerson}</p>
+          <p className="text-slate-500 text-[11px]">{row.phone}</p>
         </div>
       )
     },
-    { key: 'gstin', header: 'GSTIN', render: (row) => <span className="font-mono text-[11px] text-slate-300">{row.gstin || '—'}</span> },
-    { key: 'totalBilled', header: 'Total Billed', align: 'right', render: (row) => <span className="font-semibold text-white">{formatCurrency(row.totalBilled)}</span> },
-    { key: 'outstanding', header: 'Outstanding', align: 'right', render: (row) => <span className={`font-semibold ${row.outstanding > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{formatCurrency(row.outstanding)}</span> },
+    { key: 'gstin', header: 'GSTIN', render: (row) => <span className="font-mono text-[11px] text-slate-600">{row.gstin || '—'}</span> },
+    { key: 'totalBilled', header: 'Total Billed', align: 'right', render: (row) => <span className="font-semibold text-slate-900">{formatCurrency(row.totalBilled)}</span> },
+    { key: 'outstanding', header: 'Outstanding', align: 'right', render: (row) => <span className={`font-semibold ${row.outstanding > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{formatCurrency(row.outstanding)}</span> },
     {
       key: 'actions',
       header: 'Actions',
@@ -104,7 +124,7 @@ export const CRMModule = () => {
       render: (row) => (
         <button
           onClick={() => setSelectedClient(row)}
-          className="px-2.5 py-1 bg-[#222a36] hover:bg-gold-400 hover:text-black rounded text-[11px] font-semibold transition-colors"
+          className="px-2.5 py-1 bg-slate-100 hover:bg-[#1d68e4] hover:text-white rounded text-[11px] font-semibold transition-colors cursor-pointer"
         >
           View Profile
         </button>
@@ -112,260 +132,309 @@ export const CRMModule = () => {
     }
   ];
 
+  const leadColumns = [
+    { key: 'id', header: 'Enquiry ID', render: (row) => <span className="font-bold text-sky-600">{row.id}</span> },
+    { key: 'clientName', header: 'Prospect Client', render: (row) => <span className="font-bold text-slate-900">{row.clientName}</span> },
+    { key: 'projectType', header: 'Scope / Type', render: (row) => <span className="text-slate-700">{row.projectType}</span> },
+    { key: 'estimatedValue', header: 'Est. Value', align: 'right', render: (row) => <span className="font-bold font-mono text-emerald-600">{formatCurrency(row.estimatedValue)}</span> },
+    { key: 'assignedTo', header: 'Assigned Lead', render: (row) => <span className="text-slate-700 text-xs">{row.assignedTo}</span> },
+    {
+      key: 'status',
+      header: 'Pipeline Stage',
+      render: (row) => (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+          {row.status}
+        </span>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white font-heading">CRM & Client Management</h2>
-          <p className="text-xs text-slate-400">Manage client profiles, new project leads, enquiries, and follow-ups in Kolhapur.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('clients')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'clients' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Clients Directory ({clients.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('enquiries')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'enquiries' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Leads & Enquiries ({enquiries.length})
-          </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="erp-btn-primary text-xs"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Register Client</span>
-          </button>
-        </div>
-      </div>
+      {/* SUBSECTION 1: CUSTOMER DETAILS MANAGEMENT */}
+      {activeTab === 'customers' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+                1. CRM Management • Subsection (i)
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Customer Details Management
+              </h2>
+              <p className="text-xs text-slate-500">Corporate client directories, GSTIN registration, and verified contact profiles.</p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="erp-btn-primary text-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Register New Client</span>
+            </button>
+          </div>
 
-      {activeTab === 'clients' ? (
-        <DataTable
-          columns={clientColumns}
-          data={clients}
-          searchKey="name"
-          searchPlaceholder="Search clients by name, contact, GSTIN..."
-          exportFileName="Sanmati_Clients_List"
-        />
-      ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DataTable
+            columns={clientColumns}
+            data={clients}
+            searchKey="name"
+            searchPlaceholder="Search clients by company name or GSTIN..."
+          />
+        </div>
+      )}
+
+      {/* SUBSECTION 2: LEAD MANAGEMENT */}
+      {activeTab === 'leads' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="text-[11px] font-bold text-sky-600 uppercase tracking-wider">
+                1. CRM Management • Subsection (ii)
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Lead & Prospect Management
+              </h2>
+              <p className="text-xs text-slate-500">Track incoming civil tenders, construction inquiries, and deal pipelines.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Total Active Inquiries</span>
+              <div className="text-2xl font-black text-slate-900 mt-1">{enquiries.length} Prospects</div>
+            </div>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Total Pipeline Value</span>
+              <div className="text-2xl font-black text-emerald-600 font-mono mt-1">₹14,50,00,000</div>
+            </div>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Conversion Rate</span>
+              <div className="text-2xl font-black text-[#1d68e4] mt-1">68.4%</div>
+            </div>
+          </div>
+
+          <DataTable
+            columns={leadColumns}
+            data={enquiries}
+            searchKey="clientName"
+            searchPlaceholder="Search leads by client name or project type..."
+          />
+        </div>
+      )}
+
+      {/* SUBSECTION 3: FOLLOW-UP REMINDERS */}
+      {activeTab === 'reminders' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-amber-600 uppercase tracking-wider">
+              1. CRM Management • Subsection (iii)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Follow-Up Reminders & Schedules
+            </h2>
+            <p className="text-xs text-slate-500">Upcoming site meetings, commercial negotiations, and client calls.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {enquiries.map((enq) => (
-              <div key={enq.id} className="p-5 bg-[#181d25] border border-[#27303e] rounded-xl shadow-lg space-y-3">
+              <div key={enq.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gold-400">{enq.id}</span>
-                  <StatusBadge status={enq.status} />
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <span>Due: {formatDate(enq.nextFollowUp)}</span>
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">{enq.id}</span>
                 </div>
+
                 <div>
-                  <h4 className="text-base font-bold text-white font-heading">{enq.clientName}</h4>
-                  <p className="text-xs text-slate-400">{enq.projectType}</p>
+                  <h4 className="text-sm font-bold text-slate-900">{enq.clientName}</h4>
+                  <p className="text-xs text-slate-500">{enq.contactPerson} • {enq.phone}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-300 pt-2 border-t border-[#222935]">
-                  <div>Est. Value: <span className="font-bold text-emerald-400">{formatCurrency(enq.estimatedValue)}</span></div>
-                  <div>Assigned: <span className="font-bold text-white">{enq.assignedTo}</span></div>
-                  <div>Location: <span className="text-slate-400">{enq.location}</span></div>
-                  <div>Follow-up: <span className="text-gold-400 font-semibold">{enq.nextFollowUp}</span></div>
+
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                  <span className="font-semibold block text-[11px] text-slate-500 mb-0.5">Action Item:</span>
+                  {enq.notes}
                 </div>
-                <p className="text-xs text-slate-400 bg-[#12151a] p-2 rounded border border-[#222935]">
-                  <strong className="text-slate-300">Notes:</strong> {enq.notes}
-                </p>
+
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                  <span className="text-slate-500">Assignee: <strong className="text-slate-800">{enq.assignedTo}</strong></span>
+                  <button className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold text-[11px] hover:bg-emerald-100 transition-colors">
+                    Mark Done
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Client Profile Details Modal */}
+      {/* SUBSECTION 4: CUSTOMER HISTORY */}
+      {activeTab === 'history' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+              1. CRM Management • Subsection (iv)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Customer History & Completed Projects
+            </h2>
+            <p className="text-xs text-slate-500">Past interaction records, commercial contracts, and historical civil executions.</p>
+          </div>
+
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+            <h4 className="text-sm font-bold text-slate-900">Historical Client Ledger & Completion Logs</h4>
+            <div className="divide-y divide-slate-100">
+              {clients.map((c) => (
+                <div key={c.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                      {c.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-900">{c.name}</h5>
+                      <span className="text-[11px] text-slate-500">Member since {formatDate(c.createdDate || '2025-06-01')} • {c.category}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs font-mono">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Total Billed</span>
+                      <strong className="text-slate-900">{formatCurrency(c.totalBilled)}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 block">Outstanding</span>
+                      <strong className={c.outstanding > 0 ? 'text-rose-600' : 'text-emerald-600'}>{formatCurrency(c.outstanding)}</strong>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedClient(c)}
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold"
+                    >
+                      Dossier
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Client Profile Modal */}
       {selectedClient && (
         <Modal
           isOpen={Boolean(selectedClient)}
           onClose={() => setSelectedClient(null)}
           title={`Client Profile: ${selectedClient.name}`}
-          subtitle={`Client ID: ${selectedClient.id}`}
         >
           <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-4 bg-[#14181f] p-4 rounded-xl border border-[#262e3c]">
+            <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl">
               <div>
-                <span className="text-slate-400 block text-[11px]">Contact Person:</span>
-                <span className="text-white font-semibold text-sm">{selectedClient.contactPerson}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 block text-[11px]">Category:</span>
-                <span className="text-gold-400 font-semibold">{selectedClient.category}</span>
+                <span className="text-slate-500 block">Client ID</span>
+                <strong className="text-slate-900 font-mono">{selectedClient.id}</strong>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px]">Phone:</span>
-                <span className="text-white">{selectedClient.phone}</span>
+                <span className="text-slate-500 block">GSTIN</span>
+                <strong className="text-slate-900 font-mono">{selectedClient.gstin || '27AAYCS9281Q1ZU'}</strong>
               </div>
               <div>
-                <span className="text-slate-400 block text-[11px]">Email:</span>
-                <span className="text-white">{selectedClient.email}</span>
+                <span className="text-slate-500 block">Contact Person</span>
+                <strong className="text-slate-900">{selectedClient.contactPerson}</strong>
               </div>
-              <div className="col-span-2">
-                <span className="text-slate-400 block text-[11px]">Registered Address:</span>
-                <span className="text-white">{selectedClient.address}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-slate-400 block text-[11px]">GSTIN Number:</span>
-                <span className="text-white font-mono">{selectedClient.gstin || 'Unregistered'}</span>
+              <div>
+                <span className="text-slate-500 block">Phone</span>
+                <strong className="text-slate-900">{selectedClient.phone}</strong>
               </div>
             </div>
-
-            {/* Financial Ledger Snapshot */}
-            <div className="bg-[#14181f] p-4 rounded-xl border border-[#262e3c]">
-              <h5 className="font-bold text-white mb-2">Financial Snapshot</h5>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-2.5 bg-[#1b222d] rounded-lg">
-                  <span className="text-slate-400 text-[11px] block">Total Billed:</span>
-                  <span className="text-lg font-bold text-white">{formatCurrency(selectedClient.totalBilled)}</span>
-                </div>
-                <div className="p-2.5 bg-[#1b222d] rounded-lg">
-                  <span className="text-slate-400 text-[11px] block">Outstanding Dues:</span>
-                  <span className={`text-lg font-bold ${selectedClient.outstanding > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {formatCurrency(selectedClient.outstanding)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Associated Projects */}
-            <div>
-              <h5 className="font-bold text-white mb-2">Associated Projects ({projects.filter(p => p.clientId === selectedClient.id).length})</h5>
-              <div className="space-y-2">
-                {projects.filter(p => p.clientId === selectedClient.id).map(proj => (
-                  <div key={proj.id} className="p-2.5 bg-[#14181f] rounded-lg border border-[#262e3c] flex items-center justify-between">
-                    <div>
-                      <p className="font-bold text-white">{proj.name}</p>
-                      <p className="text-[11px] text-slate-400">{proj.location}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gold-400">{formatCurrency(proj.contractValue)}</p>
-                      <StatusBadge status={proj.status} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div className="p-3 bg-slate-50 rounded-xl">
+              <span className="text-slate-500 block">Registered Office Address</span>
+              <p className="text-slate-800 font-medium mt-0.5">{selectedClient.address || 'Station Road, Kolhapur, Maharashtra'}</p>
             </div>
           </div>
         </Modal>
       )}
 
       {/* Register Client Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Register New Client"
-        subtitle="Add a new client or institutional organization to SANMATI CONSTRUCTIONS"
-      >
-        <form onSubmit={handleCreateClient} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-slate-300 font-medium mb-1">Client / Company Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Kolhapur Developers Pvt Ltd"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="erp-input"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+      {isModalOpen && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Register New Client / Corporate Developer"
+        >
+          <form onSubmit={handleCreateClient} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-300 font-medium mb-1">Contact Person *</label>
+              <label className="block text-slate-700 font-semibold mb-1">Company / Developer Name</label>
               <input
                 type="text"
                 required
-                placeholder="Full Name"
-                value={formData.contactPerson}
-                onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="erp-input"
+                placeholder="e.g. Kolhapur Infrastructure Developers LLP"
               />
             </div>
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="erp-input"
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Contact Person</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.contactPerson}
+                  onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                  className="erp-input"
+                  placeholder="e.g. Ramesh Patil"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Phone Number</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="erp-input"
+                  placeholder="+91 98220 00000"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="erp-input"
+                  placeholder="contact@company.com"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">GSTIN</label>
+                <input
+                  type="text"
+                  value={formData.gstin}
+                  onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
+                  className="erp-input"
+                  placeholder="27XXXXX0000X1ZX"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50"
               >
-                <option value="Private Real Estate">Private Real Estate</option>
-                <option value="Government / Municipal">Government / Municipal</option>
-                <option value="Institutional">Institutional</option>
-                <option value="Industrial / Cooperative">Industrial / Cooperative</option>
-              </select>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="erp-btn-primary"
+              >
+                Save Client
+              </button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Phone Number *</label>
-              <input
-                type="tel"
-                required
-                placeholder="+91 98220 00000"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="erp-input"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Email Address</label>
-              <input
-                type="email"
-                placeholder="client@domain.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="erp-input"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-slate-300 font-medium mb-1">Site / Office Address *</label>
-            <textarea
-              required
-              rows={2}
-              placeholder="Full address in Kolhapur / Maharashtra"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="erp-input"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 font-medium mb-1">GSTIN Number (15 Characters)</label>
-            <input
-              type="text"
-              maxLength={15}
-              placeholder="27AAAAA0000A1Z5"
-              value={formData.gstin}
-              onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
-              className="erp-input font-mono"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-3 border-t border-[#262e3c]">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="erp-btn-secondary text-xs"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="erp-btn-primary text-xs"
-            >
-              Save Client Record
-            </button>
-          </div>
-        </form>
-      </Modal>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 };

@@ -1,6 +1,10 @@
-// MODULE 2: ACCOUNT MANAGEMENT
+// MODULE 2: ACCOUNT MANAGEMENT - Active Subcategories Implementation
 import React, { useState } from 'react';
-import { Landmark, ArrowUpRight, ArrowDownRight, CreditCard, DollarSign, Calendar, Plus, CheckCircle, FileText } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { 
+  Landmark, ArrowUpRight, ArrowDownRight, CreditCard, DollarSign, Calendar, 
+  Plus, CheckCircle, FileText, Receipt, BookOpen, BarChart3, TrendingUp 
+} from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
 import { Modal } from '../../components/Modal';
@@ -9,7 +13,9 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export const AccountsModule = () => {
   const { clients, vendors, raBills } = useERPData();
-  const [activeTab, setActiveTab] = useState('transactions'); // transactions, clientLedger, vendorLedger
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'records';
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Financial transactions ledger
@@ -58,332 +64,210 @@ export const AccountsModule = () => {
       date: "2026-10-28",
       account: "HDFC Current A/c - 501002",
       type: "Receipt",
-      party: "D. Y. Patil Education Society",
+      party: "Shri Mahalaxmi Cooperative Housing",
       category: "Mobilization Advance",
-      debit: 5000000,
+      debit: 2500000,
       credit: 0,
-      balance: 28280000,
-      reference: "NEFT/ICIC/55410",
+      balance: 25780000,
+      reference: "RTGS/SBIN/55120",
       status: "Reconciled"
     }
   ]);
 
-  const [formData, setFormData] = useState({
-    account: 'HDFC Current A/c - 501002',
-    type: 'Receipt',
-    party: '',
-    category: 'Client Billing',
-    amount: '',
-    reference: '',
-    date: new Date().toISOString().split('T')[0]
-  });
-
-  const handleRecordTransaction = (e) => {
-    e.preventDefault();
-    const amt = Number(formData.amount);
-    const newTxn = {
-      id: `TXN-${Date.now()}`,
-      date: formData.date,
-      account: formData.account,
-      type: formData.type,
-      party: formData.party,
-      category: formData.category,
-      debit: formData.type === 'Receipt' ? amt : 0,
-      credit: formData.type === 'Payment' ? amt : 0,
-      balance: 25000000 + (formData.type === 'Receipt' ? amt : -amt),
-      reference: formData.reference || `CHQ-${Math.floor(100000 + Math.random() * 900000)}`,
-      status: 'Pending Reconciliation'
-    };
-    setTransactions([newTxn, ...transactions]);
-    setIsModalOpen(false);
-  };
-
+  // Transaction columns
   const txnColumns = [
-    { key: 'date', header: 'Date', render: (row) => <span className="text-slate-300 font-mono text-[11px]">{formatDate(row.date)}</span> },
-    { key: 'id', header: 'Voucher No', render: (row) => <span className="font-bold text-gold-400">{row.id}</span> },
-    {
-      key: 'party',
-      header: 'Particulars / Account',
-      render: (row) => (
-        <div>
-          <span className="font-bold text-white block">{row.party}</span>
-          <span className="text-[11px] text-slate-400">{row.category} • {row.account}</span>
-        </div>
-      )
-    },
+    { key: 'date', header: 'Date', render: (row) => <span className="text-slate-800 font-semibold">{formatDate(row.date)}</span> },
+    { key: 'id', header: 'Voucher No', render: (row) => <span className="font-mono font-bold text-[#1d68e4]">{row.id}</span> },
+    { key: 'party', header: 'Party / Ledger Description', render: (row) => <div><span className="font-bold text-slate-900 block">{row.party}</span><span className="text-[11px] text-slate-500">{row.category}</span></div> },
+    { key: 'account', header: 'Bank / Cash Account', render: (row) => <span className="text-xs text-slate-700">{row.account}</span> },
     {
       key: 'type',
       header: 'Type',
       render: (row) => (
-        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-          row.type === 'Receipt' ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-700/40' : 'bg-rose-950/70 text-rose-400 border border-rose-700/40'
+        <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
+          row.type === 'Receipt' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
         }`}>
-          {row.type}
+          {row.type === 'Receipt' ? <ArrowDownRight className="w-3 h-3 text-emerald-600" /> : <ArrowUpRight className="w-3 h-3 text-rose-600" />}
+          <span>{row.type}</span>
         </span>
       )
     },
-    {
-      key: 'debit',
-      header: 'Debit (Receipt)',
-      align: 'right',
-      render: (row) => <span className="font-mono text-emerald-400 font-semibold">{row.debit > 0 ? formatCurrency(row.debit) : '—'}</span>
-    },
-    {
-      key: 'credit',
-      header: 'Credit (Payment)',
-      align: 'right',
-      render: (row) => <span className="font-mono text-rose-400 font-semibold">{row.credit > 0 ? formatCurrency(row.credit) : '—'}</span>
-    },
-    {
-      key: 'reference',
-      header: 'Bank Ref',
-      render: (row) => <span className="font-mono text-[11px] text-slate-400">{row.reference}</span>
-    },
-    {
-      key: 'status',
-      header: 'Reconciliation',
-      render: (row) => <StatusBadge status={row.status} />
-    }
+    { key: 'debit', header: 'Inward / Debit', align: 'right', render: (row) => <span className="font-mono font-bold text-emerald-600">{row.debit > 0 ? formatCurrency(row.debit) : '—'}</span> },
+    { key: 'credit', header: 'Outward / Credit', align: 'right', render: (row) => <span className="font-mono font-bold text-rose-600">{row.credit > 0 ? formatCurrency(row.credit) : '—'}</span> },
+    { key: 'balance', header: 'Running Balance', align: 'right', render: (row) => <span className="font-mono font-bold text-slate-900">{formatCurrency(row.balance)}</span> }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white font-heading">Accounts & Financial Ledger</h2>
-          <p className="text-xs text-slate-400">Cashbook, bank accounts, vouchers, client receivables, and vendor payables.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('transactions')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'transactions' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            General Ledger ({transactions.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('clientLedger')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'clientLedger' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Client Debtors ({clients.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('vendorLedger')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'vendorLedger' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
-          >
-            Vendor Creditors ({vendors.length})
-          </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="erp-btn-primary text-xs"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Record Voucher</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Account Balances Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-4 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>HDFC Bank (Current A/c - 501002)</span>
-            <Landmark className="w-4 h-4 text-gold-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-white font-heading font-mono">₹2,82,80,000.00</h3>
-          <span className="text-[11px] text-emerald-400 font-semibold mt-1 inline-block">Active • Primary Operational A/c</span>
-        </div>
-
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-4 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>Total Receivables (Debtors)</span>
-            <ArrowDownRight className="w-4 h-4 text-emerald-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-emerald-400 font-heading font-mono">
-            {formatCurrency(clients.reduce((acc, c) => acc + (c.outstanding || 0), 0))}
-          </h3>
-          <span className="text-[11px] text-slate-400 mt-1 inline-block">Pending across {clients.length} clients</span>
-        </div>
-
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-4 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>Total Payables (Creditors)</span>
-            <ArrowUpRight className="w-4 h-4 text-rose-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-rose-400 font-heading font-mono">
-            {formatCurrency(vendors.reduce((acc, v) => acc + (v.outstandingBalance || 0), 0))}
-          </h3>
-          <span className="text-[11px] text-slate-400 mt-1 inline-block">Due to suppliers & subcontractors</span>
-        </div>
-      </div>
-
-      {/* Main Ledger Table */}
-      {activeTab === 'transactions' && (
-        <DataTable
-          columns={txnColumns}
-          data={transactions}
-          searchKey="party"
-          searchPlaceholder="Search vouchers by party, category, bank reference..."
-          exportFileName="Sanmati_Financial_Transactions"
-        />
-      )}
-
-      {activeTab === 'clientLedger' && (
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-5 shadow-lg">
-          <h3 className="text-base font-bold text-white font-heading mb-4">Sundry Debtors (Client Accounts)</h3>
-          <div className="space-y-3">
-            {clients.map(cli => (
-              <div key={cli.id} className="p-3.5 bg-[#14181f] rounded-xl border border-[#242b37] flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-bold text-white">{cli.name}</h4>
-                  <p className="text-xs text-slate-400">Total Billed to Date: {formatCurrency(cli.totalBilled)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-400">Outstanding Balance</p>
-                  <p className={`text-base font-bold font-mono ${cli.outstanding > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {formatCurrency(cli.outstanding)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'vendorLedger' && (
-        <div className="bg-[#181d25] border border-[#27303e] rounded-xl p-5 shadow-lg">
-          <h3 className="text-base font-bold text-white font-heading mb-4">Sundry Creditors (Vendor & Subcontractor Accounts)</h3>
-          <div className="space-y-3">
-            {vendors.map(vnd => (
-              <div key={vnd.id} className="p-3.5 bg-[#14181f] rounded-xl border border-[#242b37] flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-bold text-white">{vnd.name}</h4>
-                  <p className="text-xs text-slate-400">Category: {vnd.category} • Total Purchases: {formatCurrency(vnd.totalPurchase)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-400">Amount Payable</p>
-                  <p className="text-base font-bold text-rose-400 font-mono">
-                    {formatCurrency(vnd.outstandingBalance)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Record Financial Transaction Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Record Financial Voucher"
-        subtitle="Create a new payment or receipt entry for the accounting ledger"
-      >
-        <form onSubmit={handleRecordTransaction} className="space-y-4 text-xs">
-          <div className="grid grid-cols-2 gap-3">
+      {/* SUBSECTION 1: INCOME & EXPENSE RECORDS */}
+      {activeTab === 'records' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <label className="block text-slate-300 font-medium mb-1">Voucher Type *</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="erp-input font-bold"
-              >
-                <option value="Receipt">Receipt (Incoming Funds / Client Payment)</option>
-                <option value="Payment">Payment (Outgoing / Vendor / Expense)</option>
-              </select>
+              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+                2. Account Management • Subsection (i)
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Income & Expense Records
+              </h2>
+              <p className="text-xs text-slate-500">Real-time inflows, client receipts, subcontractor payments, and operational vouchers.</p>
             </div>
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Transaction Date *</label>
-              <input
-                type="date"
-                required
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="erp-input"
-              />
-            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="erp-btn-primary text-xs flex items-center gap-1.5 self-start sm:self-auto cursor-pointer shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Record Inflow / Outflow</span>
+            </button>
           </div>
 
+          <DataTable
+            columns={txnColumns}
+            data={transactions}
+            searchKey="party"
+            searchPlaceholder="Search transactions by party, bill, or voucher..."
+          />
+        </div>
+      )}
+
+      {/* SUBSECTION 2: PAYMENT TRACKING */}
+      {activeTab === 'payments' && (
+        <div className="space-y-6">
           <div>
-            <label className="block text-slate-300 font-medium mb-1">Party / Ledger Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Tarabai Heights Developers LLP / Rajaram Steels"
-              value={formData.party}
-              onChange={(e) => setFormData({ ...formData, party: e.target.value })}
-              className="erp-input"
-            />
+            <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+              2. Account Management • Subsection (ii)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Payment Tracking & Aging Dues
+            </h2>
+            <p className="text-xs text-slate-500">Monitor client receivable deadlines and vendor payables aging schedules.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Bank Account</label>
-              <select
-                value={formData.account}
-                onChange={(e) => setFormData({ ...formData, account: e.target.value })}
-                className="erp-input"
-              >
-                <option value="HDFC Current A/c - 501002">HDFC Current A/c - 501002</option>
-                <option value="SBI Project A/c - 302918">SBI Project A/c - 302918</option>
-                <option value="ICICI Escrow A/c - 067801">ICICI Escrow A/c - 067801</option>
-                <option value="Petty Cash Kawala Naka">Petty Cash Kawala Naka</option>
-              </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Client Receivables */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <ArrowDownRight className="w-4 h-4 text-emerald-600" />
+                  <span>Pending Client Receivables</span>
+                </h4>
+                <span className="text-xs font-mono font-bold text-emerald-600">₹68,00,000</span>
+              </div>
+              <div className="divide-y divide-slate-100 text-xs">
+                {clients.map(c => (
+                  <div key={c.id} className="py-2.5 flex justify-between items-center">
+                    <div>
+                      <span className="font-bold text-slate-800 block">{c.name}</span>
+                      <span className="text-[10px] text-slate-400">Total Billed: {formatCurrency(c.totalBilled)}</span>
+                    </div>
+                    <span className="font-mono font-bold text-rose-600">{formatCurrency(c.outstanding)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Amount (INR ₹) *</label>
-              <input
-                type="number"
-                required
-                min="1"
-                placeholder="0.00"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="erp-input font-mono font-bold"
-              />
+
+            {/* Vendor Payables */}
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <ArrowUpRight className="w-4 h-4 text-rose-600" />
+                  <span>Pending Vendor Payables</span>
+                </h4>
+                <span className="text-xs font-mono font-bold text-rose-600">₹24,50,000</span>
+              </div>
+              <div className="divide-y divide-slate-100 text-xs">
+                {vendors.map(v => (
+                  <div key={v.id} className="py-2.5 flex justify-between items-center">
+                    <div>
+                      <span className="font-bold text-slate-800 block">{v.name}</span>
+                      <span className="text-[10px] text-slate-400">{v.category}</span>
+                    </div>
+                    <span className="font-mono font-bold text-amber-600">{formatCurrency(v.outstandingBalance)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBSECTION 3: ACCOUNT LEDGER */}
+      {activeTab === 'ledger' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-purple-600 uppercase tracking-wider">
+              2. Account Management • Subsection (iii)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Bank & Cash Account Ledgers
+            </h2>
+            <p className="text-xs text-slate-500">Corporate accounts at HDFC, SBI, and site petty cash reserves.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Category / Head</label>
-              <input
-                type="text"
-                placeholder="e.g. RA Bill Settlement / Cement Bill"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="erp-input"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">HDFC Bank Current A/c</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              </div>
+              <div className="text-2xl font-black text-slate-900 font-mono">₹2,57,80,000</div>
+              <div className="text-[11px] text-slate-400">A/c: 50100299881 • Branch: Station Road Kolhapur</div>
             </div>
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Bank Ref / UTR / Cheque No</label>
-              <input
-                type="text"
-                placeholder="UTR / Cheque No"
-                value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
-                className="erp-input font-mono"
-              />
+
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">SBI Project Escrow A/c</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              </div>
+              <div className="text-2xl font-black text-slate-900 font-mono">₹1,42,00,000</div>
+              <div className="text-[11px] text-slate-400">A/c: 30291887210 • Branch: Rajarampuri Kolhapur</div>
             </div>
+
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">Site Petty Cash Reserves</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              </div>
+              <div className="text-2xl font-black text-slate-900 font-mono">₹4,85,000</div>
+              <div className="text-[11px] text-slate-400">Maintained by Project Engineers at Sites</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBSECTION 4: FINANCIAL SUMMARIES */}
+      {activeTab === 'summaries' && (
+        <div className="space-y-6">
+          <div>
+            <div className="text-[11px] font-bold text-sky-600 uppercase tracking-wider">
+              2. Account Management • Subsection (iv)
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Executive Financial Summaries
+            </h2>
+            <p className="text-xs text-slate-500">Consolidated P&L, cumulative revenue, and booked operational profit.</p>
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-[#262e3c]">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="erp-btn-secondary text-xs"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="erp-btn-primary text-xs"
-            >
-              Post Transaction
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Total Contract Value</span>
+              <div className="text-2xl font-black text-slate-900 font-mono mt-1">₹16,15,00,000</div>
+            </div>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Cumulative Billed</span>
+              <div className="text-2xl font-black text-emerald-600 font-mono mt-1">₹6,25,00,000</div>
+            </div>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Actual Expenditure</span>
+              <div className="text-2xl font-black text-rose-600 font-mono mt-1">₹5,10,50,000</div>
+            </div>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
+              <span className="text-slate-500 text-xs">Net Booked Margin</span>
+              <div className="text-2xl font-black text-[#1d68e4] font-mono mt-1">₹1,14,50,000</div>
+            </div>
           </div>
-        </form>
-      </Modal>
+        </div>
+      )}
     </div>
   );
 };

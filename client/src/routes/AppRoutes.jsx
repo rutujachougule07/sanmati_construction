@@ -1,8 +1,8 @@
 // AppRoutes Component
 import React, { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Navbar } from '../components/Navbar';
 import { Sidebar } from '../components/Sidebar';
 
 // Pages & Modules
@@ -38,12 +38,19 @@ const ProtectedLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] flex flex-col text-slate-900">
-      <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex-1 flex">
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="flex-1 p-4 md:p-6 lg:p-7 max-w-7xl mx-auto w-full">
+    <div className="min-h-screen bg-[#f4f7fb] flex text-slate-900">
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile floating toggle button */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="lg:hidden fixed bottom-4 right-4 z-40 p-3 rounded-full bg-[#0a1626] text-white shadow-xl border border-slate-700 hover:bg-[#122e57] transition-all flex items-center justify-center"
+          title="Open Navigation Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <main className="flex-1 p-4 md:p-6 lg:p-7 max-w-7xl mx-auto w-full">
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects" element={<ProjectsModule />} />
@@ -89,9 +96,8 @@ const ProtectedLayout = () => {
           </footer>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export const AppRoutes = () => {
   return (

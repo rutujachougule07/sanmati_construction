@@ -27,20 +27,23 @@ export const formatNumber = (num, decimals = 2) => {
 };
 
 /**
- * Format date to standard Indian ERP format (DD/MM/YYYY or DD MMM YYYY)
+ * Format date to standard Day-Month-Year format (DD-MM-YYYY)
  */
 export const formatDate = (dateInput, includeTime = false) => {
   if (!dateInput) return '—';
   const date = new Date(dateInput);
   if (isNaN(date.getTime())) return '—';
   
-  const options = {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    ...(includeTime ? { hour: '2-digit', minute: '2-digit', hour12: true } : {})
-  };
-  return new Intl.DateTimeFormat('en-IN', options).format(date);
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  
+  if (includeTime) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${d}-${m}-${y} ${hours}:${minutes}`;
+  }
+  return `${d}-${m}-${y}`;
 };
 
 /**

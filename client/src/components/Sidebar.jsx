@@ -12,24 +12,26 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   // Track expanded state for modules with subcategories (auto-open if current route)
-  const [expandedModules, setExpandedModules] = useState({
-    hrms: location.pathname.startsWith('/hrms')
+  const [expandedModules, setExpandedModules] = useState(() => {
+    const activeMod = MODULES_CONFIG.find(m => location.pathname.startsWith(m.path) && m.subcategories);
+    return activeMod ? { [activeMod.id]: true } : {};
   });
 
   useEffect(() => {
-    if (location.pathname.startsWith('/hrms')) {
-      setExpandedModules(prev => ({ ...prev, hrms: true }));
+    const activeMod = MODULES_CONFIG.find(m => location.pathname.startsWith(m.path) && m.subcategories);
+    if (activeMod) {
+      setExpandedModules(prev => ({ ...prev, [activeMod.id]: true }));
     }
   }, [location.pathname]);
 
-  const toggleModuleExpand = (moduleId, defaultPath) => {
+  const toggleModuleExpand = (moduleId, defaultPath, firstSubPath) => {
     setExpandedModules(prev => ({
       ...prev,
       [moduleId]: !prev[moduleId]
     }));
     // If navigating to the module
     if (!location.pathname.startsWith(defaultPath)) {
-      navigate(defaultPath);
+      navigate(firstSubPath || defaultPath);
     }
   };
 
@@ -39,10 +41,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
     return mod.roles.includes(currentRole);
   });
 
-  // User initials for bottom avatar
-  const initials = currentUser?.name
-    ? currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-    : 'SA';
 
   // Helper to parse query param
   const currentSearch = new URLSearchParams(location.search);
@@ -116,7 +114,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
                 {hasSubcategories ? (
                   // Module with Subcategories (Clickable toggle & link)
                   <div
-                    onClick={() => toggleModuleExpand(item.id, item.path)}
+                    onClick={() => toggleModuleExpand(item.id, item.path, item.subcategories?.[0]?.path)}
                     className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer ${
                       isParentActive
                         ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
@@ -165,9 +163,9 @@ export const Sidebar = ({ isOpen, onClose }) => {
                 {/* Subcategories Dropdown List */}
                 {hasSubcategories && isExpanded && (
                   <div className="ml-4 pl-3.5 border-l border-blue-900/40 space-y-1 pt-1 pb-1">
-                    {item.subcategories.map((sub) => {
+                    {item.subcategories.map((sub, index) => {
                       const SubIcon = Icons[sub.icon] || Icons.CircleDot;
-                      const isSubActive = isParentActive && currentTab === sub.tab;
+                      const isSubActive = isParentActive && (currentTab === sub.tab || (!currentTab && index === 0));
 
                       return (
                         <NavLink
@@ -192,44 +190,15 @@ export const Sidebar = ({ isOpen, onClose }) => {
           })}
         </div>
 
-        {/* Bottom Section: ADMIN PORTALS & Session Card */}
+        {/* Bottom Section: Sign Out Only */}
         <div className="p-3 border-t border-[#132238] bg-[#081220]">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              ADMIN PORTALS
-            </span>
-            <span className="text-[9px] font-bold text-sky-400 bg-sky-950/70 border border-sky-800/60 px-1.5 py-0.5 rounded tracking-wide">
-              ALL ACCESS
-            </span>
-          </div>
-
-          {/* User Profile Pill Card */}
-          <div className="bg-[#0e2038] border border-blue-900/30 p-2 rounded-xl flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#1d68e4] text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-xs">
-                {initials}
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-white truncate leading-tight">
-                  {currentUser?.name || 'System Administrator'}
-                </div>
-                <div className="text-[10px] text-slate-400 truncate">
-                  ADM-001 • Main HQ
-                </div>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold bg-white/10 text-white px-1.5 py-0.5 rounded flex-shrink-0">
-              Admin
-            </span>
-          </div>
-
-          {/* Sign Out Session Button */}
           <button
             onClick={logout}
-            className="w-full mt-2 py-1.5 px-3 rounded-xl border border-[#182f4d] hover:bg-white/5 flex items-center justify-center gap-2 text-xs font-medium text-slate-300 hover:text-white transition-all"
+            className="w-full py-2.5 px-3 rounded-xl border border-[#182f4d] bg-[#0e2038]/70 hover:bg-rose-500/10 hover:border-rose-500/40 flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 hover:text-rose-300 transition-all cursor-pointer shadow-xs"
+            title="Sign Out"
           >
-            <Icons.LogOut className="w-3.5 h-3.5 text-slate-400" />
-            <span>Sign Out Session</span>
+            <Icons.LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-400" />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>

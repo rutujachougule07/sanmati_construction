@@ -7,13 +7,13 @@ import { isFirebaseConfigured, auth, signInWithEmailAndPassword, signOut as fbSi
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // Default to Super Admin (Sanmati Patil) for full operational demonstration
+  // Default to null so user starts at the Login page; once logged in, stored in localStorage
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('sanmati_user');
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { /* ignore */ }
     }
-    return INITIAL_USERS[0];
+    return null;
   });
   const [allUsers, setAllUsers] = useState(() => {
     const saved = localStorage.getItem('sanmati_all_users');
