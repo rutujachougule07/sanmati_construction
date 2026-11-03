@@ -53,16 +53,16 @@ export const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               Dashboard
             </h1>
             {/* Red Trend Pill Badge: ↗ System Overview */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-200/80 text-sm font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-200/80 text-xs font-bold">
               <TrendingUp className="w-4 h-4 text-red-500" />
               <span>System Overview</span>
             </div>
           </div>
-          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             Overview of your website content
           </p>
         </div>
@@ -71,7 +71,7 @@ export const Dashboard = () => {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <Link
             to="/crm?tab=leads"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs"
           >
             <span>+ Add Inquiry</span>
           </Link>
@@ -87,17 +87,17 @@ export const Dashboard = () => {
               <ImageIcon className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+              <span className="text-xs font-semibold text-slate-600 block leading-tight">
                 Hero Banners
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
                 4 Slides
               </h2>
             </div>
           </div>
           <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
-            <span className="text-sm text-slate-500 font-medium">Homepage Slider</span>
-            <span className="px-3 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100 text-sm font-bold">
+            <span className="text-xs text-slate-500 font-medium">Homepage Slider</span>
+            <span className="px-3 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100 text-xs font-bold">
               + 31%
             </span>
           </div>
@@ -110,18 +110,18 @@ export const Dashboard = () => {
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+              <span className="text-xs font-semibold text-slate-600 block leading-tight">
                 Website Status
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5 flex items-center gap-2">
                 <span>Active</span>
                 <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
               </h2>
             </div>
           </div>
           <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
-            <span className="text-sm text-slate-500 font-medium">All systems working</span>
-            <span className="px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-sm font-bold">
+            <span className="text-xs text-slate-500 font-medium">All systems working</span>
+            <span className="px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold">
               ↑ 100%
             </span>
           </div>
@@ -134,17 +134,17 @@ export const Dashboard = () => {
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+              <span className="text-xs font-semibold text-slate-600 block leading-tight">
                 Team Members
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
                 {hrmsEmployees?.length || 8} Members
               </h2>
             </div>
           </div>
           <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
-            <span className="text-sm text-slate-500 font-medium">-2 this month</span>
-            <span className="px-3 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 text-sm font-bold">
+            <span className="text-xs text-slate-500 font-medium">-2 this month</span>
+            <span className="px-3 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 text-xs font-bold">
               ↑ 38%
             </span>
           </div>
@@ -157,17 +157,17 @@ export const Dashboard = () => {
               <Mail className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+              <span className="text-xs font-semibold text-slate-600 block leading-tight">
                 Inquiries
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
                 2 Messages
               </h2>
             </div>
           </div>
           <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
-            <span className="text-sm font-bold text-rose-600">1 new unread</span>
-            <span className="px-3 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-sm font-bold">
+            <span className="text-xs font-bold text-rose-600">1 new unread</span>
+            <span className="px-3 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-xs font-bold">
               ↑ 23%
             </span>
           </div>
@@ -179,7 +179,7 @@ export const Dashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div>
-            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
               Recent Customer Inquiries
             </h3>
             <p className="text-sm text-slate-500 mt-0.5">
@@ -188,7 +188,7 @@ export const Dashboard = () => {
           </div>
           <Link
             to="/crm"
-            className="text-sm font-bold text-[#b91c1c] hover:text-red-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="text-xs font-bold text-[#b91c1c] hover:text-red-700 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <span>View All Inquiries</span>
             <ArrowRight className="w-4 h-4" />
@@ -204,10 +204,10 @@ export const Dashboard = () => {
                 R
               </div>
               <div className="min-w-0">
-                <h4 className="font-bold text-base text-slate-900 leading-tight">
+                <h4 className="font-bold text-sm text-slate-900 leading-tight">
                   rishabh
                 </h4>
-                <p className="text-sm text-slate-600 mt-0.5 truncate">
+                <p className="text-xs text-slate-600 mt-0.5 truncate">
                   Query regarding Sangli Office
                 </p>
               </div>
@@ -217,7 +217,7 @@ export const Dashboard = () => {
               <span className="text-sm text-slate-400 font-medium hidden sm:block">
                 Oct 3, 2026 04:28 PM
               </span>
-              <span className="px-3.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 text-sm font-bold">
+              <span className="px-3.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 text-xs font-bold">
                 In Progress
               </span>
             </div>
@@ -231,14 +231,14 @@ export const Dashboard = () => {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-base text-slate-900 leading-tight">
+                  <h4 className="font-bold text-sm text-slate-900 leading-tight">
                     Cherrylee Samson
                   </h4>
                   <span className="px-2.5 py-0.5 rounded-full bg-[#881337] text-white text-xs font-black uppercase tracking-wider leading-none">
                     NEW
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-[#881337] mt-0.5 truncate">
+                <p className="text-xs font-semibold text-[#881337] mt-0.5 truncate">
                   Technical Inquiry for Sangli Office
                 </p>
               </div>
@@ -248,7 +248,7 @@ export const Dashboard = () => {
               <span className="text-sm text-slate-400 font-medium hidden sm:block">
                 Oct 20, 2026 06:13 AM
               </span>
-              <span className="px-4 py-1 rounded-full bg-white text-red-600 border border-red-200 text-sm font-bold shadow-2xs">
+              <span className="px-4 py-1 rounded-full bg-white text-red-600 border border-red-200 text-xs font-bold shadow-2xs">
                 New
               </span>
             </div>
@@ -267,10 +267,10 @@ export const Dashboard = () => {
                 ERP OPERATIONS
               </span>
             </div>
-            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
               Civil Construction & Financial Summary
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 mt-0.5">
               Managing civil projects, BOQ accounts, live GPS geotracking, and Tally operations for SANMATI CONSTRUCTIONS.
             </p>
           </div>
@@ -279,7 +279,7 @@ export const Dashboard = () => {
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto shadow-2xs">
             <button
               onClick={() => setViewMode('executive')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'executive' 
                   ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -289,7 +289,7 @@ export const Dashboard = () => {
             </button>
             <button
               onClick={() => setViewMode('projects')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'projects' 
                   ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -299,7 +299,7 @@ export const Dashboard = () => {
             </button>
             <button
               onClick={() => setViewMode('attendance')}
-              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === 'attendance' 
                   ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -357,7 +357,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalContractValue)}</span>
+            <span className="text-lg font-bold text-slate-900">{formatCurrency(totalContractValue)}</span>
           </div>
           <span className="text-xs text-slate-400 font-medium">All sanctioned works</span>
         </div>
@@ -370,7 +370,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalRevenue)}</span>
+            <span className="text-lg font-bold text-slate-900">{formatCurrency(totalRevenue)}</span>
           </div>
           <span className="text-xs text-emerald-600 font-bold">RA Verified</span>
         </div>
@@ -383,7 +383,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalExpenses)}</span>
+            <span className="text-lg font-bold text-slate-900">{formatCurrency(totalExpenses)}</span>
           </div>
           <span className="text-xs text-slate-400 font-medium">Material + Labour</span>
         </div>
@@ -396,7 +396,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-emerald-700">{formatCurrency(totalProfit)}</span>
+            <span className="text-lg font-bold text-emerald-700">{formatCurrency(totalProfit)}</span>
           </div>
           <span className="text-xs text-emerald-600 font-bold">21.6% margin</span>
         </div>
@@ -409,7 +409,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="my-2.5">
-            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalOutstanding)}</span>
+            <span className="text-lg font-bold text-slate-900">{formatCurrency(totalOutstanding)}</span>
           </div>
           <span className="text-xs text-amber-600 font-semibold">Receivable from clients</span>
         </div>
@@ -521,7 +521,7 @@ export const Dashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={proj.status} />
-                    <span className="text-sm font-bold text-red-600">{proj.completionPercentage}%</span>
+                    <span className="text-xs font-bold text-red-600">{proj.completionPercentage}%</span>
                   </div>
                 </div>
 

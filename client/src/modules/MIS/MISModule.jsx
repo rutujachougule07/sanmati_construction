@@ -75,27 +75,27 @@ export const MISModule = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-[#14181f] text-gold-400 border-b border-[#252c38]">
-                    <th className="p-3">Project Code</th>
-                    <th className="p-3">Site Name & Location</th>
-                    <th className="p-3">Client</th>
-                    <th className="p-3 text-right">Contract Value</th>
-                    <th className="p-3 text-right">Budget</th>
-                    <th className="p-3 text-right">Actual Cost</th>
-                    <th className="p-3 text-right">Billed Amount</th>
-                    <th className="p-3 text-center">Progress</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Project Code</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Site Name & Location</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Client</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Contract Value</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Budget</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Actual Cost</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Billed Amount</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Progress</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#222935]">
                   {projects.map(p => (
                     <tr key={p.id} className="hover:bg-[#1a202c]">
-                      <td className="p-3 font-mono font-bold text-gold-400">{p.id}</td>
-                      <td className="p-3 font-bold text-white">{p.name}<br/><span className="text-[11px] text-slate-400">{p.location}</span></td>
-                      <td className="p-3 text-slate-300">{p.clientName}</td>
-                      <td className="p-3 text-right font-mono text-white">{formatCurrency(p.contractValue)}</td>
-                      <td className="p-3 text-right font-mono text-slate-300">{formatCurrency(p.projectBudget)}</td>
-                      <td className="p-3 text-right font-mono text-rose-400">{formatCurrency(p.actualExpenditure)}</td>
-                      <td className="p-3 text-right font-mono text-emerald-400">{formatCurrency(p.billedAmount)}</td>
-                      <td className="p-3 text-center font-bold text-gold-400 font-mono">{p.completionPercentage}%</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-mono font-bold text-gold-400">{p.id}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-bold text-white">{p.name}<br/><span className="text-[11px] text-slate-400">{p.location}</span></td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-slate-300">{p.clientName}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-white">{formatCurrency(p.contractValue)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-slate-300">{formatCurrency(p.projectBudget)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-rose-400">{formatCurrency(p.actualExpenditure)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-emerald-400">{formatCurrency(p.billedAmount)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-center font-bold text-gold-400 font-mono">{p.completionPercentage}%</td>
                     </tr>
                   ))}
                 </tbody>
@@ -111,23 +111,23 @@ export const MISModule = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-[#14181f] text-gold-400 border-b border-[#252c38]">
-                    <th className="p-3">Timestamp</th>
-                    <th className="p-3">Staff Name</th>
-                    <th className="p-3">Project</th>
-                    <th className="p-3">GPS Coordinates</th>
-                    <th className="p-3">Geofence Distance & Status</th>
-                    <th className="p-3 text-center">Status</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Timestamp</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Staff Name</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Project</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">GPS Coordinates</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Geofence Distance & Status</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#222935]">
                   {gpsLogs.map(log => (
                     <tr key={log.id} className="hover:bg-[#1a202c]">
-                      <td className="p-3 font-mono text-slate-400">{formatDate(log.timestamp, true)}</td>
-                      <td className="p-3 font-bold text-white">{log.userName}</td>
-                      <td className="p-3 text-slate-300">{log.projectName}</td>
-                      <td className="p-3 font-mono text-slate-400">{log.latitude}, {log.longitude}</td>
-                      <td className="p-3 text-slate-200">{log.geofenceStatus}</td>
-                      <td className="p-3 text-center">
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-mono text-slate-400">{formatDate(log.timestamp, true)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-bold text-white">{log.userName}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-slate-300">{log.projectName}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-mono text-slate-400">{log.latitude}, {log.longitude}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-slate-200">{log.geofenceStatus}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-center">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
                           {log.attendanceStatus}
                         </span>
@@ -147,27 +147,27 @@ export const MISModule = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-[#14181f] text-gold-400 border-b border-[#252c38]">
-                    <th className="p-3">Material Code</th>
-                    <th className="p-3">Item Description</th>
-                    <th className="p-3">Category</th>
-                    <th className="p-3 text-right">Current Stock</th>
-                    <th className="p-3 text-right">Min Threshold</th>
-                    <th className="p-3 text-right">Unit Rate</th>
-                    <th className="p-3 text-right">Inventory Valuation</th>
-                    <th className="p-3 text-center">Stock Health</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Material Code</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Item Description</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">Category</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Current Stock</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Min Threshold</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Unit Rate</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Inventory Valuation</th>
+                    <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Stock Health</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#222935]">
                   {inventory.map(mat => (
                     <tr key={mat.id} className="hover:bg-[#1a202c]">
-                      <td className="p-3 font-mono text-gold-400 font-bold">{mat.id}</td>
-                      <td className="p-3 font-bold text-white">{mat.name}</td>
-                      <td className="p-3 text-slate-400">{mat.category}</td>
-                      <td className="p-3 text-right font-mono text-white font-bold">{mat.currentStock} {mat.unit}</td>
-                      <td className="p-3 text-right font-mono text-slate-400">{mat.minimumThreshold} {mat.unit}</td>
-                      <td className="p-3 text-right font-mono text-slate-300">{formatCurrency(mat.unitPrice)}</td>
-                      <td className="p-3 text-right font-mono text-emerald-400 font-bold">{formatCurrency(mat.currentStock * mat.unitPrice)}</td>
-                      <td className="p-3 text-center">
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-mono text-gold-400 font-bold">{mat.id}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap font-bold text-white">{mat.name}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-slate-400">{mat.category}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-white font-bold">{mat.currentStock} {mat.unit}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-slate-400">{mat.minimumThreshold} {mat.unit}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-slate-300">{formatCurrency(mat.unitPrice)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-emerald-400 font-bold">{formatCurrency(mat.currentStock * mat.unitPrice)}</td>
+                      <td className="px-3 py-2 text-xs whitespace-nowrap text-center">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                           mat.currentStock <= mat.minimumThreshold ? 'bg-rose-950 text-rose-400 border border-rose-800' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
                         }`}>

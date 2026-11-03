@@ -195,32 +195,32 @@ export const ReportsModule = () => {
 
           {/* Live Report Preview Table */}
           <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+            <div className="p-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-slate-900">{reportData.title}</h4>
-                <span className="text-[11px] text-slate-500">Total Entries: {reportData.rows.length}</span>
+                <h4 className="text-xs font-bold text-slate-900">{reportData.title}</h4>
+                <span className="text-[10px] text-slate-500">Total Entries: {reportData.rows.length}</span>
               </div>
-              <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">
+              <span className="text-[10px] bg-red-50 text-red-700 border border-red-200 font-bold px-2 py-0.5 rounded-full">
                 Live Data Synchronized
               </span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
                     {reportData.headers.map((h, i) => (
-                      <th key={i} className="p-3 font-bold text-[11px] uppercase tracking-wider text-slate-700">
+                      <th key={i} className="px-3.5 py-2 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">
                         {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {reportData.rows.map((row, rIdx) => (
                     <tr key={rIdx} className="hover:bg-slate-50/80 transition-colors">
                       {row.map((cell, cIdx) => (
-                        <td key={cIdx} className="p-3 text-slate-700">{cell}</td>
+                        <td key={cIdx} className="px-3.5 py-2 text-xs text-slate-700 whitespace-nowrap">{cell}</td>
                       ))}
                     </tr>
                   ))}
@@ -296,28 +296,28 @@ export const ReportsModule = () => {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Date</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Reference / Bill</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Project Site</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Client / Party</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-right">Gross (INR)</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-right">Net Payable</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-center">Status</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 whitespace-nowrap">Date</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 whitespace-nowrap">Reference / Bill</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 whitespace-nowrap">Project Site</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 whitespace-nowrap">Client / Party</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 text-right whitespace-nowrap">Gross (INR)</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 text-right whitespace-nowrap">Net Payable</th>
+                    <th className="px-3.5 py-2 uppercase text-[10px] font-bold text-slate-600 text-center whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 bg-white">
                   {raBills.map((b) => (
                     <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-semibold text-slate-900">{formatDate(b.date)}</td>
-                      <td className="p-3 font-mono font-bold text-red-600">{b.billNumber}</td>
-                      <td className="p-3 text-slate-700 font-medium">{b.projectName}</td>
-                      <td className="p-3 text-slate-600">{b.clientName}</td>
-                      <td className="p-3 text-right font-mono text-slate-900">{formatCurrency(b.currentBillAmount)}</td>
-                      <td className="p-3 text-right font-mono font-bold text-emerald-600">{formatCurrency(b.netPayable)}</td>
-                      <td className="p-3 text-center">
+                      <td className="px-3.5 py-2 font-semibold text-slate-900 whitespace-nowrap">{formatDate(b.date)}</td>
+                      <td className="px-3.5 py-2 font-mono font-bold text-red-600 whitespace-nowrap">{b.billNumber}</td>
+                      <td className="px-3.5 py-2 text-slate-700 font-medium whitespace-nowrap">{b.projectName}</td>
+                      <td className="px-3.5 py-2 text-slate-600 whitespace-nowrap">{b.clientName}</td>
+                      <td className="px-3.5 py-2 text-right font-mono text-slate-900 whitespace-nowrap">{formatCurrency(b.currentBillAmount)}</td>
+                      <td className="px-3.5 py-2 text-right font-mono font-bold text-emerald-600 whitespace-nowrap">{formatCurrency(b.netPayable)}</td>
+                      <td className="px-3.5 py-2 text-center whitespace-nowrap">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                           {b.status || 'Certified'}
                         </span>

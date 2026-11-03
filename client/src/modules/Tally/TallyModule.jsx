@@ -164,21 +164,21 @@ export const TallyModule = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Bill Reference</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Date</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Ledger Account</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Amount (INR)</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-center">Sync Action</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Bill Reference</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Date</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Ledger Account</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap text-right">Amount (INR)</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap text-center">Sync Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {raBills.map(b => (
                     <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-red-600">{b.billNumber}</td>
-                      <td className="p-3 text-slate-700">{formatDate(b.date)}</td>
-                      <td className="p-3 font-semibold text-slate-900">{b.clientName}</td>
-                      <td className="p-3 text-right font-mono font-bold text-slate-900">{formatCurrency(b.netPayable)}</td>
-                      <td className="p-3 text-center">
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-mono font-bold text-red-600">{b.billNumber}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap text-slate-700">{formatDate(b.date)}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-semibold text-slate-900">{b.clientName}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap text-right font-mono font-bold text-slate-900">{formatCurrency(b.netPayable)}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap text-center">
                         <button
                           onClick={() => handleTestTallySync(b)}
                           disabled={isSyncing}
@@ -283,25 +283,25 @@ export const TallyModule = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Timestamp</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Sync Log ID</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Voucher Type</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Voucher No</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Amount (INR)</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Tally Master ID</th>
-                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-center">Status</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Timestamp</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Sync Log ID</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Voucher Type</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Voucher No</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap text-right">Amount (INR)</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap">Tally Master ID</th>
+                    <th className="px-3.5 py-2 text-slate-600 font-bold text-[10px] uppercase whitespace-nowrap text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {syncLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-mono text-[11px] text-slate-600">{log.timestamp}</td>
-                      <td className="p-3 font-mono font-bold text-red-600">{log.id}</td>
-                      <td className="p-3 font-semibold text-slate-900">{log.voucherType}</td>
-                      <td className="p-3 font-mono text-slate-700">{log.voucherNo}</td>
-                      <td className="p-3 text-right font-mono font-bold text-slate-900">{formatCurrency(log.amount)}</td>
-                      <td className="p-3 font-mono text-[11px] text-slate-500">{log.tallyMasterId}</td>
-                      <td className="p-3 text-center">
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-mono text-[11px] text-slate-600">{log.timestamp}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-mono font-bold text-red-600">{log.id}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-semibold text-slate-900">{log.voucherType}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-mono text-slate-700">{log.voucherNo}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap text-right font-mono font-bold text-slate-900">{formatCurrency(log.amount)}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap font-mono text-[11px] text-slate-500">{log.tallyMasterId}</td>
+                      <td className="px-3.5 py-2 text-xs whitespace-nowrap text-center">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                           {log.status}
                         </span>

@@ -91,13 +91,13 @@ export const BudgetsModule = () => {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-[#14181f] text-gold-400 border-b border-[#252c38]">
-                <th className="p-3 font-semibold">Budget Category</th>
-                <th className="p-3 text-center">Share (%)</th>
-                <th className="p-3 text-right">Allocated Budget</th>
-                <th className="p-3 text-right">Actual Incurred</th>
-                <th className="p-3 text-right">Balance Available</th>
-                <th className="p-3 text-center">Burn %</th>
-                <th className="p-3 text-center">Variance Health</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap font-semibold">Budget Category</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Share (%)</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Allocated Budget</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Actual Incurred</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-right">Balance Available</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Burn %</th>
+                <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Variance Health</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#222935]">
@@ -108,15 +108,15 @@ export const BudgetsModule = () => {
 
                 return (
                   <tr key={idx} className="hover:bg-[#1a202c]">
-                    <td className="p-3 font-bold text-white">{item.head}</td>
-                    <td className="p-3 text-center text-gold-400 font-bold">{item.share}%</td>
-                    <td className="p-3 text-right font-mono text-white">{formatCurrency(item.budgetAmount)}</td>
-                    <td className="p-3 text-right font-mono text-rose-400 font-bold">{formatCurrency(item.actualSpent)}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap font-bold text-white">{item.head}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center text-gold-400 font-bold">{item.share}%</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-white">{formatCurrency(item.budgetAmount)}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-right font-mono text-rose-400 font-bold">{formatCurrency(item.actualSpent)}</td>
                     <td className={`p-3 text-right font-mono font-bold ${balance >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
                       {formatCurrency(balance)}
                     </td>
-                    <td className="p-3 text-center font-mono font-bold text-slate-300">{pct}%</td>
-                    <td className="p-3 text-center">
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center font-mono font-bold text-slate-300">{pct}%</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         isOver ? 'bg-rose-950 text-rose-400 border border-rose-800' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
                       }`}>

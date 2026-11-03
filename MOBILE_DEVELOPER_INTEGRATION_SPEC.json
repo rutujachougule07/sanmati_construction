@@ -1,0 +1,205 @@
+{
+  "system": "SANMATI CONSTRUCTIONS ERP - Mobile Application Integration Specification",
+  "version": "1.0.0",
+  "organization": "Sanmati Constructions, Kolhapur, Maharashtra, India",
+  "targetPlatforms": ["Flutter (iOS & Android)", "React Native"],
+  "apiBaseUrl": "http://10.0.2.2:5000/api",
+  "productionApiBaseUrl": "https://erp.sanmaticonstructions.com/api",
+  "noteForMobileDeveloper": "Use 10.0.2.2:5000 if testing on Android Emulator, or your local machine LAN IP (e.g. 192.168.1.X:5000) when testing on a physical mobile device connected to the same Wi-Fi.",
+  
+  "authentication": {
+    "loginEndpoint": "/auth/login",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "requestBody": {
+      "email": "engineer@sanmaticonstructions.com",
+      "password": "SiteEngineer@2026",
+      "deviceId": "IMEI_OR_ANDROID_ID_STRING",
+      "deviceModel": "Samsung Galaxy A54",
+      "fcmToken": "FIREBASE_PUSH_NOTIFICATION_TOKEN"
+    },
+    "responseSuccess": {
+      "success": true,
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sanmati_mobile_token_demo",
+      "user": {
+        "id": "USR-ENG-001",
+        "name": "Amit Patil",
+        "role": "Site Engineer",
+        "email": "engineer@sanmaticonstructions.com",
+        "phone": "+91 98221 54321",
+        "assignedProjects": ["PRJ-KLP-001", "PRJ-KLP-002"]
+      }
+    }
+  },
+
+  "modulesAndMobileWorkflows": {
+    "module1_EmployeeTrackingAndGeofencing": {
+      "description": "Used by field staff (Site Engineers, Supervisors, Surveyors) to log daily GPS check-in/out and live on-site attendance strictly verified against site boundary coordinates.",
+      "endpoints": {
+        "getActiveSites": {
+          "endpoint": "/projects",
+          "method": "GET",
+          "description": "Fetch geofenced construction project sites with center latitude/longitude and permitted boundary radius in meters.",
+          "sampleResponse": {
+            "success": true,
+            "data": [
+              {
+                "id": "PRJ-KLP-001",
+                "name": "Royal Palace Commercial Complex",
+                "location": "Kawala Naka, Kolhapur",
+                "latitude": 16.7029,
+                "longitude": 74.2404,
+                "geofenceRadius": 250,
+                "status": "Active"
+              },
+              {
+                "id": "PRJ-KLP-002",
+                "name": "D.Y. Patil Medical Research Wing Extension",
+                "location": "Kasaba Bawada, Kolhapur",
+                "latitude": 16.7212,
+                "longitude": 74.2541,
+                "geofenceRadius": 300,
+                "status": "Active"
+              },
+              {
+                "id": "PRJ-KLP-003",
+                "name": "MIDC Shiroli Heavy Warehouse & Logistics Hub",
+                "location": "MIDC Shiroli, Kolhapur",
+                "latitude": 16.7451,
+                "longitude": 74.2811,
+                "geofenceRadius": 400,
+                "status": "Active"
+              }
+            ]
+          }
+        },
+        "postGPSCheckIn": {
+          "endpoint": "/gps/log",
+          "method": "POST",
+          "description": "Submit GPS check-in / check-out with satellite coordinates, computed distance from site center, mock/spoof detection flag, and optional selfie/site photo.",
+          "samplePayload": {
+            "userId": "USR-ENG-001",
+            "userName": "Amit Patil",
+            "userRole": "Site Engineer",
+            "projectId": "PRJ-KLP-001",
+            "projectName": "Royal Palace Commercial Complex",
+            "checkType": "CHECK_IN",
+            "latitude": 16.70295,
+            "longitude": 74.24038,
+            "accuracy": 4.2,
+            "distanceMeters": 12.8,
+            "isInsideGeofence": true,
+            "isMockLocation": false,
+            "batteryLevel": 88,
+            "notes": "Morning site reporting for Foundation Pouring inspection",
+            "photoUrl": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+            "timestamp": "2026-11-03T09:00:15+05:30"
+          },
+          "sampleResponse": {
+            "success": true,
+            "logId": "GPS-KLP-20261103-9941",
+            "attendanceStatus": "Verified On-Site",
+            "message": "GPS Check-In successfully recorded inside 250m geofence."
+          }
+        }
+      }
+    },
+
+    "module2_SiteDailyProgressReport_DPR": {
+      "description": "Allows mobile site engineers to submit daily work progress photos, labour count, and material consumption directly from Kolhapur construction sites.",
+      "endpoint": "/site/dpr",
+      "method": "POST",
+      "samplePayload": {
+        "projectId": "PRJ-KLP-001",
+        "date": "2026-11-03",
+        "reportedBy": "Amit Patil",
+        "activitiesCompleted": [
+          "Column shuttering level 2 completed",
+          "Reinforcement binding for slab grid B completed"
+        ],
+        "labourHeadcount": {
+          "masons": 6,
+          "helpers": 14,
+          "barBenders": 8,
+          "carpenters": 6
+        },
+        "materialConsumed": [
+          { "material": "OPC 53 Cement", "qty": 120, "unit": "Bags" },
+          { "material": "12mm TMT Fe550D Steel", "qty": 2.4, "unit": "Metric Tons" }
+        ],
+        "sitePhotos": [
+          "https://storage.googleapis.com/sanmati-site-photos/dpr_20261103_1.jpg"
+        ]
+      }
+    },
+
+    "module3_FieldPettyExpenses": {
+      "description": "Allows site team to upload field petty cash expenses (diesel purchase, tractor transport, local hardware) with camera photo of paper receipt.",
+      "endpoint": "/expenses/field-upload",
+      "method": "POST",
+      "samplePayload": {
+        "projectId": "PRJ-KLP-001",
+        "date": "2026-11-03",
+        "expenseCategory": "Plant & Diesel Fuel",
+        "vendorName": "Shree Ganesh Petroleum, Shiroli",
+        "amount": 4200,
+        "paymentMode": "Cash",
+        "description": "50 Liters diesel for JCB generator power backup",
+        "receiptPhotoBase64": "data:image/jpeg;base64,...",
+        "recordedBy": "Amit Patil"
+      }
+    },
+
+    "module4_MobileCRMClientVisits": {
+      "description": "Sales executives logging on-site client interactions, booking site visits, or updating lead negotiation statuses right from the field.",
+      "endpoint": "/crm/mobile-activity",
+      "method": "POST",
+      "samplePayload": {
+        "leadId": "LED-2026-004",
+        "customerName": "Ramesh Shah",
+        "activityType": "Site Visit",
+        "discussionNotes": "Showed 3BHK Corner sample flat at Royal Palace. Client liked sunlight layout.",
+        "nextFollowUpDate": "2026-11-06",
+        "nextFollowUpTime": "11:00 AM",
+        "statusUpdate": "Interested"
+      }
+    }
+  },
+
+  "offlineDatabaseSchema": {
+    "engine": "SQLite / Room / Hive",
+    "tables": [
+      {
+        "tableName": "offline_gps_logs",
+        "columns": [
+          "id TEXT PRIMARY KEY",
+          "project_id TEXT",
+          "user_id TEXT",
+          "latitude REAL",
+          "longitude REAL",
+          "accuracy REAL",
+          "distance_meters REAL",
+          "is_inside INTEGER",
+          "check_type TEXT",
+          "notes TEXT",
+          "created_at TEXT",
+          "is_synced INTEGER DEFAULT 0"
+        ]
+      },
+      {
+        "tableName": "offline_dpr",
+        "columns": [
+          "id TEXT PRIMARY KEY",
+          "project_id TEXT",
+          "date TEXT",
+          "json_payload TEXT",
+          "created_at TEXT",
+          "is_synced INTEGER DEFAULT 0"
+        ]
+      }
+    ],
+    "syncStrategy": "Store locally in SQLite when device is offline in basement/concrete tunnel. When Wi-Fi/4G connection returns, push batch payload to /api/gps/sync-offline."
+  }
+}

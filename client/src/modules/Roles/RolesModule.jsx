@@ -141,29 +141,29 @@ export const RolesModule = () => {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="bg-[#14181f] text-gold-400 border-b border-[#252c38]">
-                  <th className="p-3">ERP Functional Module</th>
-                  <th className="p-3 text-center">Owner / Super Admin</th>
-                  <th className="p-3 text-center">Project Manager</th>
-                  <th className="p-3 text-center">Site Engineer</th>
-                  <th className="p-3 text-center">Accountant</th>
-                  <th className="p-3 text-center">Purchase</th>
-                  <th className="p-3 text-center">Storekeeper</th>
-                  <th className="p-3 text-center">HR</th>
-                  <th className="p-3 text-center">Employee</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap">ERP Functional Module</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Owner / Super Admin</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Project Manager</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Site Engineer</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Accountant</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Purchase</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Storekeeper</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">HR</th>
+                  <th className="px-3 py-2 text-[10px] uppercase font-bold whitespace-nowrap text-center">Employee</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222935]">
                 {permissionsMatrix.map((row, idx) => (
                   <tr key={idx} className="hover:bg-[#1a202c]">
-                    <td className="p-3 font-bold text-white">{row.module}</td>
-                    <td className="p-3 text-center">{row.superAdmin ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.pm ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.se ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.acc ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.pur ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.store ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.hr ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
-                    <td className="p-3 text-center">{row.emp ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap font-bold text-white">{row.module}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.superAdmin ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.pm ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.se ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.acc ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.pur ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.store ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.hr ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
+                    <td className="px-3 py-2 text-xs whitespace-nowrap text-center">{row.emp ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : <X className="w-4 h-4 text-slate-600 mx-auto" />}</td>
                   </tr>
                 ))}
               </tbody>

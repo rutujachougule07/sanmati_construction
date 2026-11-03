@@ -60,13 +60,13 @@ h1, h2, h3, h4, .font-heading {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
-/* Table Header: Clean Light Slate Header with Crisp Slate Headings matching the White Theme */
+/* Table Header: Compact, Clean Light Slate Header with Small Heading Typography */
 table thead,
 table thead tr,
 .erp-table-th {
   background-color: #f8fafc !important;
-  color: #334155 !important;
-  border-bottom: 2px solid #e2e8f0 !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
 table thead th,
@@ -75,28 +75,36 @@ table thead th span,
 table thead th div,
 .erp-table-th,
 .erp-table-th * {
-  color: #334155 !important;
+  color: #475569 !important;
   font-weight: 700 !important;
-  letter-spacing: 0.04em !important;
+  font-size: 0.6875rem !important; /* 11px compact heading */
+  letter-spacing: 0.03em !important;
+  line-height: 1.2 !important;
+}
+
+table thead th {
+  padding: 0.5rem 0.75rem !important; /* Compact 8px 12px */
 }
 
 table thead th svg {
-  color: #64748b !important;
-  stroke: #64748b !important;
+  color: #94a3b8 !important;
+  stroke: #94a3b8 !important;
+  width: 0.75rem !important;
+  height: 0.75rem !important;
 }
 
 .erp-table-th {
-  font-size: 0.8125rem;
-  text-transform: uppercase;
-  padding: 0.85rem 1.15rem;
-  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.6875rem !important;
+  padding: 0.5rem 0.75rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
+table tbody td,
 .erp-table-td {
-  padding: 0.95rem 1.15rem;
+  padding: 0.5rem 0.75rem !important; /* Compact 8px 12px */
   border-bottom: 1px solid #f1f5f9;
   color: #1e293b;
-  font-size: 0.9375rem;
+  font-size: 0.75rem !important; /* 12px compact body */
 }
 
 .erp-input {
@@ -234,7 +242,7 @@ main .text-white:not(
   color: #0f172a !important;
 }
 
-/* Ensure all table headings across all modules stay crisp dark slate */
+/* Ensure all table headings across all modules stay crisp dark slate and compact */
 main thead,
 main thead *,
 main thead th,
@@ -245,6 +253,8 @@ main thead th div,
 .modal thead th,
 .modal thead th span {
   color: #334155 !important;
+  font-size: 0.6875rem !important; /* 11px compact table heading */
+  letter-spacing: 0.03em !important;
 }
 
 main .text-slate-200,

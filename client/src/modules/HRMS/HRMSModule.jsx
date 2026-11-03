@@ -243,7 +243,7 @@ export const HRMSModule = () => {
       header: 'Emp ID', 
       align: 'center',
       render: (row) => (
-        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs sm:text-[13px] font-bold bg-slate-100 text-slate-800 border border-slate-200/90 shadow-2xs">
+        <span className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-900 border border-slate-200 shadow-2xs font-mono">
           {row.id}
         </span>
       )
@@ -256,13 +256,13 @@ export const HRMSModule = () => {
         const cleanName = row.name.replace(/^(Er\.|CA|Dr\.|Mr\.|Mrs\.)\s+/i, '');
         const initials = cleanName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM';
         return (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-xs shadow-2xs flex-shrink-0 tracking-tight">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-sm shadow-2xs flex-shrink-0 tracking-tight">
               {initials}
             </div>
             <div>
-              <span className="font-bold text-slate-900 block text-sm leading-snug">{row.name}</span>
-              <span className="text-xs text-slate-500 font-normal">{row.designation}</span>
+              <span className="font-bold text-slate-900 block text-xs sm:text-lg leading-snug">{row.name}</span>
+              <span className="text-sm text-slate-500 font-medium">{row.designation}</span>
             </div>
           </div>
         );
@@ -272,26 +272,26 @@ export const HRMSModule = () => {
       key: 'department', 
       header: 'Department', 
       align: 'left',
-      render: (row) => <span className="text-slate-800 text-sm font-medium">{row.department}</span> 
+      render: (row) => <span className="text-slate-800 text-xs font-semibold">{row.department}</span> 
     },
     { 
       key: 'joiningDate', 
       header: 'Date Joined', 
       align: 'center',
-      render: (row) => <span className="text-slate-700 text-sm font-medium whitespace-nowrap">{formatDate(row.joiningDate)}</span> 
+      render: (row) => <span className="text-slate-700 text-xs font-medium whitespace-nowrap">{formatDate(row.joiningDate)}</span> 
     },
     {
       key: 'contact',
       header: 'Contact Info',
       sortable: false,
       render: (row) => (
-        <div className="text-sm text-slate-600 space-y-0.5">
-          <div className="font-medium text-slate-800 flex items-center gap-1.5">
-            <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+        <div className="text-sm sm:text-base text-slate-600 space-y-1">
+          <div className="font-bold text-slate-900 flex items-center gap-2">
+            <Phone className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <span>{row.phone || '+91 98220 00000'}</span>
           </div>
-          <div className="text-xs text-slate-500 flex items-center gap-1.5">
-            <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+          <div className="text-sm text-slate-500 flex items-center gap-2">
+            <Mail className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <span>{row.email || 'employee@sanmati.com'}</span>
           </div>
         </div>
@@ -302,7 +302,7 @@ export const HRMSModule = () => {
       header: 'Monthly Net Pay', 
       align: 'right', 
       render: (row) => (
-        <span className="font-bold text-slate-900 text-sm sm:text-base tabular-nums font-sans block text-right">
+        <span className="font-bold text-slate-900 text-base sm:text-lg tabular-nums font-mono block text-right">
           {formatCurrency(row.netSalary)}
         </span>
       )
@@ -316,7 +316,7 @@ export const HRMSModule = () => {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setSelectedEmployee(row)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg text-sm font-semibold transition-all hover:shadow-2xs active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-xl text-sm font-bold transition-all hover:shadow-2xs active:scale-95 cursor-pointer"
             title="View Full Profile"
           >
             <Eye className="w-4 h-4 text-slate-500 group-hover:text-red-500" />
@@ -324,7 +324,7 @@ export const HRMSModule = () => {
           </button>
           <button
             onClick={() => handleDeleteEmployee(row.id)}
-            className="inline-flex items-center justify-center p-2 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 rounded-lg transition-all hover:shadow-2xs active:scale-95"
+            className="inline-flex items-center justify-center p-2 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 rounded-xl transition-all hover:shadow-2xs active:scale-95 cursor-pointer"
             title="Delete Employee Record"
           >
             <Trash2 className="w-4 h-4" />
@@ -456,49 +456,49 @@ export const HRMSModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 uppercase tracking-wider text-[11px]">
-                    <th className="px-4 py-3 font-semibold">Employee</th>
-                    <th className="px-4 py-3 font-semibold">Assigned Construction Site</th>
-                    <th className="px-4 py-3 font-semibold text-center">In / Out Time</th>
-                    <th className="px-4 py-3 font-semibold">GPS Geofence Status</th>
-                    <th className="px-4 py-3 font-semibold text-center">Attendance Status</th>
-                    <th className="px-4 py-3 font-semibold text-center">Overtime (Hrs)</th>
-                    <th className="px-4 py-3 font-semibold text-right">Month Days</th>
+                  <tr className="bg-slate-50 border-b-2 border-slate-200 text-slate-800 text-xs">
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Employee</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Assigned Construction Site</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">In / Out Time</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">GPS Geofence Status</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Attendance Status</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Overtime (Hrs)</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Month Days</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {attendanceRecords.map((rec) => (
                     <tr key={rec.empId} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-3.5">
-                        <span className="font-bold text-slate-900 block">{rec.name}</span>
-                        <span className="text-[11px] text-slate-500 font-mono">{rec.empId} • {rec.designation}</span>
+                      <td className="px-3.5 py-2 text-xs">
+                        <span className="font-bold text-slate-900 block text-xs">{rec.name}</span>
+                        <span className="text-[10px] text-slate-500 font-medium font-mono">{rec.empId} • {rec.designation}</span>
                       </td>
 
-                      <td className="px-4 py-3.5">
-                        <span className="text-slate-800 font-medium flex items-center gap-1">
-                          <Building2 className="w-3.5 h-3.5 text-copper-500" />
+                      <td className="px-3.5 py-2 text-xs">
+                        <span className="text-slate-800 font-semibold flex items-center gap-1 text-xs">
+                          <Building2 className="w-4 h-4 text-copper-500" />
                           {rec.site}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3.5 text-center font-mono text-[11px] text-slate-700">
+                      <td className="px-3.5 py-2 text-xs text-center font-mono text-sm font-medium text-slate-800">
                         <span>{rec.inTime}</span>
-                        <span className="text-slate-400 mx-1">-</span>
+                        <span className="text-slate-400 mx-1.5">-</span>
                         <span>{rec.outTime}</span>
                       </td>
 
-                      <td className="px-4 py-3.5">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <MapPin className="w-3 h-3 text-emerald-600" />
+                      <td className="px-3.5 py-2 text-xs">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                           {rec.gpsStatus}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3.5 text-center">
+                      <td className="px-3.5 py-2 text-xs text-center">
                         <select
                           value={rec.status}
                           onChange={(e) => updateAttendanceStatus(rec.empId, e.target.value)}
-                          className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors ${
+                          className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-colors ${
                             rec.status === 'Present' 
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
                               : rec.status === 'Half Day' 
@@ -513,27 +513,27 @@ export const HRMSModule = () => {
                         </select>
                       </td>
 
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
+                      <td className="px-3.5 py-2 text-xs text-center">
+                        <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1">
                           <button 
                             onClick={() => updateOvertime(rec.empId, -0.5)}
-                            className="text-slate-500 hover:text-slate-900 font-bold px-1"
+                            className="text-slate-500 hover:text-slate-900 font-bold px-1.5 text-sm"
                           >
                             -
                           </button>
-                          <span className="font-mono font-bold text-slate-800 text-xs min-w-[28px]">
+                          <span className="font-mono font-bold text-slate-800 text-sm min-w-[32px]">
                             {rec.overtimeHours}h
                           </span>
                           <button 
                             onClick={() => updateOvertime(rec.empId, 0.5)}
-                            className="text-slate-500 hover:text-slate-900 font-bold px-1"
+                            className="text-slate-500 hover:text-slate-900 font-bold px-1.5 text-sm"
                           >
                             +
                           </button>
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5 text-right font-mono text-slate-800 font-bold">
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-900 font-bold text-xs">
                         {rec.daysPresentMonth} / {standardWorkingDays}
                       </td>
                     </tr>
@@ -615,36 +615,36 @@ export const HRMSModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 uppercase tracking-wider text-[11px]">
-                    <th className="px-4 py-3 font-semibold">Employee</th>
-                    <th className="px-4 py-3 font-semibold text-right">Earned Basic</th>
-                    <th className="px-4 py-3 font-semibold text-right">HRA & Allowances</th>
-                    <th className="px-4 py-3 font-semibold text-center">Days Worked</th>
-                    <th className="px-4 py-3 font-semibold text-right">Overtime Pay</th>
-                    <th className="px-4 py-3 font-semibold text-right">PF Deduction</th>
-                    <th className="px-4 py-3 font-semibold text-right">Prof. Tax (PT)</th>
-                    <th className="px-4 py-3 font-semibold text-right">Net Take-Home</th>
-                    <th className="px-4 py-3 font-semibold text-center">Status</th>
+                  <tr className="bg-slate-50 border-b-2 border-slate-200 text-slate-800 text-xs">
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Employee</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Earned Basic</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">HRA & Allowances</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Days Worked</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Overtime Pay</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">PF Deduction</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Prof. Tax (PT)</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Net Take-Home</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {payrollCalculations.map((calc) => (
                     <tr key={calc.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-4 py-3.5">
-                        <span className="font-bold text-slate-900 block">{calc.name}</span>
-                        <span className="text-[11px] text-slate-500 font-mono">{calc.id}</span>
+                      <td className="px-3.5 py-2 text-xs">
+                        <span className="font-bold text-slate-900 block text-xs">{calc.name}</span>
+                        <span className="text-[10px] text-slate-500 font-mono font-medium">{calc.id}</span>
                       </td>
-                      <td className="px-4 py-3.5 text-right font-mono text-slate-800">{formatCurrency(calc.earnedBasic)}</td>
-                      <td className="px-4 py-3.5 text-right font-mono text-slate-800">{formatCurrency(calc.earnedHra + calc.earnedAllowances)}</td>
-                      <td className="px-4 py-3.5 text-center font-mono font-bold text-slate-800">{calc.daysWorked} / {standardWorkingDays}</td>
-                      <td className="px-4 py-3.5 text-right font-mono text-emerald-700">+{formatCurrency(calc.overtimePay)}</td>
-                      <td className="px-4 py-3.5 text-right font-mono text-rose-600">-{formatCurrency(calc.pf)}</td>
-                      <td className="px-4 py-3.5 text-right font-mono text-rose-600">-{formatCurrency(calc.pt)}</td>
-                      <td className="px-4 py-3.5 text-right font-mono font-bold text-emerald-700 text-sm">
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-800 font-semibold">{formatCurrency(calc.earnedBasic)}</td>
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-800 font-semibold">{formatCurrency(calc.earnedHra + calc.earnedAllowances)}</td>
+                      <td className="px-3.5 py-2 text-xs text-center font-mono font-bold text-slate-900">{calc.daysWorked} / {standardWorkingDays}</td>
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-emerald-700 font-bold">+{formatCurrency(calc.overtimePay)}</td>
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-rose-600 font-semibold">-{formatCurrency(calc.pf)}</td>
+                      <td className="px-3.5 py-2 text-xs text-right font-mono text-rose-600 font-semibold">-{formatCurrency(calc.pt)}</td>
+                      <td className="px-3.5 py-2 text-xs text-right font-mono font-bold text-emerald-700 text-xs font-bold">
                         {formatCurrency(calc.netPayable)}
                       </td>
-                      <td className="px-4 py-3.5 text-center">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <td className="px-3.5 py-2 text-xs text-center">
+                        <span className="px-2.5 py-1 rounded-md text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           {calc.status}
                         </span>
                       </td>

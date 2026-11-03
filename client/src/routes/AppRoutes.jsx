@@ -116,17 +116,17 @@ const ProtectedLayout = () => {
           {/* User Profile */}
           <div className="flex items-center gap-2.5 pl-2 cursor-pointer group">
             <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-[#0080ff] text-white font-bold flex items-center justify-center text-sm shadow-xs">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white font-bold flex items-center justify-center text-xs shadow-xs">
                 A
               </div>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white absolute bottom-0 right-0"></span>
             </div>
             <div className="flex flex-col text-left">
-              <div className="flex items-center gap-1 font-bold text-sm text-slate-900 group-hover:text-red-600 transition-colors">
+              <div className="flex items-center gap-1 font-bold text-xs text-slate-900 group-hover:text-red-600 transition-colors">
                 <span>Admin</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-red-600" />
               </div>
-              <span className="text-xs text-slate-400 font-semibold leading-none mt-0.5">
+              <span className="text-[10px] text-slate-400 font-semibold leading-none mt-0.5">
                 Administrator
               </span>
             </div>

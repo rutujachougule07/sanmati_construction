@@ -55,35 +55,35 @@ export const InventoryModule = () => {
   };
 
   const stockColumns = [
-    { key: 'id', header: 'Material Code', render: (row) => <span className="font-bold text-gold-400 font-mono">{row.id}</span> },
+    { key: 'id', header: 'Material Code', render: (row) => <span className="font-bold text-red-600 font-mono text-sm">{row.id}</span> },
     {
       key: 'name',
       header: 'Material Description',
       render: (row) => (
         <div>
-          <span className="font-bold text-white block">{row.name}</span>
-          <span className="text-[11px] text-slate-400">{row.category}</span>
+          <span className="font-bold text-slate-900 block text-base">{row.name}</span>
+          <span className="text-sm text-slate-500 font-medium">{row.category}</span>
         </div>
       )
     },
-    { key: 'unit', header: 'Unit', align: 'center', render: (row) => <span className="text-slate-300 font-bold">{row.unit}</span> },
+    { key: 'unit', header: 'Unit', align: 'center', render: (row) => <span className="text-slate-800 font-semibold text-xs">{row.unit}</span> },
     {
       key: 'currentStock',
       header: 'Available Stock',
       align: 'right',
       render: (row) => (
-        <span className={`font-mono font-bold ${row.currentStock <= row.minimumThreshold ? 'text-rose-400' : 'text-emerald-400'}`}>
+        <span className={`font-mono font-bold text-xs ${row.currentStock <= row.minimumThreshold ? 'text-rose-600' : 'text-emerald-700'}`}>
           {row.currentStock} {row.unit}
         </span>
       )
     },
-    { key: 'minimumThreshold', header: 'Min Safety Level', align: 'right', render: (row) => <span className="font-mono text-slate-400">{row.minimumThreshold} {row.unit}</span> },
-    { key: 'unitPrice', header: 'Unit Rate', align: 'right', render: (row) => <span className="font-mono text-slate-200">{formatCurrency(row.unitPrice)}</span> },
+    { key: 'minimumThreshold', header: 'Min Safety Level', align: 'right', render: (row) => <span className="font-mono text-slate-600 text-sm">{row.minimumThreshold} {row.unit}</span> },
+    { key: 'unitPrice', header: 'Unit Rate', align: 'right', render: (row) => <span className="font-mono text-slate-800 font-semibold text-xs">{formatCurrency(row.unitPrice)}</span> },
     {
       key: 'valuation',
       header: 'Valuation',
       align: 'right',
-      render: (row) => <span className="font-mono font-bold text-gold-400">{formatCurrency(row.currentStock * row.unitPrice)}</span>
+      render: (row) => <span className="font-mono font-bold text-emerald-700 text-xs">{formatCurrency(row.currentStock * row.unitPrice)}</span>
     },
     { key: 'status', header: 'Stock Health', render: (row) => <StatusBadge status={row.status} /> }
   ];
@@ -91,24 +91,27 @@ export const InventoryModule = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div>
-          <h2 className="text-2xl font-bold text-white font-heading">Inventory & Store Management</h2>
-          <p className="text-xs text-slate-400">Manage cement, steel rebars, aggregates, stock inward/outward and site material issues.</p>
+          <div className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
+            SANMATI CONSTRUCTIONS • CENTRAL WAREHOUSE
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">Inventory & Store Management</h2>
+          <p className="text-sm text-slate-500 mt-1">Manage cement, steel rebars, aggregates, stock inward/outward and site material issues.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsInwardModalOpen(true)}
-            className="erp-btn-secondary text-xs flex items-center gap-1.5"
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
           >
-            <ArrowDownRight className="w-3.5 h-3.5 text-emerald-400" />
+            <ArrowDownRight className="w-4 h-4 text-emerald-600" />
             <span>Stock Inward (GRN)</span>
           </button>
           <button
             onClick={() => setIsIssueModalOpen(true)}
-            className="erp-btn-primary text-xs flex items-center gap-1.5"
+            className="erp-btn-primary text-sm font-bold px-4 py-2 flex items-center gap-1.5"
           >
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <ArrowUpRight className="w-4 h-4" />
             <span>Issue to Site</span>
           </button>
         </div>
@@ -116,17 +119,17 @@ export const InventoryModule = () => {
 
       {/* Low Stock Warning Banner if any items triggered */}
       {inventory.some(i => i.currentStock <= i.minimumThreshold) && (
-        <div className="p-4 bg-amber-950/40 border border-amber-800/60 rounded-xl flex items-center justify-between text-xs text-amber-300">
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-sm text-amber-900 shadow-2xs">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div>
-              <p className="font-bold">Low Stock Warning Triggered</p>
-              <p className="text-amber-400/80 text-[11px]">One or more materials in Central Warehouse have breached minimum threshold levels.</p>
+              <p className="font-bold text-base">Low Stock Warning Triggered</p>
+              <p className="text-amber-800 text-sm">One or more materials in Central Warehouse have breached minimum threshold levels.</p>
             </div>
           </div>
           <button
             onClick={() => setIsInwardModalOpen(true)}
-            className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs"
+            className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer shadow-2xs"
           >
             Order Inward Stock
           </button>
