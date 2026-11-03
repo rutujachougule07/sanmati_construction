@@ -147,12 +147,13 @@ export const DataTable = ({
 
       {/* Table Viewport with Clean Slate Header & Unified Styling */}
       <div className="overflow-x-auto w-full">
-        <table className="w-full text-left border-collapse min-w-[760px]">
+        <table className="w-full text-left border-collapse table-fixed min-w-[760px]">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200/90 text-slate-700">
               {columns.map((col) => {
                 const isSortable = col.sortable !== false && col.key && col.key !== 'actions' && col.key !== 'action';
                 const isSorted = sortConfig.key === col.key;
+                const colWidth = col.width || `${(100 / columns.length).toFixed(3)}%`;
                 return (
                   <th
                     key={col.key || col.header}
@@ -164,7 +165,7 @@ export const DataTable = ({
                     } ${col.headerClassName || ''}`}
                     style={{
                       textAlign: col.align || 'left',
-                      ...(col.width ? { width: col.width } : {}),
+                      width: colWidth,
                       ...(col.minWidth ? { minWidth: col.minWidth } : {})
                     }}
                   >
@@ -199,21 +200,24 @@ export const DataTable = ({
                   key={row.id || rIdx} 
                   className="hover:bg-slate-50/80 transition-colors"
                 >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key || col.header}
-                      className={`px-2.5 py-1.5 text-[11px] text-slate-700 align-middle ${
-                        col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
-                      } ${col.cellClassName || ''}`}
-                      style={{ 
-                        textAlign: col.align || 'left',
-                        ...(col.width ? { width: col.width } : {}),
-                        ...(col.minWidth ? { minWidth: col.minWidth } : {})
-                      }}
-                    >
-                      {col.render ? col.render(row) : (row[col.key] ?? '—')}
-                    </td>
-                  ))}
+                  {columns.map((col) => {
+                    const colWidth = col.width || `${(100 / columns.length).toFixed(3)}%`;
+                    return (
+                      <td
+                        key={col.key || col.header}
+                        className={`px-3 py-2 text-[11px] text-slate-700 align-middle ${
+                          col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                        } ${col.cellClassName || ''}`}
+                        style={{ 
+                          textAlign: col.align || 'left',
+                          width: colWidth,
+                          ...(col.minWidth ? { minWidth: col.minWidth } : {})
+                        }}
+                      >
+                        {col.render ? col.render(row) : (row[col.key] ?? '—')}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             ) : (

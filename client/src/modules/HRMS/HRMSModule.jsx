@@ -241,9 +241,8 @@ export const HRMSModule = () => {
     { 
       key: 'id', 
       header: 'Emp ID', 
-      align: 'center',
-      width: '10%',
-      minWidth: '95px',
+      align: 'left',
+      width: '14.285%',
       render: (row) => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-900 border border-slate-200/90 font-mono">
           {row.id}
@@ -254,19 +253,18 @@ export const HRMSModule = () => {
       key: 'name',
       header: 'Employee Name & Role',
       align: 'left',
-      width: '23%',
-      minWidth: '190px',
+      width: '14.285%',
       render: (row) => {
         const cleanName = row.name.replace(/^(Er\.|CA|Dr\.|Mr\.|Mrs\.)\s+/i, '');
         const initials = cleanName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM';
         return (
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-[10px] shadow-2xs flex-shrink-0 tracking-tight">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-[9px] shadow-2xs flex-shrink-0 tracking-tight">
               {initials}
             </div>
-            <div>
-              <span className="font-bold text-slate-900 block text-xs leading-snug">{row.name}</span>
-              <span className="text-[10px] text-slate-500 font-medium">{row.designation}</span>
+            <div className="min-w-0">
+              <span className="font-bold text-slate-900 block text-xs leading-tight truncate">{row.name}</span>
+              <span className="text-[10px] text-slate-500 font-medium truncate block">{row.designation}</span>
             </div>
           </div>
         );
@@ -276,33 +274,31 @@ export const HRMSModule = () => {
       key: 'department', 
       header: 'Department', 
       align: 'left',
-      width: '15%',
-      minWidth: '130px',
-      render: (row) => <span className="text-slate-800 text-[11px] font-semibold">{row.department}</span> 
+      width: '14.285%',
+      render: (row) => <span className="text-slate-800 text-[11px] font-semibold truncate block">{row.department}</span> 
     },
     { 
       key: 'joiningDate', 
       header: 'Date Joined', 
-      align: 'center',
-      width: '12%',
-      minWidth: '110px',
+      align: 'left',
+      width: '14.285%',
       render: (row) => <span className="text-slate-700 text-[11px] font-medium whitespace-nowrap">{formatDate(row.joiningDate)}</span> 
     },
     {
       key: 'contact',
       header: 'Contact Info',
       sortable: false,
-      width: '20%',
-      minWidth: '180px',
+      align: 'left',
+      width: '14.285%',
       render: (row) => (
         <div className="text-[11px] text-slate-600 space-y-0.5">
-          <div className="font-semibold text-slate-800 flex items-center gap-1.5 text-[11px]">
+          <div className="font-semibold text-slate-800 flex items-center gap-1.5 text-[11px] truncate">
             <Phone className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span>{row.phone || '+91 98220 00000'}</span>
+            <span className="truncate">{row.phone || '+91 98220 00000'}</span>
           </div>
-          <div className="text-[10px] text-slate-500 flex items-center gap-1.5">
+          <div className="text-[10px] text-slate-500 flex items-center gap-1.5 truncate">
             <Mail className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span>{row.email || 'employee@sanmati.com'}</span>
+            <span className="truncate">{row.email || 'employee@sanmati.com'}</span>
           </div>
         </div>
       )
@@ -310,11 +306,10 @@ export const HRMSModule = () => {
     { 
       key: 'netSalary', 
       header: 'Monthly Net Pay', 
-      align: 'right', 
-      width: '12%',
-      minWidth: '120px',
+      align: 'left', 
+      width: '14.285%',
       render: (row) => (
-        <span className="font-bold text-slate-900 text-xs tabular-nums font-mono block text-right">
+        <span className="font-bold text-slate-900 text-xs tabular-nums font-mono block">
           {formatCurrency(row.netSalary)}
         </span>
       )
@@ -322,12 +317,11 @@ export const HRMSModule = () => {
     {
       key: 'actions',
       header: 'Actions',
-      align: 'center',
+      align: 'left',
       sortable: false,
-      width: '8%',
-      minWidth: '125px',
+      width: '14.285%',
       render: (row) => (
-        <div className="flex items-center justify-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setSelectedEmployee(row)}
             className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
