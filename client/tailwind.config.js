@@ -59,11 +59,22 @@ export default {
           100: '#f8f8f6',
           200: '#efefe9',
           300: '#e3e3dc',
+        },
+        brandRed: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        heading: ['Outfit', 'Inter', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        mono: ['Consolas', 'SFMono-Regular', 'Menlo', 'Monaco', 'ui-monospace', 'monospace'],
       }
     },
   },

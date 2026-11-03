@@ -77,7 +77,7 @@ export const AccountsModule = () => {
   // Transaction columns
   const txnColumns = [
     { key: 'date', header: 'Date', render: (row) => <span className="text-slate-800 font-semibold">{formatDate(row.date)}</span> },
-    { key: 'id', header: 'Voucher No', render: (row) => <span className="font-mono font-bold text-[#1d68e4]">{row.id}</span> },
+    { key: 'id', header: 'Voucher No', render: (row) => <span className="font-mono font-bold text-red-600">{row.id}</span> },
     { key: 'party', header: 'Party / Ledger Description', render: (row) => <div><span className="font-bold text-slate-900 block">{row.party}</span><span className="text-[11px] text-slate-500">{row.category}</span></div> },
     { key: 'account', header: 'Bank / Cash Account', render: (row) => <span className="text-xs text-slate-700">{row.account}</span> },
     {
@@ -104,7 +104,7 @@ export const AccountsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-red-600 uppercase tracking-wider">
                 2. Account Management • Subsection (i)
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -263,7 +263,7 @@ export const AccountsModule = () => {
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Net Booked Margin</span>
-              <div className="text-2xl font-black text-[#1d68e4] font-mono mt-1">₹1,14,50,000</div>
+              <div className="text-2xl font-black text-red-600 font-mono mt-1">₹1,14,50,000</div>
             </div>
           </div>
         </div>

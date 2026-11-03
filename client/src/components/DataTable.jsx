@@ -1,6 +1,6 @@
 // DataTable Component
 import React, { useState, useMemo } from 'react';
-import { Search, Download, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { Search, Download, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react';
 import { exportToExcel, exportToCSV } from '../services/exportService';
 
 export const DataTable = ({
@@ -78,46 +78,64 @@ export const DataTable = ({
       <div className="p-4 border-b border-slate-200/90 bg-white flex flex-col md:flex-row items-center justify-between gap-3">
         {title ? (
           <div className="flex items-center gap-2.5">
-            <h4 className="text-sm font-bold text-slate-900 font-heading">{title}</h4>
-            <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">
+            <h4 className="text-base font-bold text-slate-900 font-heading">{title}</h4>
+            <span className="text-sm font-bold bg-red-50 text-red-600 px-3 py-0.5 rounded-full border border-red-200/80">
               {data.length} records
             </span>
           </div>
         ) : (
-          <div className="text-xs text-slate-500">
-            Total: <span className="text-[#1d68e4] font-bold">{data.length}</span> records
+          <div className="flex items-center gap-2 text-sm text-slate-700 font-medium">
+            <span>Total:</span>
+            <span className="bg-red-50 text-red-600 font-bold px-2.5 py-0.5 rounded-md border border-red-200/80 text-sm">
+              {filteredData.length} records
+            </span>
+            {filteredData.length !== data.length && (
+              <span className="text-xs text-slate-400">
+                (filtered from {data.length})
+              </span>
+            )}
           </div>
         )}
 
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-          {/* Search Input matching screenshot */}
-          <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          {/* Search Input with Clear Button */}
+          <div className="relative flex-1 sm:w-72 md:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-slate-50/70 border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#1d68e4] focus:bg-white transition-colors"
+              className="w-full bg-slate-50/80 border border-slate-200 rounded-lg pl-9 pr-8 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:bg-white transition-all shadow-2xs"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Export Buttons */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleExportExcel}
               title="Export to Excel"
-              className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-xs flex items-center gap-1 transition-colors font-medium shadow-2xs"
+              className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-sm flex items-center gap-1.5 transition-colors font-semibold shadow-2xs"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Excel</span>
             </button>
             <button
               onClick={handleExportCSV}
               title="Export to CSV"
-              className="p-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-lg text-xs flex items-center gap-1 transition-colors font-medium shadow-2xs"
+              className="px-3.5 py-2 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-lg text-sm flex items-center gap-1.5 transition-colors font-semibold shadow-2xs"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span className="hidden sm:inline">CSV</span>
             </button>
           </div>
@@ -127,27 +145,63 @@ export const DataTable = ({
         </div>
       </div>
 
-      {/* Table Viewport with Screenshot Royal Navy Blue Header */}
+      {/* Table Viewport with Clean Slate Header & Unified Styling */}
       <div className="overflow-x-auto w-full">
         <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
-            <tr className="bg-[#103a6c] !text-white text-white">
-              {columns.map((col) => (
-                <th
-                  key={col.key || col.header}
-                  onClick={() => col.sortable !== false && col.key && requestSort(col.key)}
-                  className={`px-4 py-3 text-[11px] font-bold uppercase tracking-wider !text-white text-white border-r border-[#15467f] last:border-r-0 ${
-                    col.sortable !== false && col.key ? 'cursor-pointer hover:bg-[#15467f] transition-colors' : ''
-                  } ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
-                >
-                  <div className={`inline-flex items-center gap-1.5 ${col.align === 'right' ? 'justify-end' : ''}`}>
-                    <span className="!text-white text-white font-bold tracking-wider">{col.header}</span>
-                    {col.sortable !== false && col.key && (
-                      <ArrowUpDown className="w-3 h-3 opacity-90 !text-white text-white" />
-                    )}
-                  </div>
-                </th>
-              ))}
+            <tr className="bg-slate-50 border-b border-slate-200/90 text-slate-700">
+              {columns.map((col) => {
+                const isSortable = col.sortable !== false && col.key && col.key !== 'actions' && col.key !== 'action';
+                const isSorted = sortConfig.key === col.key;
+                return (
+                  <th
+                    key={col.key || col.header}
+                    onClick={() => isSortable && requestSort(col.key)}
+                    className={`px-4 py-3.5 text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-700 select-none transition-colors border-b border-slate-200/90 ${
+                      isSortable ? 'cursor-pointer hover:bg-slate-100' : ''
+                    } ${
+                      col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                    } ${col.headerClassName || ''}`}
+                    style={{
+                      textAlign: col.align || 'left',
+                      ...(col.width ? { width: col.width } : {})
+                    }}
+                  >
+                    <div
+                      className={`inline-flex items-center gap-1.5 ${
+                        col.align === 'right'
+                          ? 'ml-auto justify-end'
+                          : col.align === 'center'
+                          ? 'mx-auto justify-center'
+                          : 'mr-auto justify-start'
+                      }`}
+                      style={{
+                        display: 'inline-flex',
+                        ...(col.align === 'right' ? { marginLeft: 'auto', textAlign: 'right' } : {}),
+                        ...(col.align === 'center' ? { margin: '0 auto', textAlign: 'center' } : {}),
+                        ...(col.align === 'left' || !col.align ? { marginRight: 'auto', textAlign: 'left' } : {})
+                      }}
+                    >
+                      <span className="text-slate-700 font-bold tracking-wider whitespace-nowrap">
+                        {col.header}
+                      </span>
+                      {isSortable && (
+                        <span className="inline-flex items-center flex-shrink-0">
+                          {isSorted ? (
+                            sortConfig.direction === 'asc' ? (
+                              <ArrowUp className="w-3.5 h-3.5 text-red-600" />
+                            ) : (
+                              <ArrowDown className="w-3.5 h-3.5 text-red-600" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600" />
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
@@ -155,14 +209,15 @@ export const DataTable = ({
               paginatedData.map((row, rIdx) => (
                 <tr 
                   key={row.id || rIdx} 
-                  className="hover:bg-blue-50/20 transition-colors"
+                  className="hover:bg-slate-50/80 transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key || col.header}
-                      className={`px-4 py-3.5 text-xs text-slate-800 ${
+                      className={`px-4 py-3.5 text-sm text-slate-800 align-middle ${
                         col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
-                      }`}
+                      } ${col.cellClassName || ''}`}
+                      style={{ textAlign: col.align || 'left' }}
                     >
                       {col.render ? col.render(row) : (row[col.key] ?? '—')}
                     </td>
@@ -171,8 +226,17 @@ export const DataTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-xs text-slate-400">
-                  {emptyMessage}
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-sm text-slate-400">
+                  <p className="font-medium text-slate-500 mb-1">{emptyMessage}</p>
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm('')}
+                      className="text-red-600 hover:underline text-sm font-semibold"
+                    >
+                      Clear search filter
+                    </button>
+                  )}
                 </td>
               </tr>
             )}
@@ -181,7 +245,7 @@ export const DataTable = ({
       </div>
 
       {/* Screenshot Exact Pagination Footer */}
-      <div className="px-4 py-3 border-t border-slate-200/90 flex flex-wrap items-center justify-between text-xs text-slate-600 bg-white gap-3">
+      <div className="px-4 py-3.5 border-t border-slate-200/90 flex flex-wrap items-center justify-between text-sm text-slate-600 bg-white gap-3">
         <div className="flex items-center gap-3">
           <span>
             Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
@@ -199,18 +263,18 @@ export const DataTable = ({
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-sm font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className="w-4 h-4" />
             <span>Previous</span>
           </button>
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-sm font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
           >
             <span>Next</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

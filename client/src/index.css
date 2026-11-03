@@ -3,29 +3,30 @@
 @tailwind utilities;
 
 :root {
-  --color-app-base: #f4f7fb;
+  --color-app-base: #f8fafc;
   --color-app-card: #ffffff;
   --color-app-border: #e2e8f0;
-  --color-sidebar-navy: #0a1626;
-  --color-brand-blue: #1d68e4;
-  --color-brand-navy-header: #103a6c;
+  --color-brand-red: #dc2626;
+  --color-brand-red-dark: #b91c1c;
   --color-text-main: #0f172a;
   --color-text-muted: #64748b;
 }
 
+html {
+  font-size: 16.5px;
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #f4f7fb;
-  background-image: radial-gradient(at 0% 0%, rgba(226, 242, 255, 0.45) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(238, 246, 255, 0.4) 0px, transparent 50%);
-  background-attachment: fixed;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.9375rem;
+  background-color: #f8fafc;
   color: #0f172a;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
 h1, h2, h3, h4, .font-heading {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -59,12 +60,13 @@ h1, h2, h3, h4, .font-heading {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
-/* Screenshot Table Header: Deep Royal Navy Blue with Crisp Pure White Headings */
+/* Table Header: Clean Light Slate Header with Crisp Slate Headings matching the White Theme */
 table thead,
 table thead tr,
 .erp-table-th {
-  background-color: #103a6c !important;
-  color: #ffffff !important;
+  background-color: #f8fafc !important;
+  color: #334155 !important;
+  border-bottom: 2px solid #e2e8f0 !important;
 }
 
 table thead th,
@@ -73,66 +75,66 @@ table thead th span,
 table thead th div,
 .erp-table-th,
 .erp-table-th * {
-  color: #ffffff !important;
+  color: #334155 !important;
   font-weight: 700 !important;
   letter-spacing: 0.04em !important;
 }
 
 table thead th svg {
-  color: #ffffff !important;
-  stroke: #ffffff !important;
+  color: #64748b !important;
+  stroke: #64748b !important;
 }
 
 .erp-table-th {
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   text-transform: uppercase;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #0c2d54;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .erp-table-td {
-  padding: 0.85rem 1rem;
+  padding: 0.95rem 1.15rem;
   border-bottom: 1px solid #f1f5f9;
   color: #1e293b;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
 }
 
 .erp-input {
   background-color: #ffffff;
   border: 1px solid #dce3ed;
   color: #0f172a;
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.8125rem;
+  border-radius: 0.625rem;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.9375rem;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   width: 100%;
 }
 
 .erp-input:focus {
   outline: none;
-  border-color: #1d68e4;
-  box-shadow: 0 0 0 2px rgba(29, 104, 228, 0.2);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
-/* Screenshot Action Buttons: Solid Electric Blue */
+/* Action Buttons: Brand Red matching Sidebar Accent */
 .erp-btn-primary {
-  background-color: #1d68e4;
+  background-color: #dc2626;
   color: #ffffff;
-  font-weight: 600;
-  padding: 0.5rem 1.15rem;
-  border-radius: 0.5rem;
+  font-weight: 700;
+  padding: 0.65rem 1.35rem;
+  border-radius: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  font-size: 0.78rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(29, 104, 228, 0.3);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
 }
 
 .erp-btn-primary:hover {
-  background-color: #1552b8;
-  box-shadow: 0 2px 6px rgba(29, 104, 228, 0.4);
+  background-color: #b91c1c;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
 }
 
 .erp-btn-secondary {
@@ -206,7 +208,7 @@ main [class*="border-[#"],
   border-color: #e2e8f0 !important;
 }
 
-/* Typography contrast for white theme (strictly excludes all table headers, buttons, and dark navy containers) */
+/* Typography contrast for white theme */
 main .text-white:not(
   .erp-btn-primary *,
   .erp-btn-copper *,
@@ -215,14 +217,9 @@ main .text-white:not(
   .bg-emerald-600 *,
   .bg-rose-500 *,
   .bg-rose-600 *,
-  .bg-blue-600 *,
-  .bg-blue-700 *,
-  thead *,
-  th *,
-  tr.bg-\[\#103a6c\] *,
-  .erp-table-th *,
-  [class*="bg-[#103a6c]"] *,
-  [class*="bg-[#0a1626]"] *
+  .bg-red-500 *,
+  .bg-red-600 *,
+  .bg-red-700 *
 ),
 .modal .text-white:not(
   .erp-btn-primary *,
@@ -230,14 +227,14 @@ main .text-white:not(
   .bg-gold-400 *,
   .bg-emerald-500 *,
   .bg-emerald-600 *,
-  thead *,
-  th *,
-  .erp-table-th *
+  .bg-red-500 *,
+  .bg-red-600 *,
+  .bg-red-700 *
 ) {
   color: #0f172a !important;
 }
 
-/* Ensure all table headings across all modules stay crisp pure white */
+/* Ensure all table headings across all modules stay crisp dark slate */
 main thead,
 main thead *,
 main thead th,
@@ -247,7 +244,7 @@ main thead th div,
 .modal thead *,
 .modal thead th,
 .modal thead th span {
-  color: #ffffff !important;
+  color: #334155 !important;
 }
 
 main .text-slate-200,

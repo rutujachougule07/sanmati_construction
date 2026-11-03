@@ -208,9 +208,9 @@ export const ReportsModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#103a6c] text-white">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
                     {reportData.headers.map((h, i) => (
-                      <th key={i} className="p-3 font-bold text-[11px] uppercase tracking-wider text-white">
+                      <th key={i} className="p-3 font-bold text-[11px] uppercase tracking-wider text-slate-700">
                         {h}
                       </th>
                     ))}
@@ -298,21 +298,21 @@ export const ReportsModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#103a6c] text-white">
-                    <th className="p-3 uppercase text-[11px] font-bold text-white">Date</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white">Reference / Bill</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white">Project Site</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white">Client / Party</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white text-right">Gross (INR)</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white text-right">Net Payable</th>
-                    <th className="p-3 uppercase text-[11px] font-bold text-white text-center">Status</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Date</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Reference / Bill</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Project Site</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700">Client / Party</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-right">Gross (INR)</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-right">Net Payable</th>
+                    <th className="p-3 uppercase text-[11px] font-bold text-slate-700 text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {raBills.map((b) => (
                     <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-3 font-semibold text-slate-900">{formatDate(b.date)}</td>
-                      <td className="p-3 font-mono font-bold text-[#1d68e4]">{b.billNumber}</td>
+                      <td className="p-3 font-mono font-bold text-red-600">{b.billNumber}</td>
                       <td className="p-3 text-slate-700 font-medium">{b.projectName}</td>
                       <td className="p-3 text-slate-600">{b.clientName}</td>
                       <td className="p-3 text-right font-mono text-slate-900">{formatCurrency(b.currentBillAmount)}</td>
@@ -375,7 +375,7 @@ export const ReportsModule = () => {
                     </div>
                     <div>
                       <span className="text-slate-500 text-[10px]">Net Profit</span>
-                      <div className="font-bold text-[#1d68e4] font-mono">{formatCurrency(p.actualProfit)}</div>
+                      <div className="font-bold text-emerald-700 font-mono">{formatCurrency(p.actualProfit)}</div>
                     </div>
                   </div>
 

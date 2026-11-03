@@ -1,4 +1,4 @@
-// Dashboard Page Component
+// Dashboard Page Component - Exact Screenshot Theme Match (Plus Jakarta Sans, Pure White Cards, Coral/Red Accents)
 import React, { useState } from 'react';
 import { 
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, 
@@ -6,11 +6,11 @@ import {
 } from 'recharts';
 import { 
   Building2, TrendingUp, DollarSign, Clock, Users, AlertTriangle, 
-  CheckCircle, ArrowUpRight, ArrowDownRight, MapPin, HardHat, FileSpreadsheet 
+  CheckCircle, ArrowUpRight, ArrowDownRight, MapPin, HardHat, FileSpreadsheet,
+  Mail, Image as ImageIcon, CheckCircle2, ArrowRight, ShieldCheck, Activity
 } from 'lucide-react';
 import { useERPData } from '../context/ERPDataContext';
 import { useAuth } from '../context/AuthContext';
-import { StatCard } from '../components/StatCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { formatCurrency, formatNumber } from '../utils/formatters';
 import { Link } from 'react-router-dom';
@@ -40,49 +40,248 @@ export const Dashboard = () => {
     profit: (p.actualProfit || 0) / 100000
   }));
 
-  // Chart Data: Monthly Revenue & Expense Cashflow
-  const monthlyCashflow = [
-    { month: 'Jun', billing: 38, expenses: 28 },
-    { month: 'Jul', billing: 45, expenses: 35 },
-    { month: 'Aug', billing: 52, expenses: 40 },
-    { month: 'Sep', billing: 65, expenses: 49 },
-    { month: 'Oct', billing: 78, expenses: 58 },
-    { month: 'Nov', billing: 92, expenses: 68 }
-  ];
-
-  // Project Progress Breakdown - Exact Screenshot Palette
+  // Project Progress Breakdown
   const projectStatusData = [
     { name: 'Completed (>80%)', value: 1, color: '#10b981' },
-    { name: 'In Progress (30-80%)', value: 1, color: '#1d68e4' },
+    { name: 'In Progress (30-80%)', value: 1, color: '#dc2626' },
     { name: 'Early Stage (<30%)', value: 1, color: '#8b5cf6' }
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner with Screenshot Telemetry Ribbon & Welcome Header */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
+    <div className="space-y-6 font-sans">
+      {/* 1. Header Row - Exact Screenshot Match */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Dashboard
+            </h1>
+            {/* Red Trend Pill Badge: ↗ System Overview */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-500 border border-red-200/80 text-sm font-bold">
+              <TrendingUp className="w-4 h-4 text-red-500" />
+              <span>System Overview</span>
+            </div>
+          </div>
+          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
+            Overview of your website content
+          </p>
+        </div>
+
+        {/* Action button */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link
+            to="/crm?tab=leads"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all shadow-2xs"
+          >
+            <span>+ Add Inquiry</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* 2. Top 4 Stat Cards - Exact Screenshot Match */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Hero Banners */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0 border border-red-100">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+                Hero Banners
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                4 Slides
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
+            <span className="text-sm text-slate-500 font-medium">Homepage Slider</span>
+            <span className="px-3 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100 text-sm font-bold">
+              + 31%
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Website Status */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0 border border-emerald-100">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+                Website Status
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1 flex items-center gap-2">
+                <span>Active</span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
+            <span className="text-sm text-slate-500 font-medium">All systems working</span>
+            <span className="px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-sm font-bold">
+              ↑ 100%
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Team Members */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 border border-purple-100">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+                Team Members
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                {hrmsEmployees?.length || 8} Members
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
+            <span className="text-sm text-slate-500 font-medium">-2 this month</span>
+            <span className="px-3 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 text-sm font-bold">
+              ↑ 38%
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Inquiries */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center flex-shrink-0 border border-rose-100">
+              <Mail className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-sm font-semibold text-slate-600 block leading-tight">
+                Inquiries
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
+                2 Messages
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100">
+            <span className="text-sm font-bold text-rose-600">1 new unread</span>
+            <span className="px-3 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-sm font-bold">
+              ↑ 23%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Recent Customer Inquiries Card - Exact Screenshot Match */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+          <div>
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+              Recent Customer Inquiries
+            </h3>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Latest project inquiries received via website contact form
+            </p>
+          </div>
+          <Link
+            to="/crm"
+            className="text-sm font-bold text-[#b91c1c] hover:text-red-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>View All Inquiries</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Inquiry Items List */}
+        <div className="space-y-3">
+          {/* Row 1: rishabh (In Progress) */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl hover:bg-slate-50/70 transition-colors">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-11 h-11 rounded-full bg-rose-100 text-rose-500 font-bold flex items-center justify-center text-base flex-shrink-0">
+                R
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-bold text-base text-slate-900 leading-tight">
+                  rishabh
+                </h4>
+                <p className="text-sm text-slate-600 mt-0.5 truncate">
+                  Query regarding Sangli Office
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-6 flex-shrink-0">
+              <span className="text-sm text-slate-400 font-medium hidden sm:block">
+                Oct 3, 2026 04:28 PM
+              </span>
+              <span className="px-3.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/80 text-sm font-bold">
+                In Progress
+              </span>
+            </div>
+          </div>
+
+          {/* Row 2: Cherrylee Samson (Highlighted with dark red left border, NEW badge, and New status) */}
+          <div className="border-l-4 border-[#881337] bg-red-50/25 p-4 rounded-r-xl flex items-center justify-between transition-colors shadow-2xs">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-11 h-11 rounded-full bg-[#881337] text-white font-bold flex items-center justify-center text-base flex-shrink-0 shadow-xs">
+                C
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-bold text-base text-slate-900 leading-tight">
+                    Cherrylee Samson
+                  </h4>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#881337] text-white text-xs font-black uppercase tracking-wider leading-none">
+                    NEW
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-[#881337] mt-0.5 truncate">
+                  Technical Inquiry for Sangli Office
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-6 flex-shrink-0">
+              <span className="text-sm text-slate-400 font-medium hidden sm:block">
+                Oct 20, 2026 06:13 AM
+              </span>
+              <span className="px-4 py-1 rounded-full bg-white text-red-600 border border-red-200 text-sm font-bold shadow-2xs">
+                New
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Construction ERP Telemetry Ribbon & Quick Actions */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#1d68e4] mb-1">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 mb-1">
               <span>Kolhapur Headquarters</span>
               <span>•</span>
-              <span className="bg-blue-50 text-[#1d68e4] px-1.5 py-0.5 rounded border border-blue-200/60 font-semibold">ROOT CONTROL</span>
+              <span className="bg-red-50 text-red-600 px-2.5 py-0.5 rounded-md border border-red-200 font-bold">
+                ERP OPERATIONS
+              </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-heading tracking-tight">
-              Welcome back, {currentUser?.name}
-            </h1>
-            <p className="text-xs md:text-sm text-slate-500 mt-1">
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Civil Construction & Financial Summary
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">
               Managing civil projects, BOQ accounts, live GPS geotracking, and Tally operations for SANMATI CONSTRUCTIONS.
             </p>
           </div>
 
-          {/* View Switcher Buttons matching screenshot pill buttons */}
-          <div className="flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200 self-start md:self-auto shadow-2xs">
+          {/* View Switcher Buttons */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto shadow-2xs">
             <button
               onClick={() => setViewMode('executive')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                 viewMode === 'executive' 
-                  ? 'bg-white text-[#1d68e4] shadow-xs font-bold' 
+                  ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -90,9 +289,9 @@ export const Dashboard = () => {
             </button>
             <button
               onClick={() => setViewMode('projects')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                 viewMode === 'projects' 
-                  ? 'bg-white text-[#1d68e4] shadow-xs font-bold' 
+                  ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -100,9 +299,9 @@ export const Dashboard = () => {
             </button>
             <button
               onClick={() => setViewMode('attendance')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                 viewMode === 'attendance' 
-                  ? 'bg-white text-[#1d68e4] shadow-xs font-bold' 
+                  ? 'bg-white text-red-600 shadow-xs font-bold' 
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -111,140 +310,124 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Live Fleet & Telemetry Ribbon - Exact Screenshot 2 Match */}
-        <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+        {/* Live Fleet Radar Ribbon */}
+        <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-sm">
           <div className="flex flex-wrap items-center gap-3 md:gap-5 text-slate-600">
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-slate-900">Live Fleet Radar</span>
-              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="font-bold text-slate-900">Live Fleet Radar</span>
+              <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
                 1 ON DUTY
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-500">
+            <div className="flex items-center gap-1.5 text-slate-600">
               <span>Drivers:</span>
               <span className="font-bold text-slate-800">1 Transit</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-500">
+            <div className="flex items-center gap-1.5 text-slate-600">
               <span>Plant Staff:</span>
               <span className="font-bold text-slate-800">2 In-Plant</span>
             </div>
-            <div className="flex items-center gap-1.5 text-slate-500">
+            <div className="flex items-center gap-1.5 text-slate-600">
               <span>Field Sites:</span>
               <span className="font-bold text-slate-800">1 Active</span>
             </div>
-            <div className="hidden sm:flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50/70 px-2 py-0.5 rounded-full border border-emerald-200 text-[11px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="hidden sm:flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50/70 px-3 py-0.5 rounded-full border border-emerald-200 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>GNSS Telemetry Live</span>
             </div>
           </div>
 
           <Link
             to="/geotracking"
-            className="px-3.5 py-1.5 bg-[#1d68e4] hover:bg-blue-700 text-white rounded-lg font-semibold text-xs transition-colors shadow-2xs flex items-center gap-1.5"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-sm transition-colors shadow-2xs flex items-center gap-1.5"
           >
-            <MapPin className="w-3.5 h-3.5" />
+            <MapPin className="w-4 h-4" />
             <span>Track Live Locations</span>
           </Link>
         </div>
       </div>
 
-      {/* Primary KPI Grid (10 Key Metric Cards) - Responsive for all window screens */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 md:gap-4">
-        <StatCard
-          title="Active Projects"
-          value={`${activeProjectsCount} / ${projects.length}`}
-          icon="HardHat"
-          subtitle="All sites operational"
-          accent="indigo"
-          badgeText="Active Duty"
-        />
-        <StatCard
-          title="Total Contract Value"
-          value={formatCurrency(totalContractValue)}
-          icon="Building2"
-          change="12% YoY"
-          isPositive={true}
-          accent="blue"
-        />
-        <StatCard
-          title="Revenue (Billed)"
-          value={formatCurrency(totalRevenue)}
-          icon="TrendingUp"
-          subtitle="Cumulative RA Bills"
-          accent="emerald"
-          badgeText="RA Verified"
-        />
-        <StatCard
-          title="Actual Expenditure"
-          value={formatCurrency(totalExpenses)}
-          icon="DollarSign"
-          subtitle="Labour + Materials"
-          accent="purple"
-          badgeText="Cost Incurred"
-        />
-        <StatCard
-          title="Net Booked Profit"
-          value={formatCurrency(totalProfit)}
-          icon="TrendingUp"
-          change="21.6% margin"
-          isPositive={true}
-          accent="emerald"
-        />
-        <StatCard
-          title="Outstanding Dues"
-          value={formatCurrency(totalOutstanding)}
-          icon="Clock"
-          subtitle="Receivable from clients"
-          accent="amber"
-          badgeText="Action Needed"
-        />
-        <StatCard
-          title="Pending Approvals"
-          value={`${pendingApprovalsCount}`}
-          icon="AlertTriangle"
-          subtitle="Action required"
-          accent="amber"
-          badgeText="Pending Review"
-        />
-        <StatCard
-          title="Stock Alerts"
-          value={`${lowStockCount}`}
-          icon="AlertTriangle"
-          subtitle="Items below threshold"
-          accent="purple"
-          badgeText="Threshold"
-        />
-        <StatCard
-          title="Staff Attendance"
-          value={`${hrmsEmployees.length} on duty`}
-          icon="Users"
-          subtitle="GPS verified"
-          accent="emerald"
-          badgeText="Biometric Sync"
-        />
-        <StatCard
-          title="Tally Status"
-          value="Synchronized"
-          icon="CheckCircle"
-          subtitle="ODBC Gateway 9000"
-          accent="blue"
-          badgeText="ODBC Ready"
-        />
+      {/* 5. Construction ERP KPI Metric Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-500">Total Contract</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Building2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalContractValue)}</span>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">All sanctioned works</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-500">Revenue (Billed)</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalRevenue)}</span>
+          </div>
+          <span className="text-xs text-emerald-600 font-bold">RA Verified</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-500">Expenditure</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalExpenses)}</span>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">Material + Labour</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-500">Net Profit</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <span className="text-2xl font-black text-emerald-700">{formatCurrency(totalProfit)}</span>
+          </div>
+          <span className="text-xs text-emerald-600 font-bold">21.6% margin</span>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs sm:text-[13px] font-bold uppercase tracking-wider text-slate-500">Outstanding</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="my-2.5">
+            <span className="text-2xl font-black text-slate-900">{formatCurrency(totalOutstanding)}</span>
+          </div>
+          <span className="text-xs text-amber-600 font-semibold">Receivable from clients</span>
+        </div>
       </div>
 
-      {/* Main Charts Row */}
+      {/* 6. Main Financial Charts & Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Project Profitability & Budget Bar Chart */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 font-heading">
+              <h3 className="text-lg font-extrabold text-slate-900 font-heading">
                 Project Financials: Contract vs Budget vs Actual Cost
               </h3>
-              <p className="text-xs text-slate-500">Values in INR (₹ Lakhs) across Kolhapur projects</p>
+              <p className="text-sm text-slate-500">Values in INR (₹ Lakhs) across Kolhapur projects</p>
             </div>
-            <Link to="/bi" className="text-xs text-[#1d68e4] font-semibold hover:underline flex items-center gap-1">
-              Full BI View <ArrowUpRight className="w-3.5 h-3.5" />
+            <Link to="/bi" className="text-sm text-red-600 font-bold hover:underline flex items-center gap-1">
+              Full BI View <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -252,28 +435,28 @@ export const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={profitabilityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '12px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '13px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}
                   formatter={(val) => [`₹${val.toFixed(2)} Lakhs`, '']}
                 />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                <Bar dataKey="contract" name="Contract Value" fill="#103a6c" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="budget" name="Approved Budget" fill="#1d68e4" radius={[4, 4, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
+                <Bar dataKey="contract" name="Contract Value" fill="#0f172a" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="budget" name="Approved Budget" fill="#dc2626" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="actualCost" name="Actual Cost Incurred" fill="#f59e0b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Project Status Distribution & Alerts */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs flex flex-col justify-between">
+        {/* Project Status Distribution */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-slate-900 font-heading mb-1">
+            <h3 className="text-lg font-extrabold text-slate-900 font-heading mb-1">
               Project Stage Distribution
             </h3>
-            <p className="text-xs text-slate-500 mb-4">Overall project completion milestones</p>
+            <p className="text-sm text-slate-500 mb-4">Overall project completion milestones</p>
             <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -291,19 +474,19 @@ export const Dashboard = () => {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '12px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}
+                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', fontSize: '13px', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div className="space-y-2 mt-2">
               {projectStatusData.map((item) => (
-                <div key={item.name} className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-2 text-slate-600">
+                <div key={item.name} className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-slate-700">
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
                     {item.name}
                   </span>
-                  <span className="font-bold text-slate-800">{item.value} Projects</span>
+                  <span className="font-bold text-slate-900">{item.value} Projects</span>
                 </div>
               ))}
             </div>
@@ -311,49 +494,49 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Secondary Row: Active Project Highlights & Pending Approvals */}
+      {/* 7. Active Construction Sites & Pending Approvals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active Projects Tracker */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs">
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-slate-900 font-heading">
+            <h3 className="text-lg font-extrabold text-slate-900 font-heading">
               Active Construction Sites in Kolhapur
             </h3>
-            <Link to="/projects" className="text-xs text-[#1d68e4] font-semibold hover:underline">
+            <Link to="/projects" className="text-sm text-red-600 font-bold hover:underline">
               View All Projects →
             </Link>
           </div>
 
           <div className="space-y-4">
             {projects.map((proj) => (
-              <div key={proj.id} className="p-4 bg-slate-50/70 rounded-xl border border-slate-200/90 hover:border-[#1d68e4]/60 transition-all">
+              <div key={proj.id} className="p-4 bg-slate-50/60 rounded-xl border border-slate-200/80 hover:border-red-400 transition-all">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                   <div>
-                    <span className="text-xs text-[#1d68e4] font-bold">{proj.id}</span>
-                    <h4 className="text-sm font-bold text-slate-900">{proj.name}</h4>
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3 h-3 text-[#1d68e4]" />
+                    <span className="text-xs text-red-600 font-bold">{proj.id}</span>
+                    <h4 className="text-base font-bold text-slate-900">{proj.name}</h4>
+                    <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+                      <MapPin className="w-3.5 h-3.5 text-red-600" />
                       {proj.location}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={proj.status} />
-                    <span className="text-xs font-bold text-[#1d68e4]">{proj.completionPercentage}%</span>
+                    <span className="text-sm font-bold text-red-600">{proj.completionPercentage}%</span>
                   </div>
                 </div>
 
-                {/* Progress Bar in Electric Blue */}
-                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden my-2">
+                {/* Progress Bar in Coral Red */}
+                <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden my-2.5">
                   <div
-                    className="h-full bg-gradient-to-r from-[#1d68e4] to-cyan-400 rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-red-600 to-rose-500 rounded-full transition-all duration-500"
                     style={{ width: `${proj.completionPercentage}%` }}
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-[11px] text-slate-600">
-                  <div>Contract: <span className="text-slate-900 font-semibold">{formatCurrency(proj.contractValue)}</span></div>
-                  <div>Spent: <span className="text-slate-900 font-semibold">{formatCurrency(proj.actualExpenditure)}</span></div>
-                  <div>Billed: <span className="text-emerald-700 font-semibold">{formatCurrency(proj.billedAmount)}</span></div>
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/80 text-xs sm:text-[13px] text-slate-600">
+                  <div>Contract: <span className="text-slate-900 font-bold">{formatCurrency(proj.contractValue)}</span></div>
+                  <div>Spent: <span className="text-slate-900 font-bold">{formatCurrency(proj.actualExpenditure)}</span></div>
+                  <div>Billed: <span className="text-emerald-700 font-bold">{formatCurrency(proj.billedAmount)}</span></div>
                 </div>
               </div>
             ))}
@@ -361,46 +544,46 @@ export const Dashboard = () => {
         </div>
 
         {/* Action Center: Pending Approvals & Alerts */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 font-heading">
+              <h3 className="text-lg font-extrabold text-slate-900 font-heading">
                 Pending Approvals ({pendingApprovalsCount})
               </h3>
-              <Link to="/approvals" className="text-xs text-[#1d68e4] font-semibold hover:underline">
+              <Link to="/approvals" className="text-sm text-red-600 font-bold hover:underline">
                 Manage →
               </Link>
             </div>
 
             <div className="space-y-3">
               {approvals.slice(0, 4).map((app) => (
-                <div key={app.id} className="p-3 bg-slate-50/70 rounded-xl border border-slate-200/90 text-xs">
+                <div key={app.id} className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 text-sm">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-[#1d68e4] uppercase text-[10px] tracking-wider">{app.type}</span>
+                    <span className="font-bold text-red-600 uppercase text-xs tracking-wider">{app.type}</span>
                     <StatusBadge status={app.status} />
                   </div>
-                  <p className="font-semibold text-slate-900 truncate">{app.title}</p>
-                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-200/70 text-[10px] text-slate-500">
+                  <p className="font-bold text-slate-900 truncate">{app.title}</p>
+                  <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-200/70 text-xs text-slate-500">
                     <span>By: {app.requester}</span>
-                    <span className="font-bold text-slate-800">{formatCurrency(app.amount)}</span>
+                    <span className="font-bold text-slate-900">{formatCurrency(app.amount)}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Quick GPS Geofence Check CTA matching screenshot */}
-          <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-blue-50/70 via-white to-sky-50/70 border border-blue-200/80 text-xs shadow-2xs">
-            <div className="flex items-center gap-2 text-[#1d68e4] font-bold mb-1">
+          {/* Quick GPS Geofence Check CTA */}
+          <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-red-50/40 via-white to-rose-50/30 border border-red-200/70 text-sm shadow-2xs">
+            <div className="flex items-center gap-2 text-red-600 font-bold mb-1">
               <MapPin className="w-4 h-4" />
               <span>Site Geofence Attendance</span>
             </div>
-            <p className="text-slate-600 text-[11px] mb-3">
-              Authorize GPS check-in/out for active project site engineers and contractors.
+            <p className="text-slate-500 text-xs mb-3">
+              Authorize GPS check-in/out for active project site engineers and contractors in Kolhapur & Sangli.
             </p>
             <Link
               to="/geotracking"
-              className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#1d68e4] hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-2xs"
+              className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-colors shadow-2xs"
             >
               Open GPS Tracking Console
             </Link>

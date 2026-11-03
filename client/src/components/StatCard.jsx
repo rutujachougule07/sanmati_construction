@@ -35,10 +35,15 @@ export const StatCard = ({
       iconBg: 'bg-purple-50 text-purple-600 border border-purple-100',
       badge: 'text-purple-700 bg-purple-50/80 border-purple-200/60'
     },
+    red: {
+      stripe: 'border-t-4 border-red-600',
+      iconBg: 'bg-red-50 text-red-600 border border-red-100',
+      badge: 'text-red-700 bg-red-50/80 border-red-200/60'
+    },
     blue: {
-      stripe: 'border-t-4 border-[#1d68e4]',
-      iconBg: 'bg-blue-50 text-[#1d68e4] border border-blue-100',
-      badge: 'text-[#1d68e4] bg-blue-50/80 border-blue-200/60'
+      stripe: 'border-t-4 border-red-600',
+      iconBg: 'bg-red-50 text-red-600 border border-red-100',
+      badge: 'text-red-700 bg-red-50/80 border-red-200/60'
     },
     gold: {
       stripe: 'border-t-4 border-amber-500',

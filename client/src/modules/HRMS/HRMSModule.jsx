@@ -10,7 +10,7 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   Users, Calendar, CheckCircle2, DollarSign, Download, Plus, FileText, 
   MapPin, Clock, ShieldCheck, Printer, Eye, Calculator, RefreshCw, 
-  AlertCircle, Building2, Briefcase, Phone, Mail, Award, X
+  AlertCircle, Building2, Briefcase, Phone, Mail, Award, X, Trash2
 } from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
@@ -100,8 +100,14 @@ export const HRMSModule = () => {
     const pt = 200; // Standard Maharashtra Professional Tax
     const net = basic + hra + conv + sp - pf - pt;
 
+    const nextNum = hrmsEmployees.reduce((max, e) => {
+      const match = e.id?.match(/EMP-KLP-(\d+)/);
+      return match ? Math.max(max, parseInt(match[1], 10)) : max;
+    }, 0) + 1;
+    const newId = `EMP-KLP-${String(nextNum).padStart(2, '0')}`;
+
     const newEmp = {
-      id: `EMP-KLP-0${hrmsEmployees.length + 1}`,
+      id: newId,
       name: formData.name,
       designation: formData.designation,
       department: formData.department,
@@ -141,6 +147,15 @@ export const HRMSModule = () => {
     ]);
 
     setIsOnboardModalOpen(false);
+  };
+
+  // Delete Employee handler
+  const handleDeleteEmployee = (empId) => {
+    if (window.confirm('Are you sure you want to delete this employee record?')) {
+      setHrmsEmployees(prev => prev.filter(e => e.id !== empId));
+      setAttendanceRecords(prev => prev.filter(r => r.empId !== empId));
+      if (selectedEmployee?.id === empId) setSelectedEmployee(null);
+    }
   };
 
   // Quick Attendance Status Toggle
@@ -226,40 +241,59 @@ export const HRMSModule = () => {
     { 
       key: 'id', 
       header: 'Emp ID', 
-      render: (row) => <span className="font-bold text-gold-600 font-mono text-xs">{row.id}</span> 
+      align: 'center',
+      render: (row) => (
+        <span className="inline-flex items-center px-3 py-1 rounded-md text-xs sm:text-[13px] font-bold bg-slate-100 text-slate-800 border border-slate-200/90 shadow-2xs">
+          {row.id}
+        </span>
+      )
     },
     {
       key: 'name',
       header: 'Employee Name & Role',
-      render: (row) => (
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-800">
-            {row.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+      align: 'left',
+      render: (row) => {
+        const cleanName = row.name.replace(/^(Er\.|CA|Dr\.|Mr\.|Mrs\.)\s+/i, '');
+        const initials = cleanName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM';
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-xs shadow-2xs flex-shrink-0 tracking-tight">
+              {initials}
+            </div>
+            <div>
+              <span className="font-bold text-slate-900 block text-sm leading-snug">{row.name}</span>
+              <span className="text-xs text-slate-500 font-normal">{row.designation}</span>
+            </div>
           </div>
-          <div>
-            <span className="font-bold text-slate-900 block text-xs">{row.name}</span>
-            <span className="text-[11px] text-slate-500">{row.designation}</span>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     { 
       key: 'department', 
       header: 'Department', 
-      render: (row) => <span className="text-slate-700 text-xs">{row.department}</span> 
+      align: 'left',
+      render: (row) => <span className="text-slate-800 text-sm font-medium">{row.department}</span> 
     },
     { 
       key: 'joiningDate', 
       header: 'Date Joined', 
-      render: (row) => <span className="text-slate-600 font-mono text-[11px]">{formatDate(row.joiningDate)}</span> 
+      align: 'center',
+      render: (row) => <span className="text-slate-700 text-sm font-medium whitespace-nowrap">{formatDate(row.joiningDate)}</span> 
     },
     {
       key: 'contact',
       header: 'Contact Info',
+      sortable: false,
       render: (row) => (
-        <div className="text-[11px] text-slate-600">
-          <p>{row.phone || '+91 98220 00000'}</p>
-          <p className="text-slate-400">{row.email || 'employee@sanmati.com'}</p>
+        <div className="text-sm text-slate-600 space-y-0.5">
+          <div className="font-medium text-slate-800 flex items-center gap-1.5">
+            <Phone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+            <span>{row.phone || '+91 98220 00000'}</span>
+          </div>
+          <div className="text-xs text-slate-500 flex items-center gap-1.5">
+            <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+            <span>{row.email || 'employee@sanmati.com'}</span>
+          </div>
         </div>
       )
     },
@@ -267,20 +301,35 @@ export const HRMSModule = () => {
       key: 'netSalary', 
       header: 'Monthly Net Pay', 
       align: 'right', 
-      render: (row) => <span className="font-bold text-slate-900 font-mono text-xs">{formatCurrency(row.netSalary)}</span> 
+      render: (row) => (
+        <span className="font-bold text-slate-900 text-sm sm:text-base tabular-nums font-sans block text-right">
+          {formatCurrency(row.netSalary)}
+        </span>
+      )
     },
     {
       key: 'actions',
-      header: 'Profile',
+      header: 'Actions',
       align: 'center',
+      sortable: false,
       render: (row) => (
-        <button
-          onClick={() => setSelectedEmployee(row)}
-          className="px-2.5 py-1 bg-slate-100 hover:bg-gold-400 hover:text-black rounded text-[11px] font-semibold transition-colors flex items-center gap-1 mx-auto border border-slate-200 shadow-sm"
-        >
-          <Eye className="w-3 h-3" />
-          <span>Full Details</span>
-        </button>
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setSelectedEmployee(row)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg text-sm font-semibold transition-all hover:shadow-2xs active:scale-95"
+            title="View Full Profile"
+          >
+            <Eye className="w-4 h-4 text-slate-500 group-hover:text-red-500" />
+            <span>Full Details</span>
+          </button>
+          <button
+            onClick={() => handleDeleteEmployee(row.id)}
+            className="inline-flex items-center justify-center p-2 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/70 rounded-lg transition-all hover:shadow-2xs active:scale-95"
+            title="Delete Employee Record"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       )
     }
   ];
@@ -288,22 +337,22 @@ export const HRMSModule = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1d68e4] mb-0.5">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 mb-1">
             <span>SANMATI CONSTRUCTIONS</span>
             <span>•</span>
             <span>Module 6</span>
             <span>•</span>
-            <span className="bg-blue-50 text-[#1d68e4] font-bold px-2 py-0.5 rounded border border-blue-200/70 text-[11px]">
+            <span className="bg-red-50 text-red-600 font-bold px-2.5 py-0.5 rounded border border-red-200/80 text-xs">
               {activeTab === 'records' && 'i. Employee Records'}
               {activeTab === 'attendance' && 'ii. Attendance Management'}
               {activeTab === 'salary' && 'iii. Salary Calculation'}
               {activeTab === 'payslips' && 'iv. Payslip Generation'}
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 font-heading">HRMS & Payroll Management</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="text-3xl font-extrabold text-slate-900 font-heading">HRMS & Payroll Management</h2>
+          <p className="text-sm text-slate-500 mt-1">
             Comprehensive human resource suite: Employee records, attendance, salary calculations, and official payslips.
           </p>
         </div>
@@ -316,16 +365,16 @@ export const HRMSModule = () => {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-500">
-                Staff count: <strong className="text-slate-800">{hrmsEmployees.length} registered employees</strong>
+              <span className="text-sm text-slate-600">
+                Staff count: <strong className="text-slate-900 font-bold">{hrmsEmployees.length} registered employees</strong>
               </span>
-              <span className="inline-block w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="text-xs text-emerald-700 font-medium">All KYC & Banking profiles verified</span>
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+              <span className="text-sm text-emerald-700 font-semibold">All KYC & Banking profiles verified</span>
             </div>
             
             <button
               onClick={() => setIsOnboardModalOpen(true)}
-              className="erp-btn-primary text-xs"
+              className="erp-btn-primary text-sm font-bold px-4 py-2"
             >
               <Plus className="w-4 h-4" />
               <span>Onboard New Employee</span>

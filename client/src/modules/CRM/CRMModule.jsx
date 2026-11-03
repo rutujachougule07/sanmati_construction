@@ -93,7 +93,7 @@ export const CRMModule = () => {
   };
 
   const clientColumns = [
-    { key: 'id', header: 'Client ID', render: (row) => <span className="font-bold text-[#1d68e4]">{row.id}</span> },
+    { key: 'id', header: 'Client ID', render: (row) => <span className="font-bold text-red-600">{row.id}</span> },
     {
       key: 'name',
       header: 'Client / Company',
@@ -124,7 +124,7 @@ export const CRMModule = () => {
       render: (row) => (
         <button
           onClick={() => setSelectedClient(row)}
-          className="px-2.5 py-1 bg-slate-100 hover:bg-[#1d68e4] hover:text-white rounded text-[11px] font-semibold transition-colors cursor-pointer"
+          className="px-2.5 py-1 bg-slate-100 hover:bg-red-600 hover:text-white rounded text-[11px] font-semibold transition-colors cursor-pointer"
         >
           View Profile
         </button>
@@ -156,7 +156,7 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-red-600 uppercase tracking-wider">
                 1. CRM Management • Subsection (i)
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -187,7 +187,7 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-bold text-sky-600 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-red-600 uppercase tracking-wider">
                 1. CRM Management • Subsection (ii)
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -208,7 +208,7 @@ export const CRMModule = () => {
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Conversion Rate</span>
-              <div className="text-2xl font-black text-[#1d68e4] mt-1">68.4%</div>
+              <div className="text-2xl font-black text-red-600 mt-1">68.4%</div>
             </div>
           </div>
 

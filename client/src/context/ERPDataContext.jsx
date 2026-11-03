@@ -26,7 +26,15 @@ export const ERPDataProvider = ({ children }) => {
     const [state, setState] = useState(() => {
       const saved = localStorage.getItem(`sanmati_${key}`);
       if (saved) {
-        try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+        try {
+          let parsed = JSON.parse(saved);
+          if (key === 'hrmsEmployees' && Array.isArray(parsed)) {
+            const DUMMY_IDS = ['EMP-KLP-01', 'EMP-KLP-02', 'EMP-KLP-03', 'EMP-KLP-04'];
+            parsed = parsed.filter(emp => !DUMMY_IDS.includes(emp.id) && emp.name !== 'Sanmati Patil' && emp.name !== 'Er. Rajesh Kulkarni' && emp.name !== 'Er. Amit Deshmukh' && emp.name !== 'CA Sneha Shinde');
+            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
+          }
+          return parsed;
+        } catch (e) { /* ignore */ }
       }
       return initial;
     });

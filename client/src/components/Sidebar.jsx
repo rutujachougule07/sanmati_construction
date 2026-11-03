@@ -55,36 +55,30 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
         />
       )}
 
-      {/* Sidebar Panel - Deep Midnight Navy with Responsive Desktop Collapse */}
+      {/* Sidebar Panel - Light Clean Theme with Red Active Indicator */}
       <aside 
-        className={`fixed lg:sticky top-0 left-0 z-50 lg:z-30 h-screen bg-[#0a1626] border-r border-[#132238] flex flex-col transition-all duration-300 ease-in-out shadow-2xl flex-shrink-0 ${
+        className={`fixed lg:sticky top-0 left-0 z-50 lg:z-30 h-screen bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 ease-in-out shadow-xs flex-shrink-0 font-sans ${
           isCollapsed ? 'lg:w-20' : 'lg:w-64'
         } ${
           isOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Top Header Card */}
-        <div className={`p-3.5 border-b border-[#132238] flex items-center bg-[#081220] ${
+        <div className={`p-4 border-b border-slate-100 flex items-center bg-white ${
           isCollapsed ? 'justify-center' : 'justify-between'
         }`}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1d68e4] to-cyan-400 p-[1.5px] shadow-sm flex items-center justify-center flex-shrink-0">
-              <div className="w-full h-full bg-[#0a1626] rounded-[10px] flex items-center justify-center font-extrabold text-cyan-400 text-xs tracking-wider">
-                SC
-              </div>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-black text-xs tracking-wider shadow-xs flex-shrink-0">
+              SC
             </div>
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-xs text-white tracking-wide truncate">
-                    SANMATI CONSTR
-                  </span>
+                <div className="font-extrabold text-base text-slate-900 tracking-tight leading-none flex items-center gap-1.5">
+                  <span>SANMATI</span>
+                  <span className="text-red-600 text-xs font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-100">ERP</span>
                 </div>
-                <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
-                  <span>Kolhapur, Sangli</span>
-                </div>
-                <div className="text-[9px] font-bold text-sky-400 tracking-wider uppercase">
-                  ADMIN
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 truncate">
+                  ADMIN CONTROL CENTER
                 </div>
               </div>
             )}
@@ -99,7 +93,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
                 onToggleCollapse?.();
               }
             }}
-            className={`w-6 h-6 rounded-full bg-[#11233b] hover:bg-[#1a3356] border border-[#1d3557] flex items-center justify-center text-slate-400 hover:text-white transition-colors flex-shrink-0 ${
+            className={`w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors flex-shrink-0 ${
               isCollapsed ? 'hidden lg:flex mt-2' : ''
             }`}
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
@@ -112,18 +106,73 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
           </button>
         </div>
 
-        {/* Section Header: NAVIGATION */}
-        {!isCollapsed && (
-          <div className="px-4 pt-4 pb-1 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              NAVIGATION
-            </span>
-          </div>
-        )}
+        {/* Navigation Menu Items */}
+        <div className={`flex-1 overflow-y-auto ${isCollapsed ? 'px-2 py-3 space-y-2' : 'px-2.5 py-2 space-y-1'} custom-scrollbar`}>
+          {/* Section 1: OVERVIEW */}
+          {!isCollapsed && (
+            <div className="px-3 pt-2.5 pb-1 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                OVERVIEW
+              </span>
+            </div>
+          )}
 
-        {/* Navigation Menu Items with Subcategories */}
-        <div className={`flex-1 overflow-y-auto ${isCollapsed ? 'px-2 py-3 space-y-2' : 'px-2.5 py-1 space-y-1'} custom-scrollbar`}>
-          {accessibleModules.map((item) => {
+          {/* Dashboard Item */}
+          {(() => {
+            const dashboardItem = accessibleModules.find(m => m.id === 'dashboard');
+            if (!dashboardItem) return null;
+            const isDashActive = location.pathname === '/dashboard';
+
+            if (isCollapsed) {
+              return (
+                <div className="relative group">
+                  <NavLink
+                    to="/dashboard"
+                    onClick={onClose}
+                    className={`w-full p-2.5 rounded-xl flex items-center justify-center transition-all ${
+                      isDashActive
+                        ? 'bg-red-50 text-red-600 border border-red-200 font-bold shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Icons.LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+                  </NavLink>
+                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-50 bg-slate-900 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
+                    Dashboard
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                to="/dashboard"
+                onClick={onClose}
+                className={`group flex items-center justify-between px-3.5 py-2.5 text-sm transition-all ${
+                  isDashActive
+                    ? 'bg-red-50/80 text-red-600 font-bold border-l-4 border-red-600 rounded-r-xl rounded-l-none'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-xl'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Icons.LayoutDashboard className={`w-4 h-4 flex-shrink-0 ${isDashActive ? 'text-red-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                  <span className="truncate">Dashboard</span>
+                </div>
+              </NavLink>
+            );
+          })()}
+
+          {/* Section 2: CONSTRUCTION MODULES */}
+          {!isCollapsed && (
+            <div className="px-3 pt-4 pb-1.5 flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                ERP MODULES ({accessibleModules.filter(m => m.id !== 'dashboard').length} SECTIONS)
+              </span>
+            </div>
+          )}
+
+          {/* Other Modules */}
+          {accessibleModules.filter(m => m.id !== 'dashboard').map((item) => {
             const IconComponent = Icons[item.icon] || Icons.CircleDot;
             const hasSubcategories = Boolean(item.subcategories && item.subcategories.length > 0);
             const isExpanded = Boolean(expandedModules[item.id]);
@@ -140,14 +189,13 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
                     title={item.name}
                     className={`w-full p-2.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                       isParentActive
-                        ? 'bg-[#1d68e4] text-white shadow-md shadow-blue-900/40'
-                        : 'text-slate-400 hover:text-white hover:bg-white/10'
+                        ? 'bg-red-50 text-red-600 border border-red-200 font-bold shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <IconComponent className="w-5 h-5 flex-shrink-0" />
                   </button>
-                  {/* Tooltip on hover */}
-                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-50 bg-[#0d1f36] border border-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
+                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block z-50 bg-slate-900 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
                     {item.name}
                   </div>
                 </div>
@@ -157,48 +205,46 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
             return (
               <div key={item.id} className="space-y-0.5">
                 {hasSubcategories ? (
-                  // Module with Subcategories (Clickable toggle & link)
                   <div
                     onClick={() => toggleModuleExpand(item.id, item.path, item.subcategories?.[0]?.path)}
-                    className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer ${
+                    className={`group flex items-center justify-between px-3.5 py-2.5 text-sm transition-all cursor-pointer ${
                       isParentActive
-                        ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5 font-normal'
+                        ? 'bg-red-50/80 text-red-600 font-bold border-l-4 border-red-600 rounded-r-xl rounded-l-none'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-xl'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <IconComponent className={`w-4 h-4 flex-shrink-0 ${isParentActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <IconComponent className={`w-4 h-4 flex-shrink-0 ${isParentActive ? 'text-red-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                       <span className="truncate">{item.name}</span>
                     </div>
                     {isExpanded ? (
-                      <Icons.ChevronDown className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
-                        isParentActive ? 'text-white' : 'text-slate-400'
+                      <Icons.ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                        isParentActive ? 'text-red-600' : 'text-slate-400'
                       }`} />
                     ) : (
-                      <Icons.ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
-                        isParentActive ? 'text-white opacity-90' : 'text-slate-500 opacity-60 group-hover:text-slate-300'
+                      <Icons.ChevronRight className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                        isParentActive ? 'text-red-600 opacity-90' : 'text-slate-400 group-hover:text-slate-600'
                       }`} />
                     )}
                   </div>
                 ) : (
-                  // Standard NavLink
                   <NavLink
                     to={item.path}
                     onClick={onClose}
-                    className={({ isActive }) => `group flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all ${
+                    className={({ isActive }) => `group flex items-center justify-between px-3.5 py-2.5 text-sm transition-all ${
                       isActive
-                        ? 'bg-[#1d68e4] text-white font-medium shadow-md shadow-blue-900/30'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5 font-normal'
+                        ? 'bg-red-50/80 text-red-600 font-bold border-l-4 border-red-600 rounded-r-xl rounded-l-none'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 font-semibold rounded-xl'
                     }`}
                   >
                     {({ isActive }) => (
                       <>
-                        <div className="flex items-center gap-3 min-w-0">
-                          <IconComponent className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`} />
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <IconComponent className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-red-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                           <span className="truncate">{item.name}</span>
                         </div>
-                        <Icons.ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 transition-transform ${
-                          isActive ? 'text-white opacity-90' : 'text-slate-500 opacity-60 group-hover:text-slate-300'
+                        <Icons.ChevronRight className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                          isActive ? 'text-red-600' : 'text-slate-300 group-hover:text-slate-500'
                         }`} />
                       </>
                     )}
@@ -207,7 +253,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
 
                 {/* Subcategories Dropdown List */}
                 {hasSubcategories && isExpanded && (
-                  <div className="ml-4 pl-3.5 border-l border-blue-900/40 space-y-1 pt-1 pb-1">
+                  <div className="ml-4 pl-3 border-l-2 border-slate-200/80 space-y-1 pt-1.5 pb-1.5">
                     {item.subcategories.map((sub, index) => {
                       const SubIcon = Icons[sub.icon] || Icons.CircleDot;
                       const isSubActive = isParentActive && (currentTab === sub.tab || (!currentTab && index === 0));
@@ -217,13 +263,13 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
                           key={sub.id}
                           to={sub.path}
                           onClick={onClose}
-                          className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] transition-all ${
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs sm:text-[13px] transition-all ${
                             isSubActive
-                              ? 'bg-[#122e57] text-cyan-300 font-semibold border-l-2 border-cyan-400 shadow-2xs'
-                              : 'text-slate-400 hover:text-white hover:bg-white/5 font-normal'
+                              ? 'bg-red-50/90 text-red-600 font-bold border-l-2 border-red-600 shadow-2xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
                           }`}
                         >
-                          <SubIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isSubActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <SubIcon className={`w-3.5 h-3.5 flex-shrink-0 ${isSubActive ? 'text-red-600' : 'text-slate-400'}`} />
                           <span className="truncate">{sub.name}</span>
                         </NavLink>
                       );
@@ -235,18 +281,18 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
           })}
         </div>
 
-        {/* Bottom Section: Sign Out Only */}
-        <div className={`p-3 border-t border-[#132238] bg-[#081220] ${isCollapsed ? 'flex justify-center' : ''}`}>
+        {/* Bottom Section: Sign Out */}
+        <div className={`p-3.5 border-t border-slate-100 bg-white ${isCollapsed ? 'flex justify-center' : ''}`}>
           <button
             onClick={logout}
             className={`${
               isCollapsed 
                 ? 'p-2.5 rounded-xl' 
                 : 'w-full py-2.5 px-3 rounded-xl'
-            } border border-[#182f4d] bg-[#0e2038]/70 hover:bg-rose-500/10 hover:border-rose-500/40 flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 hover:text-rose-300 transition-all cursor-pointer shadow-xs`}
+            } border border-slate-200 bg-slate-50/70 hover:bg-red-50 hover:border-red-200 flex items-center justify-center gap-2 text-sm font-bold text-slate-700 hover:text-red-600 transition-all cursor-pointer shadow-2xs`}
             title="Sign Out"
           >
-            <Icons.LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-400" />
+            <Icons.LogOut className="w-4 h-4 text-slate-500 group-hover:text-red-500" />
             {!isCollapsed && <span>Sign Out</span>}
           </button>
         </div>

@@ -114,7 +114,7 @@ export const TallyModule = () => {
 
             <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
               <span className="text-xs font-bold text-slate-500">ODBC & Sync Frequency</span>
-              <div className="text-base font-bold text-[#1d68e4]">Automated (Bi-Directional)</div>
+              <div className="text-base font-bold text-red-600">Automated (Bi-Directional)</div>
               <p className="text-[11px] text-slate-400">Last sync verified 14 mins ago</p>
             </div>
           </div>
@@ -163,18 +163,18 @@ export const TallyModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#103a6c] text-white">
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Bill Reference</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Date</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Ledger Account</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-right">Amount (INR)</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-center">Sync Action</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Bill Reference</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Date</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Ledger Account</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Amount (INR)</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-center">Sync Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {raBills.map(b => (
                     <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-[#1d68e4]">{b.billNumber}</td>
+                      <td className="p-3 font-mono font-bold text-red-600">{b.billNumber}</td>
                       <td className="p-3 text-slate-700">{formatDate(b.date)}</td>
                       <td className="p-3 font-semibold text-slate-900">{b.clientName}</td>
                       <td className="p-3 text-right font-mono font-bold text-slate-900">{formatCurrency(b.netPayable)}</td>
@@ -214,7 +214,7 @@ export const TallyModule = () => {
             {raBills.map(b => (
               <div key={b.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#1d68e4] bg-blue-50 px-2 py-0.5 rounded">
+                  <span className="text-xs font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
                     {b.billNumber}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">Sales Voucher</span>
@@ -246,7 +246,7 @@ export const TallyModule = () => {
                       });
                       downloadTallyXML(xml, `${b.billNumber.replace(/\//g, '_')}_Tally.xml`);
                     }}
-                    className="py-1.5 px-2.5 bg-blue-50 hover:bg-blue-100 text-[#1d68e4] rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                    className="py-1.5 px-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download</span>
@@ -282,21 +282,21 @@ export const TallyModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#103a6c] text-white">
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Timestamp</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Sync Log ID</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Voucher Type</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Voucher No</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-right">Amount (INR)</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Tally Master ID</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-center">Status</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Timestamp</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Sync Log ID</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Voucher Type</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Voucher No</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Amount (INR)</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Tally Master ID</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {syncLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-3 font-mono text-[11px] text-slate-600">{log.timestamp}</td>
-                      <td className="p-3 font-mono font-bold text-[#1d68e4]">{log.id}</td>
+                      <td className="p-3 font-mono font-bold text-red-600">{log.id}</td>
                       <td className="p-3 font-semibold text-slate-900">{log.voucherType}</td>
                       <td className="p-3 font-mono text-slate-700">{log.voucherNo}</td>
                       <td className="p-3 text-right font-mono font-bold text-slate-900">{formatCurrency(log.amount)}</td>

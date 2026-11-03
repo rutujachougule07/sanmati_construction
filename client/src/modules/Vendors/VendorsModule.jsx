@@ -47,7 +47,7 @@ export const VendorsModule = () => {
   };
 
   const columns = [
-    { key: 'id', header: 'Vendor ID', render: (row) => <span className="font-bold text-[#1d68e4] font-mono">{row.id}</span> },
+    { key: 'id', header: 'Vendor ID', render: (row) => <span className="font-bold text-red-600 font-mono">{row.id}</span> },
     {
       key: 'name',
       header: 'Vendor Name',
@@ -78,7 +78,7 @@ export const VendorsModule = () => {
       render: (row) => (
         <button
           onClick={() => setSelectedVendor(row)}
-          className="px-2.5 py-1 bg-slate-100 hover:bg-[#1d68e4] hover:text-white rounded text-[11px] font-semibold transition-colors cursor-pointer"
+          className="px-2.5 py-1 bg-slate-100 hover:bg-red-600 hover:text-white rounded text-[11px] font-semibold transition-colors cursor-pointer"
         >
           View Profile
         </button>
@@ -136,7 +136,7 @@ export const VendorsModule = () => {
             {vendors.map((v) => (
               <div key={v.id} className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[#1d68e4] bg-blue-50 px-2 py-0.5 rounded">
+                  <span className="text-xs font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
                     {v.id}
                   </span>
                   <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">
@@ -159,7 +159,7 @@ export const VendorsModule = () => {
                     <span>{v.email}</span>
                   </div>
                   <div className="flex items-start gap-2 pt-1 text-[11px] text-slate-500">
-                    <MapPin className="w-3.5 h-3.5 text-[#1d68e4] flex-shrink-0 mt-0.5" />
+                    <MapPin className="w-3.5 h-3.5 text-red-600 flex-shrink-0 mt-0.5" />
                     <span>{v.address}</span>
                   </div>
                 </div>
@@ -230,20 +230,20 @@ export const VendorsModule = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="bg-[#103a6c] text-white">
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Vendor ID</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Vendor / Supplier</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase">Category</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-right">Total Order (INR)</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-right">Paid Amount</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-right">Balance Due</th>
-                    <th className="p-3 text-white font-bold text-[11px] uppercase text-center">Status</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700">
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Vendor ID</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Vendor / Supplier</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase">Category</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Total Order (INR)</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Paid Amount</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-right">Balance Due</th>
+                    <th className="p-3 text-slate-700 font-bold text-[11px] uppercase text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {vendors.map(v => (
                     <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-[#1d68e4]">{v.id}</td>
+                      <td className="p-3 font-mono font-bold text-red-600">{v.id}</td>
                       <td className="p-3 font-bold text-slate-900">{v.name}</td>
                       <td className="p-3 text-slate-600">{v.category}</td>
                       <td className="p-3 text-right font-mono text-slate-900">{formatCurrency(v.totalPurchase)}</td>

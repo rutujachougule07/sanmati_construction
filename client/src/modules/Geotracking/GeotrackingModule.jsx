@@ -111,7 +111,7 @@ export const GeotrackingModule = () => {
       header: 'GPS Coordinates',
       render: (row) => <span className="font-mono text-[11px] text-slate-600">{row.latitude?.toFixed(4)}, {row.longitude?.toFixed(4)} (±{row.accuracy}m)</span>
     },
-    { key: 'locationType', header: 'Type', render: (row) => <span className="text-[#1d68e4] font-semibold text-[11px]">{row.locationType}</span> },
+    { key: 'locationType', header: 'Type', render: (row) => <span className="text-red-600 font-semibold text-[11px]">{row.locationType}</span> },
     { 
       key: 'attendanceStatus', 
       header: 'Geofence Verification', 
@@ -133,7 +133,7 @@ export const GeotrackingModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-red-600 uppercase tracking-wider">
                 7. Geotracking & Geofencing • Subsection (i)
               </div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -217,7 +217,7 @@ export const GeotrackingModule = () => {
                 </div>
               ) : (
                 <div className="p-6 bg-slate-50 rounded-xl text-center text-xs text-slate-500 space-y-2">
-                  <Compass className="w-8 h-8 text-[#1d68e4] mx-auto" />
+                  <Compass className="w-8 h-8 text-red-600 mx-auto" />
                   <p>Click "Acquire My GPS" to calculate live satellite coordinates.</p>
                 </div>
               )}
@@ -293,7 +293,7 @@ export const GeotrackingModule = () => {
             <div>
               <div className="flex justify-between text-xs text-slate-600 font-medium mb-1.5">
                 <span>Geofence Perimeter Radius:</span>
-                <strong className="text-[#1d68e4] font-mono">{configRadius} meters</strong>
+                <strong className="text-red-600 font-mono">{configRadius} meters</strong>
               </div>
               <input
                 type="range"
@@ -302,7 +302,7 @@ export const GeotrackingModule = () => {
                 step="25"
                 value={configRadius}
                 onChange={(e) => setConfigRadius(e.target.value)}
-                className="w-full accent-[#1d68e4] cursor-pointer"
+                className="w-full accent-red-600 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                 <span>50m (Strict Entrance)</span>

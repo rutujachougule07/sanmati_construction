@@ -28,7 +28,7 @@ export const DatePicker = ({ value, onChange, className = '', min, max }) => {
   return (
     <div 
       onClick={handleOpenPicker}
-      className={`relative inline-flex items-center border border-slate-200 bg-white rounded-lg px-2.5 py-1.5 cursor-pointer hover:border-slate-300 focus-within:border-[#1d68e4] focus-within:ring-1 focus-within:ring-[#1d68e4] transition-all shadow-2xs ${className}`}
+      className={`relative inline-flex items-center border border-slate-200 bg-white rounded-lg px-2.5 py-1.5 cursor-pointer hover:border-slate-300 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 transition-all shadow-2xs ${className}`}
       title="Click to select date (Day-Month-Year)"
     >
       <input
