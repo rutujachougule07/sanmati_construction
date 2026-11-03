@@ -339,18 +339,6 @@ export const HRMSModule = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-red-600 mb-1">
-            <span>SANMATI CONSTRUCTIONS</span>
-            <span>•</span>
-            <span>Module 6</span>
-            <span>•</span>
-            <span className="bg-red-50 text-red-600 font-bold px-2.5 py-0.5 rounded border border-red-200/80 text-xs">
-              {activeTab === 'records' && 'i. Employee Records'}
-              {activeTab === 'attendance' && 'ii. Attendance Management'}
-              {activeTab === 'salary' && 'iii. Salary Calculation'}
-              {activeTab === 'payslips' && 'iv. Payslip Generation'}
-            </span>
-          </div>
           <h2 className="text-3xl font-extrabold text-slate-900 font-heading">HRMS & Payroll Management</h2>
           <p className="text-sm text-slate-500 mt-1">
             Comprehensive human resource suite: Employee records, attendance, salary calculations, and official payslips.
