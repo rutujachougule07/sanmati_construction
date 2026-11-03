@@ -868,16 +868,6 @@ export const HRMSModule = () => {
                   <Save className="w-3.5 h-3.5" />
                   <span>Save Attendance</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleOpenIndividualAttendance(filteredAttendance[0] || hrmsEmployees[0])}
-                  className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                  title="Set past or future attendance for a particular employee"
-                >
-                  <UserCheck className="w-3.5 h-3.5 text-slate-600" />
-                  <span>वैयक्तिक हजेरी (Particular Employee)</span>
-                </button>
               </div>
             </div>
           </div>
