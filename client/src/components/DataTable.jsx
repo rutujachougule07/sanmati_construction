@@ -1,6 +1,6 @@
 // DataTable Component
 import React, { useState, useMemo } from 'react';
-import { Search, Download, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react';
+import { Search, Download, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { exportToExcel, exportToCSV } from '../services/exportService';
 
 export const DataTable = ({
@@ -185,19 +185,6 @@ export const DataTable = ({
                       <span className="text-slate-600 font-bold tracking-wider uppercase whitespace-nowrap text-[10px]">
                         {col.header}
                       </span>
-                      {isSortable && (
-                        <span className="inline-flex items-center flex-shrink-0">
-                          {isSorted ? (
-                            sortConfig.direction === 'asc' ? (
-                              <ArrowUp className="w-3 h-3 text-red-600" />
-                            ) : (
-                              <ArrowDown className="w-3 h-3 text-red-600" />
-                            )
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 text-slate-400 hover:text-slate-600" />
-                          )}
-                        </span>
-                      )}
                     </div>
                   </th>
                 );

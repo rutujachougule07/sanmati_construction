@@ -356,8 +356,6 @@ export const HRMSModule = () => {
               <span className="text-sm text-slate-600">
                 Staff count: <strong className="text-slate-900 font-bold">{hrmsEmployees.length} registered employees</strong>
               </span>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              <span className="text-sm text-emerald-700 font-semibold">All KYC & Banking profiles verified</span>
             </div>
             
             <button
