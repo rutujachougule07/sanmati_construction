@@ -1284,26 +1284,43 @@ export const HRMSModule = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Dark Navy Header (Matching Image 2) */}
-              <div className="bg-[#0b192c] px-6 py-4 flex items-center justify-between text-white">
+              <div className="bg-[#0b192c] px-6 py-4 flex items-center justify-between text-white shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#003865] border border-blue-400/30 text-amber-400 font-extrabold text-base flex items-center justify-center shadow-inner flex-shrink-0">
+                  <div 
+                    className="w-10 h-10 rounded-full bg-[#003865] border border-blue-400/40 text-amber-300 font-black text-base flex items-center justify-center shadow-inner flex-shrink-0"
+                    style={{ color: '#fde047' }}
+                  >
                     {individualEmployee.name ? individualEmployee.name.trim()[0].toUpperCase() : 'S'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base leading-snug">
+                    <h3 
+                      className="font-extrabold text-base leading-snug tracking-tight text-white !text-white"
+                      style={{ color: '#ffffff' }}
+                    >
                       {individualEmployee.name}
                     </h3>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300 mt-0.5">
-                      <span className="inline-flex items-center gap-1 text-slate-300">
-                        <span>✂️</span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs mt-0.5">
+                      <span 
+                        className="inline-flex items-center gap-1 font-medium text-slate-200 !text-slate-200"
+                        style={{ color: '#e2e8f0' }}
+                      >
+                        <span className="text-sm">✂️</span>
                         <span>{individualEmployee.department || 'Grafting & Propagation'}</span>
                       </span>
-                      <span className="text-slate-500">•</span>
-                      <span>{individualEmployee.designation || 'General Worker'}</span>
-                      <span className="text-slate-500">•</span>
-                      <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
-                        <Phone className="w-3 h-3 text-emerald-400" />
-                        <span>{individualEmployee.phone || '7498953099'}</span>
+                      <span className="font-bold text-slate-400" style={{ color: '#94a3b8' }}>•</span>
+                      <span 
+                        className="font-medium text-slate-200 !text-slate-200"
+                        style={{ color: '#e2e8f0' }}
+                      >
+                        {individualEmployee.designation || 'General Worker'}
+                      </span>
+                      <span className="font-bold text-slate-400" style={{ color: '#94a3b8' }}>•</span>
+                      <span 
+                        className="inline-flex items-center gap-1 font-semibold text-emerald-400 !text-emerald-400"
+                        style={{ color: '#34d399' }}
+                      >
+                        <Phone className="w-3.5 h-3.5 text-emerald-400" style={{ color: '#34d399' }} />
+                        <span>{individualEmployee.phone || '+91 98220 00000'}</span>
                       </span>
                     </div>
                   </div>
@@ -1312,10 +1329,11 @@ export const HRMSModule = () => {
                 <button
                   type="button"
                   onClick={() => setIndividualModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white !text-white flex items-center justify-center transition-colors cursor-pointer border border-slate-700/60 shadow-xs"
+                  style={{ color: '#ffffff' }}
                   title="Close (बंद करा)"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-white !text-white" style={{ color: '#ffffff' }} />
                 </button>
               </div>
 

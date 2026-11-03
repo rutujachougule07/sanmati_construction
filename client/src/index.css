@@ -251,7 +251,9 @@ main .text-white:not(
   .bg-rose-600 *,
   .bg-red-500 *,
   .bg-red-600 *,
-  .bg-red-700 *
+  .bg-red-700 *,
+  [class*="bg-[#0b192c]"] *,
+  [class*="bg-[#071326]"] *
 ),
 .modal .text-white:not(
   .erp-btn-primary *,
@@ -261,9 +263,27 @@ main .text-white:not(
   .bg-emerald-600 *,
   .bg-red-500 *,
   .bg-red-600 *,
-  .bg-red-700 *
+  .bg-red-700 *,
+  [class*="bg-[#0b192c]"] *,
+  [class*="bg-[#071326]"] *
 ) {
   color: #0f172a !important;
+}
+
+/* Ensure dark navy headers in modals/cards keep crisp white and light text */
+[class*="bg-[#0b192c]"] h1,
+[class*="bg-[#0b192c]"] h2,
+[class*="bg-[#0b192c]"] h3,
+[class*="bg-[#0b192c]"] h4,
+[class*="bg-[#0b192c]"] .text-white,
+[class*="bg-[#071326]"] .text-white {
+  color: #ffffff !important;
+}
+
+[class*="bg-[#0b192c]"] .text-slate-100,
+[class*="bg-[#0b192c]"] .text-slate-200,
+[class*="bg-[#0b192c]"] .text-slate-300 {
+  color: #e2e8f0 !important;
 }
 
 /* Ensure all table headings across all modules stay crisp dark slate and compact */
