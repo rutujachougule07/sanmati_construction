@@ -84,13 +84,13 @@ export const DataTable = ({
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 text-xs text-slate-700 font-medium">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-700 font-medium">
             <span>Total:</span>
-            <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-md border border-red-200/80 text-xs">
+            <span className="bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-md border border-red-200/80 text-[11px]">
               {filteredData.length} records
             </span>
             {filteredData.length !== data.length && (
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[10px] text-slate-400">
                 (filtered from {data.length})
               </span>
             )}
@@ -106,7 +106,7 @@ export const DataTable = ({
               placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="w-full bg-slate-50/80 border border-slate-200 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-400 focus:bg-white transition-all shadow-2xs"
+              className="w-full bg-slate-50/80 border border-slate-200 rounded-lg pl-8 pr-7 py-1 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-400 focus:bg-white transition-all shadow-2xs"
             />
             {searchTerm && (
               <button
@@ -125,17 +125,17 @@ export const DataTable = ({
             <button
               onClick={handleExportExcel}
               title="Export to Excel"
-              className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-xs flex items-center gap-1 transition-colors font-semibold shadow-2xs"
+              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3 h-3" />
               <span className="hidden sm:inline">Excel</span>
             </button>
             <button
               onClick={handleExportCSV}
               title="Export to CSV"
-              className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-lg text-xs flex items-center gap-1 transition-colors font-semibold shadow-2xs"
+              className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3 h-3" />
               <span className="hidden sm:inline">CSV</span>
             </button>
           </div>
@@ -201,7 +201,7 @@ export const DataTable = ({
                   {columns.map((col) => (
                     <td
                       key={col.key || col.header}
-                      className={`px-3 py-2 text-xs text-slate-700 align-middle ${
+                      className={`px-2.5 py-1.5 text-[11px] text-slate-700 align-middle ${
                         col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                       } ${col.cellClassName || ''}`}
                       style={{ textAlign: col.align || 'left' }}
@@ -213,13 +213,13 @@ export const DataTable = ({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-10 text-center text-xs text-slate-400">
+                <td colSpan={columns.length} className="px-4 py-8 text-center text-xs text-slate-400">
                   <p className="font-medium text-slate-500 mb-1">{emptyMessage}</p>
                   {searchTerm && (
                     <button
                       type="button"
                       onClick={() => setSearchTerm('')}
-                      className="text-red-600 hover:underline text-xs font-semibold"
+                      className="text-red-600 hover:underline text-[11px] font-semibold"
                     >
                       Clear search filter
                     </button>
@@ -232,8 +232,8 @@ export const DataTable = ({
       </div>
 
       {/* Screenshot Exact Pagination Footer */}
-      <div className="px-3.5 py-2.5 border-t border-slate-200/90 flex flex-wrap items-center justify-between text-xs text-slate-600 bg-white gap-3">
-        <div className="flex items-center gap-2">
+      <div className="px-3 py-2 border-t border-slate-200/90 flex flex-wrap items-center justify-between text-[11px] text-slate-600 bg-white gap-2">
+        <div className="flex items-center gap-1.5">
           <span>
             Showing <span className="font-semibold text-slate-900">{(currentPage - 1) * pageSize + 1}</span> to{' '}
             <span className="font-semibold text-slate-900">{Math.min(currentPage * pageSize, sortedData.length)}</span> of{' '}
@@ -243,25 +243,25 @@ export const DataTable = ({
           <span className="hidden sm:inline text-slate-500">Per page: {pageSize}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <span className="text-slate-600 font-medium mr-1">
             Page {currentPage} of {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
+            className="px-2 py-0.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className="w-3 h-3" />
             <span>Previous</span>
           </button>
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
+            className="px-2 py-0.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-2xs flex items-center gap-1"
           >
             <span>Next</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3 h-3" />
           </button>
         </div>
       </div>

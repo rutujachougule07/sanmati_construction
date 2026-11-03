@@ -101,10 +101,34 @@ table thead th svg {
 
 table tbody td,
 .erp-table-td {
-  padding: 0.5rem 0.75rem !important; /* Compact 8px 12px */
+  padding: 0.35rem 0.6rem !important; /* Compact 6px 10px */
   border-bottom: 1px solid #f1f5f9;
   color: #1e293b;
   font-size: 0.75rem !important; /* 12px compact body */
+}
+
+/* Ensure data text inside table body across all modules stays small and compact */
+table tbody td,
+table tbody td *,
+.erp-table-td,
+.erp-table-td * {
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+}
+
+table tbody td .text-\[10px\],
+table tbody td .text-\[11px\] {
+  font-size: 0.6875rem !important; /* 11px */
+}
+
+table tbody td button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.6875rem !important;
+}
+
+table tbody td svg {
+  width: 0.8125rem !important;
+  height: 0.8125rem !important;
 }
 
 .erp-input {
