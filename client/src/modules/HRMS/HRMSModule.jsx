@@ -232,6 +232,12 @@ export const HRMSModule = () => {
     showAttendanceToast(`Attendance register successfully saved & locked for ${formatDisplayDate(selectedDate)}!`);
   };
 
+  // Filtered attendance by site
+  const filteredAttendance = useMemo(() => {
+    if (siteFilter === 'all') return currentAttendanceRecords;
+    return currentAttendanceRecords.filter(r => r.site === siteFilter);
+  }, [currentAttendanceRecords, siteFilter]);
+
   // Onboarding Form State
   const [formData, setFormData] = useState({
     name: '',
