@@ -1,7 +1,7 @@
 // DataTable Component
 import React, { useState, useMemo } from 'react';
 import { Search, Download, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { exportToExcel, exportToCSV } from '../services/exportService';
+import { exportToExcel, generatePDFReport } from '../services/exportService';
 
 export const DataTable = ({
   columns = [],
@@ -68,8 +68,26 @@ export const DataTable = ({
     exportToExcel(data, exportFileName);
   };
 
-  const handleExportCSV = () => {
-    exportToCSV(data, exportFileName);
+  const handleExportPDF = () => {
+    const exportableCols = columns.filter(c => c.key && c.key !== 'actions' && c.key !== 'action');
+    const headers = exportableCols.map(c => c.header || c.key);
+    const rows = (filteredData.length > 0 ? filteredData : data).map(item => {
+      return exportableCols.map(c => {
+        const val = item[c.key];
+        if (val === null || val === undefined) return '—';
+        if (typeof val === 'object') return JSON.stringify(val);
+        return String(val);
+      });
+    });
+
+    generatePDFReport({
+      title: title || `${exportFileName.replace(/_/g, ' ').toUpperCase()}`,
+      subtitle: `Sanmati Constructions ERP | Total Records: ${rows.length}`,
+      headers,
+      rows,
+      fileName: exportFileName,
+      orientation: exportableCols.length > 5 ? 'landscape' : 'portrait'
+    });
   };
 
   return (
@@ -125,18 +143,18 @@ export const DataTable = ({
             <button
               onClick={handleExportExcel}
               title="Export to Excel"
-              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs"
+              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs cursor-pointer"
             >
               <Download className="w-3 h-3" />
               <span className="hidden sm:inline">Excel</span>
             </button>
             <button
-              onClick={handleExportCSV}
-              title="Export to CSV"
-              className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs"
+              onClick={handleExportPDF}
+              title="Export to PDF"
+              className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs cursor-pointer"
             >
               <Download className="w-3 h-3" />
-              <span className="hidden sm:inline">CSV</span>
+              <span className="hidden sm:inline">PDF</span>
             </button>
           </div>
 
