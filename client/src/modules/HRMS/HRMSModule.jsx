@@ -165,10 +165,32 @@ export const HRMSModule = () => {
     ));
   };
 
-  // Quick Overtime Adjuster
+  // Overtime Adjuster (Buttons & Direct Input)
   const updateOvertime = (empId, delta) => {
+    setAttendanceRecords(prev => prev.map(rec => {
+      if (rec.empId !== empId) return rec;
+      const current = Number(rec.overtimeHours) || 0;
+      return { ...rec, overtimeHours: Math.max(0, Number((current + delta).toFixed(1))) };
+    }));
+  };
+
+  const setOvertimeDirect = (empId, val) => {
+    if (val === '') {
+      setAttendanceRecords(prev => prev.map(rec => 
+        rec.empId === empId ? { ...rec, overtimeHours: '' } : rec
+      ));
+      return;
+    }
+    const num = parseFloat(val);
     setAttendanceRecords(prev => prev.map(rec => 
-      rec.empId === empId ? { ...rec, overtimeHours: Math.max(0, Number((rec.overtimeHours + delta).toFixed(1))) } : rec
+      rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec
+    ));
+  };
+
+  const handleOvertimeBlur = (empId, val) => {
+    const num = parseFloat(val);
+    setAttendanceRecords(prev => prev.map(rec => 
+      rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec
     ));
   };
 
@@ -184,7 +206,7 @@ export const HRMSModule = () => {
     return hrmsEmployees.map(emp => {
       const att = attendanceRecords.find(a => a.empId === emp.id) || { daysPresentMonth: 26, overtimeHours: 0 };
       const daysWorked = att.daysPresentMonth;
-      const otHours = att.overtimeHours || 0;
+      const otHours = Number(att.overtimeHours) || 0;
 
       const basic = emp.basicSalary || 0;
       const hra = emp.hra || 0;
@@ -515,19 +537,34 @@ export const HRMSModule = () => {
                       </td>
 
                       <td className="px-3.5 py-2 text-xs text-center">
-                        <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5">
+                        <div className="inline-flex items-center gap-0.5 bg-white border border-slate-200 rounded-lg px-1 py-0.5 shadow-2xs">
                           <button 
+                            type="button"
                             onClick={() => updateOvertime(rec.empId, -0.5)}
-                            className="text-slate-500 hover:text-slate-900 font-bold px-1 text-xs"
+                            className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors"
+                            title="Decrease (-0.5h)"
                           >
                             -
                           </button>
-                          <span className="font-mono font-bold text-slate-800 text-xs min-w-[28px]">
-                            {rec.overtimeHours}h
-                          </span>
+                          <div className="flex items-center">
+                            <input
+                              type="number"
+                              step="0.5"
+                              min="0"
+                              max="24"
+                              value={rec.overtimeHours === '' ? '' : rec.overtimeHours}
+                              onChange={(e) => setOvertimeDirect(rec.empId, e.target.value)}
+                              onBlur={(e) => handleOvertimeBlur(rec.empId, e.target.value)}
+                              onClick={(e) => e.target.select()}
+                              className="w-7 text-center font-mono font-bold text-slate-800 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="text-[10px] text-slate-400 font-bold pr-0.5">h</span>
+                          </div>
                           <button 
+                            type="button"
                             onClick={() => updateOvertime(rec.empId, 0.5)}
-                            className="text-slate-500 hover:text-slate-900 font-bold px-1 text-xs"
+                            className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors"
+                            title="Increase (+0.5h)"
                           >
                             +
                           </button>
