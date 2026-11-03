@@ -102,44 +102,24 @@ export const HRMSModule = () => {
   }, [selectedDate, todayIso]);
 
   // Attendance Records per Date: { [dateStr]: records[] }
+  // Clean blank slate: All dummy present/absent/overtime records removed
   const [attendanceByDate, setAttendanceByDate] = useState(() => {
-    const initial = {};
-    const defaultSiteFor = (idx) => idx === 0 ? 'Head Office, Tarabai Park' : idx === 1 ? 'Royal Palace Commercial Complex' : idx === 2 ? 'Tarabai Park High-Rise' : 'Head Office, Tarabai Park';
-
-    const makeDay = (status, ot = 0) => hrmsEmployees.map((emp, idx) => ({
-      empId: emp.id,
-      name: emp.name,
-      designation: emp.designation,
-      site: defaultSiteFor(idx),
-      inTime: idx === 0 ? '09:00 AM' : '08:45 AM',
-      outTime: '06:00 PM',
-      status,
-      gpsStatus: 'Recorded in Ledger',
-      overtimeHours: ot,
-      daysPresentMonth: 26
-    }));
-
-    // Seed October 2026 days matching user calendar demo
-    initial['2026-10-07'] = makeDay('Present', 12);
-    initial['2026-10-08'] = makeDay('Present', 0);
-    initial['2026-10-09'] = makeDay('Present', 1);
-    initial['2026-10-10'] = makeDay('Present', 2);
-    initial['2026-10-12'] = makeDay('Present', 0);
-    initial['2026-10-13'] = makeDay('Present', 0);
-    initial['2026-10-14'] = makeDay('Present', 1);
-    initial['2026-10-15'] = makeDay('Present', 2);
-    initial['2026-10-16'] = makeDay('Absent', 0);
-    initial['2026-10-17'] = makeDay('Present', 0);
-    initial['2026-10-18'] = makeDay('Present', 0);
-    initial['2026-10-19'] = makeDay('Present', 0);
-    initial['2026-10-20'] = makeDay('Present', 1);
-    initial['2026-10-28'] = makeDay('Present', 0);
-
-    // Seed today
-    initial[todayIso] = makeDay('Present', 0);
-
-    return initial;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sanmati_attendance_clean_ledger');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {};
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sanmati_attendance_clean_ledger', JSON.stringify(attendanceByDate));
+    }
+  }, [attendanceByDate]);
 
   // Helper to get active records for selected date
   const currentAttendanceRecords = useMemo(() => {
@@ -289,6 +269,23 @@ export const HRMSModule = () => {
     } else {
       setCalendarMonth(prev => prev + 1);
     }
+  };
+
+  // Clear all marked attendance for the currently viewed month
+  const handleClearMonthAttendance = () => {
+    const monthStr = String(calendarMonth + 1).padStart(2, '0');
+    const prefix = `${calendarYear}-${monthStr}-`;
+    setAttendanceByDate(prev => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach(k => {
+        if (k.startsWith(prefix)) {
+          delete updated[k];
+        }
+      });
+      return updated;
+    });
+    setActiveDayPopover(null);
+    showAttendanceToast(`${monthNames[calendarMonth]} ${calendarYear} ची सर्व हजेरी रिकामी केली (Cleared)`);
   };
 
   // Helper to set an employee's attendance status directly on a specific dateKey
@@ -1386,23 +1383,35 @@ export const HRMSModule = () => {
                     </button>
                   </div>
 
-                  {hrmsEmployees.length > 1 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">कर्मचारी बदला:</span>
-                      <select
-                        value={individualEmployee.id || individualEmployee.empId}
-                        onChange={(e) => {
-                          const emp = hrmsEmployees.find(item => item.id === e.target.value);
-                          if (emp) handleOpenIndividualAttendance(emp);
-                        }}
-                        className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
-                      >
-                        {hrmsEmployees.map(e => (
-                          <option key={e.id} value={e.id}>{e.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleClearMonthAttendance}
+                      className="px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 active:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                      title="या महिन्यातील सर्व हजेरी नोंदी रिकाम्या करा"
+                    >
+                      <Trash2 className="w-3 h-3 text-rose-500" />
+                      <span>महिना क्लिअर करा</span>
+                    </button>
+
+                    {hrmsEmployees.length > 1 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">कर्मचारी बदला:</span>
+                        <select
+                          value={individualEmployee.id || individualEmployee.empId}
+                          onChange={(e) => {
+                            const emp = hrmsEmployees.find(item => item.id === e.target.value);
+                            if (emp) handleOpenIndividualAttendance(emp);
+                          }}
+                          className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
+                        >
+                          {hrmsEmployees.map(e => (
+                            <option key={e.id} value={e.id}>{e.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Weekdays Header Row */}
