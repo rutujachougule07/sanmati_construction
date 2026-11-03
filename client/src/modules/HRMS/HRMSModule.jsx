@@ -10,7 +10,8 @@ import { useSearchParams } from 'react-router-dom';
 import { 
   Users, Calendar, CheckCircle2, DollarSign, Download, Plus, FileText, 
   MapPin, Clock, ShieldCheck, Printer, Eye, Calculator, RefreshCw, 
-  AlertCircle, Building2, Briefcase, Phone, Mail, Award, X, Trash2
+  AlertCircle, Building2, Briefcase, Phone, Mail, Award, X, Trash2,
+  ChevronLeft, ChevronRight, CalendarDays, Save, UserX, Check
 } from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
@@ -50,24 +51,186 @@ export const HRMSModule = () => {
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
   const [viewPayslipEmployee, setViewPayslipEmployee] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState('November 2026');
-  const [selectedDate, setSelectedDate] = useState('2026-11-02');
   const [isPayrollApproved, setIsPayrollApproved] = useState(false);
+  const [siteFilter, setSiteFilter] = useState('all');
+  const [attendanceToast, setAttendanceToast] = useState(null);
 
-  // Dynamic Daily Attendance Register State
-  const [attendanceRecords, setAttendanceRecords] = useState(() => {
+  // Date utilities
+  const getTodayIso = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const shiftDate = (currentDateStr, deltaDays) => {
+    const parts = (currentDateStr || getTodayIso()).split('-').map(Number);
+    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+    dateObj.setDate(dateObj.getDate() + deltaDays);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDisplayDate = (isoStr) => {
+    if (!isoStr) return '';
+    const parts = String(isoStr).split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return isoStr;
+  };
+
+  // Active date for Attendance Register (Defaults to 2026-10-28 as per user view or today)
+  const todayIso = useMemo(() => getTodayIso(), []);
+  const [selectedDate, setSelectedDate] = useState('2026-10-28');
+
+  const showAttendanceToast = (msg) => {
+    setAttendanceToast(msg);
+    setTimeout(() => {
+      setAttendanceToast(null);
+    }, 3500);
+  };
+
+  // Date Category: past / today / future
+  const dateCategory = useMemo(() => {
+    if (selectedDate < todayIso) return 'past';
+    if (selectedDate === todayIso) return 'today';
+    return 'future';
+  }, [selectedDate, todayIso]);
+
+  // Attendance Records per Date: { [dateStr]: records[] }
+  const [attendanceByDate, setAttendanceByDate] = useState(() => {
+    const initial = {};
+    const defaultSiteFor = (idx) => idx === 0 ? 'Head Office, Tarabai Park' : idx === 1 ? 'Royal Palace Commercial Complex' : idx === 2 ? 'Tarabai Park High-Rise' : 'Head Office, Tarabai Park';
+
+    // Seed today
+    initial[todayIso] = hrmsEmployees.map((emp, idx) => ({
+      empId: emp.id,
+      name: emp.name,
+      designation: emp.designation,
+      site: defaultSiteFor(idx),
+      inTime: idx === 0 ? '09:00 AM' : idx === 1 ? '08:45 AM' : idx === 2 ? '08:58 AM' : '09:15 AM',
+      outTime: '06:30 PM',
+      status: 'Present',
+      gpsStatus: idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (18m)',
+      overtimeHours: idx === 1 ? 1.5 : idx === 2 ? 2.0 : 0,
+      daysPresentMonth: idx === 0 ? 26 : idx === 1 ? 25 : idx === 2 ? 26 : 24
+    }));
+
+    // Seed 2026-10-28 (Past Date seen in user screenshot)
+    initial['2026-10-28'] = hrmsEmployees.map((emp, idx) => ({
+      empId: emp.id,
+      name: emp.name,
+      designation: emp.designation,
+      site: defaultSiteFor(idx),
+      inTime: idx === 0 ? '09:00 AM' : idx === 1 ? '08:45 AM' : idx === 2 ? '08:58 AM' : '09:15 AM',
+      outTime: '06:30 PM',
+      status: 'Present',
+      gpsStatus: 'Recorded in Historical Ledger',
+      overtimeHours: 0,
+      daysPresentMonth: 26
+    }));
+
+    return initial;
+  });
+
+  // Helper to get active records for selected date
+  const currentAttendanceRecords = useMemo(() => {
+    if (attendanceByDate[selectedDate]) {
+      return attendanceByDate[selectedDate];
+    }
+    // Dynamic generation if date not yet touched
+    const isFuture = selectedDate > todayIso;
+    const isPast = selectedDate < todayIso;
     return hrmsEmployees.map((emp, idx) => ({
       empId: emp.id,
       name: emp.name,
       designation: emp.designation,
       site: idx === 0 ? 'Head Office, Tarabai Park' : idx === 1 ? 'Royal Palace Commercial Complex' : idx === 2 ? 'Tarabai Park High-Rise' : 'Head Office, Tarabai Park',
-      inTime: idx === 0 ? '09:00 AM' : idx === 1 ? '08:45 AM' : idx === 2 ? '08:58 AM' : '09:15 AM',
-      outTime: '06:30 PM',
-      status: 'Present', // Present, Half Day, Absent, On Leave
-      gpsStatus: idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (18m)',
-      overtimeHours: idx === 1 ? 1.5 : idx === 2 ? 2.0 : 0,
-      daysPresentMonth: idx === 0 ? 26 : idx === 1 ? 25 : idx === 2 ? 26 : 24
+      inTime: isFuture ? '09:00 AM (Scheduled)' : '09:00 AM',
+      outTime: isFuture ? '06:00 PM (Scheduled)' : '06:00 PM',
+      status: 'Present',
+      gpsStatus: isFuture 
+        ? 'Advance Scheduled' 
+        : isPast 
+        ? 'Historical Entry' 
+        : (idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (15m)'),
+      overtimeHours: 0,
+      daysPresentMonth: 26
     }));
-  });
+  }, [attendanceByDate, selectedDate, hrmsEmployees, todayIso]);
+
+  // Immutable date updater
+  const updateRecordForDate = (dateStr, updateFn) => {
+    setAttendanceByDate(prev => {
+      const existing = prev[dateStr] || currentAttendanceRecords;
+      return {
+        ...prev,
+        [dateStr]: updateFn(existing)
+      };
+    });
+  };
+
+  // Quick Attendance Status Toggle
+  const updateAttendanceStatus = (empId, newStatus) => {
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => rec.empId === empId ? { ...rec, status: newStatus } : rec)
+    );
+  };
+
+  // Overtime Adjuster (Buttons & Direct Input)
+  const updateOvertime = (empId, delta) => {
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => {
+        if (rec.empId !== empId) return rec;
+        const current = Number(rec.overtimeHours) || 0;
+        return { ...rec, overtimeHours: Math.max(0, Number((current + delta).toFixed(1))) };
+      })
+    );
+  };
+
+  const setOvertimeDirect = (empId, val) => {
+    if (val === '') {
+      updateRecordForDate(selectedDate, records => 
+        records.map(rec => rec.empId === empId ? { ...rec, overtimeHours: '' } : rec)
+      );
+      return;
+    }
+    const num = parseFloat(val);
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec)
+    );
+  };
+
+  const handleOvertimeBlur = (empId, val) => {
+    const num = parseFloat(val);
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec)
+    );
+  };
+
+  // Bulk actions for the selected date
+  const handleMarkAllPresent = () => {
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => ({ ...rec, status: 'Present' }))
+    );
+    showAttendanceToast(`All employees marked Present for ${formatDisplayDate(selectedDate)}.`);
+  };
+
+  const handleMarkAllAbsent = () => {
+    updateRecordForDate(selectedDate, records => 
+      records.map(rec => ({ ...rec, status: 'Absent' }))
+    );
+    showAttendanceToast(`All employees marked Absent for ${formatDisplayDate(selectedDate)}.`);
+  };
+
+  const handleSaveAttendance = () => {
+    updateRecordForDate(selectedDate, records => [...records]);
+    showAttendanceToast(`Attendance register successfully saved & locked for ${formatDisplayDate(selectedDate)}!`);
+  };
 
   // Onboarding Form State
   const [formData, setFormData] = useState({
@@ -129,9 +292,10 @@ export const HRMSModule = () => {
 
     setHrmsEmployees([newEmp, ...hrmsEmployees]);
     
-    // Add to attendance register as well
-    setAttendanceRecords(prev => [
-      {
+    // Add to attendance register as well across dates
+    setAttendanceByDate(prev => {
+      const updated = { ...prev };
+      const newRec = {
         empId: newEmp.id,
         name: newEmp.name,
         designation: newEmp.designation,
@@ -142,9 +306,12 @@ export const HRMSModule = () => {
         gpsStatus: 'Inside Site Geofence (15m)',
         overtimeHours: 0,
         daysPresentMonth: 26
-      },
-      ...prev
-    ]);
+      };
+      Object.keys(updated).forEach(k => {
+        updated[k] = [newRec, ...updated[k]];
+      });
+      return updated;
+    });
 
     setIsOnboardModalOpen(false);
   };
@@ -153,50 +320,15 @@ export const HRMSModule = () => {
   const handleDeleteEmployee = (empId) => {
     if (window.confirm('Are you sure you want to delete this employee record?')) {
       setHrmsEmployees(prev => prev.filter(e => e.id !== empId));
-      setAttendanceRecords(prev => prev.filter(r => r.empId !== empId));
+      setAttendanceByDate(prev => {
+        const updated = {};
+        Object.keys(prev).forEach(k => {
+          updated[k] = prev[k].filter(r => r.empId !== empId);
+        });
+        return updated;
+      });
       if (selectedEmployee?.id === empId) setSelectedEmployee(null);
     }
-  };
-
-  // Quick Attendance Status Toggle
-  const updateAttendanceStatus = (empId, newStatus) => {
-    setAttendanceRecords(prev => prev.map(rec => 
-      rec.empId === empId ? { ...rec, status: newStatus } : rec
-    ));
-  };
-
-  // Overtime Adjuster (Buttons & Direct Input)
-  const updateOvertime = (empId, delta) => {
-    setAttendanceRecords(prev => prev.map(rec => {
-      if (rec.empId !== empId) return rec;
-      const current = Number(rec.overtimeHours) || 0;
-      return { ...rec, overtimeHours: Math.max(0, Number((current + delta).toFixed(1))) };
-    }));
-  };
-
-  const setOvertimeDirect = (empId, val) => {
-    if (val === '') {
-      setAttendanceRecords(prev => prev.map(rec => 
-        rec.empId === empId ? { ...rec, overtimeHours: '' } : rec
-      ));
-      return;
-    }
-    const num = parseFloat(val);
-    setAttendanceRecords(prev => prev.map(rec => 
-      rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec
-    ));
-  };
-
-  const handleOvertimeBlur = (empId, val) => {
-    const num = parseFloat(val);
-    setAttendanceRecords(prev => prev.map(rec => 
-      rec.empId === empId ? { ...rec, overtimeHours: isNaN(num) || num < 0 ? 0 : Number(num.toFixed(1)) } : rec
-    ));
-  };
-
-  // Mark all present helper
-  const handleMarkAllPresent = () => {
-    setAttendanceRecords(prev => prev.map(rec => ({ ...rec, status: 'Present' })));
   };
 
   // --- Calculations for Subsection iii: Salary calculation ---
@@ -204,7 +336,7 @@ export const HRMSModule = () => {
 
   const payrollCalculations = useMemo(() => {
     return hrmsEmployees.map(emp => {
-      const att = attendanceRecords.find(a => a.empId === emp.id) || { daysPresentMonth: 26, overtimeHours: 0 };
+      const att = currentAttendanceRecords.find(a => a.empId === emp.id) || { daysPresentMonth: 26, overtimeHours: 0 };
       const daysWorked = att.daysPresentMonth;
       const otHours = Number(att.overtimeHours) || 0;
 
@@ -251,7 +383,7 @@ export const HRMSModule = () => {
         status: isPayrollApproved ? 'Approved & Locked' : 'Calculated & Verified'
       };
     });
-  }, [hrmsEmployees, attendanceRecords, isPayrollApproved]);
+  }, [hrmsEmployees, currentAttendanceRecords, isPayrollApproved]);
 
   // Aggregate totals
   const totalGrossPayroll = payrollCalculations.reduce((sum, item) => sum + item.earnedGross + item.overtimePay, 0);
@@ -418,61 +550,205 @@ export const HRMSModule = () => {
       {/* SUBSECTION ii: ATTENDANCE MANAGEMENT                                       */}
       {/* ========================================================================= */}
       {activeTab === 'attendance' && (
-        <div className="space-y-5">
+        <div className="space-y-4">
+          {/* Toast Notification */}
+          {attendanceToast && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs animate-fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>{attendanceToast}</span>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setAttendanceToast(null)} 
+                className="text-emerald-700 hover:text-emerald-900 p-0.5 rounded cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {/* Top Controls Ribbon */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                  Attendance Register Date
-                </label>
-                <DatePicker
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                />
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              {/* Date Selection & Stepper Area */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Attendance Register Date
+                    </label>
+                    {/* Date Type Badge */}
+                    {dateCategory === 'past' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        <Clock className="w-2.5 h-2.5 text-amber-600" />
+                        <span>मागील तारीख (Backdated)</span>
+                      </span>
+                    )}
+                    {dateCategory === 'today' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>आजची तारीख (Today)</span>
+                      </span>
+                    )}
+                    {dateCategory === 'future' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                        <CalendarDays className="w-2.5 h-2.5 text-blue-600" />
+                        <span>पुढील तारीख (Advance)</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {/* Previous Day Button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDate(prev => shiftDate(prev, -1))}
+                      className="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                      title="मागील दिवस (Previous Day)"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline text-[11px]">मागील</span>
+                    </button>
+
+                    {/* DatePicker */}
+                    <DatePicker
+                      value={selectedDate}
+                      onChange={setSelectedDate}
+                    />
+
+                    {/* Next Day Button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDate(prev => shiftDate(prev, 1))}
+                      className="px-2 py-1.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                      title="पुढील दिवस (Next Day)"
+                    >
+                      <span className="hidden sm:inline text-[11px]">पुढील</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Today Button */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDate(todayIso)}
+                      className={`px-2.5 py-1.5 border rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+                        selectedDate === todayIso
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                      }`}
+                      title="Jump to Today (आज)"
+                    >
+                      आज (Today)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Site Filter */}
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Site Geofence Filter
+                  </label>
+                  <select
+                    value={siteFilter}
+                    onChange={(e) => setSiteFilter(e.target.value)}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
+                  >
+                    <option value="all">All Construction Sites (Kolhapur)</option>
+                    <option value="Royal Palace Commercial Complex">Royal Palace Commercial Complex</option>
+                    <option value="Tarabai Park High-Rise">Tarabai Park High-Rise</option>
+                    <option value="Head Office, Tarabai Park">Head Office, Tarabai Park</option>
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                  Site Geofence Filter
-                </label>
-                <select className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-gold-500">
-                  <option value="all">All Construction Sites (Kolhapur)</option>
-                  <option value="prj1">Royal Palace Commercial Complex</option>
-                  <option value="prj2">Tarabai Park High-Rise</option>
-                </select>
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleMarkAllPresent}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Mark all staff Present for this date"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Mark All Present</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleMarkAllAbsent}
+                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Mark all staff Absent for this date"
+                >
+                  <UserX className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Mark All Absent</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveAttendance}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  title="Save attendance for selected date"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Attendance</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => alert("GPS coordinates resynchronized with active site geofences.")}
+                  className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  title="Sync geofence GPS"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="hidden sm:inline">Sync GPS</span>
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleMarkAllPresent}
-                className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Mark All Present</span>
-              </button>
-
-              <button
-                onClick={() => alert("GPS coordinates resynchronized with active site geofences.")}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-gold-600" />
-                <span>Sync Geofence GPS</span>
-              </button>
-            </div>
+            {/* Explanatory banner for past/future date */}
+            {dateCategory === 'past' && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-amber-50/70 border border-amber-200/80 rounded-lg text-[11px] text-amber-900">
+                <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                <span>
+                  <strong>मागील तारीख (Backdated Attendance Mode):</strong> You are viewing / marking attendance for <strong>{formatDisplayDate(selectedDate)}</strong>. Status changes and overtime hours are saved to this historical date.
+                </span>
+              </div>
+            )}
+            {dateCategory === 'future' && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50/70 border border-blue-200/80 rounded-lg text-[11px] text-blue-900">
+                <CalendarDays className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                <span>
+                  <strong>पुढील तारीख (Advance Schedule Mode):</strong> You are pre-scheduling attendance or planned leaves for <strong>{formatDisplayDate(selectedDate)}</strong>.
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Real-Time Attendance Register Table */}
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+            <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h4 className="font-bold text-slate-900 text-sm font-heading">Daily Site Attendance & GPS Geofence Verification</h4>
-                <p className="text-[11px] text-slate-500">Live check-in log linked to authorized site engineers and project managers.</p>
+                <p className="text-[11px] text-slate-500">
+                  Register for: <strong className="text-slate-800">{formatDisplayDate(selectedDate)}</strong> • {filteredAttendance.length} staff records
+                </p>
               </div>
-              <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-lg flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>4 / 4 Present Today</span>
+              <span className={`px-2.5 py-1 text-xs font-bold rounded-lg flex items-center gap-1.5 border ${
+                dateCategory === 'today'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                  : dateCategory === 'past'
+                  ? 'bg-amber-50 border-amber-200 text-amber-800'
+                  : 'bg-blue-50 border-blue-200 text-blue-800'
+              }`}>
+                {dateCategory === 'today' ? (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                ) : (
+                  <Calendar className="w-3 h-3" />
+                )}
+                <span>
+                  {filteredAttendance.filter(r => r.status === 'Present').length} / {filteredAttendance.length} Present ({formatDisplayDate(selectedDate)})
+                </span>
               </span>
             </div>
 
@@ -490,92 +766,108 @@ export const HRMSModule = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {attendanceRecords.map((rec) => (
-                    <tr key={rec.empId} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="px-3.5 py-2 text-xs">
-                        <span className="font-bold text-slate-900 block text-xs">{rec.name}</span>
-                        <span className="text-[10px] text-slate-500 font-medium font-mono">{rec.empId} • {rec.designation}</span>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs">
-                        <span className="text-slate-800 font-semibold flex items-center gap-1 text-xs">
-                          <Building2 className="w-4 h-4 text-copper-500" />
-                          {rec.site}
-                        </span>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs text-center font-mono font-medium text-slate-800">
-                        <span>{rec.inTime}</span>
-                        <span className="text-slate-400 mx-1.5">-</span>
-                        <span>{rec.outTime}</span>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <MapPin className="w-3 h-3 text-emerald-600" />
-                          {rec.gpsStatus}
-                        </span>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs text-center">
-                        <select
-                          value={rec.status}
-                          onChange={(e) => updateAttendanceStatus(rec.empId, e.target.value)}
-                          className={`px-2 py-1 rounded-md text-xs font-bold border transition-colors ${
-                            rec.status === 'Present' 
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
-                              : rec.status === 'Half Day' 
-                              ? 'bg-amber-50 text-amber-700 border-amber-300' 
-                              : 'bg-rose-50 text-rose-700 border-rose-300'
-                          }`}
-                        >
-                          <option value="Present">Present</option>
-                          <option value="Half Day">Half Day</option>
-                          <option value="Absent">Absent</option>
-                          <option value="On Leave">On Leave</option>
-                        </select>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs text-center">
-                        <div className="inline-flex items-center gap-0.5 bg-white border border-slate-200 rounded-lg px-1 py-0.5 shadow-2xs">
-                          <button 
-                            type="button"
-                            onClick={() => updateOvertime(rec.empId, -0.5)}
-                            className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors"
-                            title="Decrease (-0.5h)"
-                          >
-                            -
-                          </button>
-                          <div className="flex items-center">
-                            <input
-                              type="number"
-                              step="0.5"
-                              min="0"
-                              max="24"
-                              value={rec.overtimeHours === '' ? '' : rec.overtimeHours}
-                              onChange={(e) => setOvertimeDirect(rec.empId, e.target.value)}
-                              onBlur={(e) => handleOvertimeBlur(rec.empId, e.target.value)}
-                              onClick={(e) => e.target.select()}
-                              className="w-7 text-center font-mono font-bold text-slate-800 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
-                            <span className="text-[10px] text-slate-400 font-bold pr-0.5">h</span>
-                          </div>
-                          <button 
-                            type="button"
-                            onClick={() => updateOvertime(rec.empId, 0.5)}
-                            className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors"
-                            title="Increase (+0.5h)"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
-
-                      <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-900 font-bold text-xs">
-                        {rec.daysPresentMonth} / {standardWorkingDays}
+                  {filteredAttendance.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="px-4 py-8 text-center text-slate-400 text-xs">
+                        No employees found matching the selected site filter.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredAttendance.map((rec) => (
+                      <tr key={rec.empId} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="px-3.5 py-2 text-xs">
+                          <span className="font-bold text-slate-900 block text-xs">{rec.name}</span>
+                          <span className="text-[10px] text-slate-500 font-medium font-mono">{rec.empId} • {rec.designation}</span>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs">
+                          <span className="text-slate-800 font-semibold flex items-center gap-1 text-xs">
+                            <Building2 className="w-4 h-4 text-copper-500" />
+                            {rec.site}
+                          </span>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs text-center font-mono font-medium text-slate-800">
+                          <span>{rec.inTime}</span>
+                          <span className="text-slate-400 mx-1.5">-</span>
+                          <span>{rec.outTime}</span>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                            dateCategory === 'future'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : dateCategory === 'past'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            <MapPin className="w-3 h-3" />
+                            {rec.gpsStatus}
+                          </span>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs text-center">
+                          <select
+                            value={rec.status}
+                            onChange={(e) => updateAttendanceStatus(rec.empId, e.target.value)}
+                            className={`px-2 py-1 rounded-md text-xs font-bold border transition-colors cursor-pointer ${
+                              rec.status === 'Present' 
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-300' 
+                                : rec.status === 'Half Day' 
+                                ? 'bg-amber-50 text-amber-700 border-amber-300' 
+                                : rec.status === 'Absent'
+                                ? 'bg-rose-50 text-rose-700 border-rose-300'
+                                : 'bg-purple-50 text-purple-700 border-purple-300'
+                            }`}
+                          >
+                            <option value="Present">Present</option>
+                            <option value="Half Day">Half Day</option>
+                            <option value="Absent">Absent</option>
+                            <option value="On Leave">On Leave</option>
+                          </select>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs text-center">
+                          <div className="inline-flex items-center gap-0.5 bg-white border border-slate-200 rounded-lg px-1 py-0.5 shadow-2xs">
+                            <button 
+                              type="button"
+                              onClick={() => updateOvertime(rec.empId, -0.5)}
+                              className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                              title="Decrease (-0.5h)"
+                            >
+                              -
+                            </button>
+                            <div className="flex items-center">
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                max="24"
+                                value={rec.overtimeHours === '' ? '' : rec.overtimeHours}
+                                onChange={(e) => setOvertimeDirect(rec.empId, e.target.value)}
+                                onBlur={(e) => handleOvertimeBlur(rec.empId, e.target.value)}
+                                onClick={(e) => e.target.select()}
+                                className="w-7 text-center font-mono font-bold text-slate-800 text-xs bg-transparent border-0 focus:outline-none focus:ring-0 p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                              <span className="text-[10px] text-slate-400 font-bold pr-0.5">h</span>
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => updateOvertime(rec.empId, 0.5)}
+                              className="text-slate-400 hover:text-slate-900 font-bold px-1.5 py-0.5 text-xs hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                              title="Increase (+0.5h)"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-900 font-bold text-xs">
+                          {rec.daysPresentMonth} / {standardWorkingDays}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
