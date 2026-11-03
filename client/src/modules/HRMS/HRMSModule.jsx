@@ -247,6 +247,7 @@ export const HRMSModule = () => {
   const [individualEmployee, setIndividualEmployee] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(9); // 0-based: 9 = October
   const [calendarYear, setCalendarYear] = useState(2026);
+  const [activeDayPopover, setActiveDayPopover] = useState(null); // Key of day with open status menu (e.g. '2026-10-06')
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -258,6 +259,7 @@ export const HRMSModule = () => {
     if (!emp) return;
     const targetEmp = hrmsEmployees.find(e => e.id === emp.empId || e.id === emp.id) || emp;
     setIndividualEmployee(targetEmp);
+    setActiveDayPopover(null);
 
     if (selectedDate) {
       const parts = selectedDate.split('-').map(Number);
@@ -270,6 +272,7 @@ export const HRMSModule = () => {
   };
 
   const handlePrevMonth = () => {
+    setActiveDayPopover(null);
     if (calendarMonth === 0) {
       setCalendarMonth(11);
       setCalendarYear(prev => prev - 1);
@@ -279,12 +282,63 @@ export const HRMSModule = () => {
   };
 
   const handleNextMonth = () => {
+    setActiveDayPopover(null);
     if (calendarMonth === 11) {
       setCalendarMonth(0);
       setCalendarYear(prev => prev + 1);
     } else {
       setCalendarMonth(prev => prev + 1);
     }
+  };
+
+  // Helper to set an employee's attendance status directly on a specific dateKey
+  const setEmployeeStatusOnDate = (empId, dateKey, newStatus, ot = 0) => {
+    setAttendanceByDate(prev => {
+      const existing = prev[dateKey] || currentAttendanceRecords;
+      const targetEmp = hrmsEmployees.find(e => e.id === empId) || individualEmployee;
+      
+      if (newStatus === null) {
+        return {
+          ...prev,
+          [dateKey]: existing.filter(r => r.empId !== empId)
+        };
+      }
+
+      const exists = existing.some(r => r.empId === empId);
+      let updatedList;
+      if (exists) {
+        updatedList = existing.map(r => {
+          if (r.empId !== empId) return r;
+          return {
+            ...r,
+            status: newStatus,
+            overtimeHours: ot
+          };
+        });
+      } else {
+        updatedList = [
+          ...existing,
+          {
+            empId,
+            name: targetEmp.name,
+            designation: targetEmp.designation,
+            site: targetEmp.site || 'Royal Palace Commercial Complex',
+            inTime: '09:00 AM',
+            outTime: '06:00 PM',
+            status: newStatus,
+            gpsStatus: dateKey > todayIso ? 'Advance Scheduled' : 'Verified',
+            overtimeHours: ot,
+            daysPresentMonth: 26
+          }
+        ];
+      }
+      return {
+        ...prev,
+        [dateKey]: updatedList
+      };
+    });
+    setActiveDayPopover(null);
+    showAttendanceToast(`${formatDisplayDate(dateKey)}: ${newStatus || 'Clear'}${ot > 0 ? ` (+${ot}h OT)` : ''} सेव्ह केले`);
   };
 
   // Helper to get an employee's attendance on a specific dateKey (YYYY-MM-DD)
@@ -1344,6 +1398,14 @@ export const HRMSModule = () => {
                   <div className="text-slate-600 font-bold py-1">Sat</div>
                 </div>
 
+                {/* Backdrop for open popover */}
+                {activeDayPopover && (
+                  <div 
+                    className="fixed inset-0 z-20" 
+                    onClick={() => setActiveDayPopover(null)} 
+                  />
+                )}
+
                 {/* Calendar Days Matrix */}
                 <div className="grid grid-cols-7 gap-2">
                   {calendarDays.map((cell) => {
@@ -1358,13 +1420,18 @@ export const HRMSModule = () => {
 
                     const empId = individualEmployee.id || individualEmployee.empId;
                     const att = getEmployeeAttendanceOnDate(empId, cell.dateKey);
+                    const isPopoverOpen = activeDayPopover === cell.dateKey;
 
                     return (
                       <div
                         key={cell.dateKey}
-                        onClick={() => cycleEmployeeDayStatus(empId, cell.dateKey)}
-                        className="rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white p-2 min-h-[68px] flex flex-col justify-between transition-all hover:shadow-xs cursor-pointer select-none group"
-                        title={`क्लिक करून हजेरी बदला (${cell.dateKey})`}
+                        onClick={() => setActiveDayPopover(prev => prev === cell.dateKey ? null : cell.dateKey)}
+                        className={`relative rounded-2xl border bg-white p-2 min-h-[68px] flex flex-col justify-between transition-all select-none cursor-pointer group ${
+                          isPopoverOpen
+                            ? 'ring-2 ring-purple-600 border-purple-600 shadow-md z-30'
+                            : 'border-slate-200/90 hover:border-slate-300 hover:shadow-xs'
+                        }`}
+                        title={`हजेरी पर्याय निवडा (${cell.dateKey})`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-xs font-bold leading-none ${
@@ -1376,8 +1443,10 @@ export const HRMSModule = () => {
 
                         <div className="mt-1 flex items-center justify-center">
                           {!att || !att.status ? (
-                            <div className="w-full py-1 rounded-full bg-slate-50 border border-slate-200/90 text-slate-400 text-xs font-bold flex items-center justify-center group-hover:bg-slate-100 group-hover:text-slate-600 transition-colors">
-                              +
+                            <div className="w-full py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold flex items-center justify-center group-hover:bg-slate-100 transition-colors">
+                              <span className="w-5 h-5 rounded-full border border-blue-400 bg-blue-50/70 text-blue-600 flex items-center justify-center text-xs font-bold leading-none shadow-2xs">
+                                +
+                              </span>
                             </div>
                           ) : att.overtimeHours > 0 ? (
                             <div className="w-full py-0.5 px-1 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center gap-1 shadow-2xs">
@@ -1406,6 +1475,98 @@ export const HRMSModule = () => {
                             </div>
                           )}
                         </div>
+
+                        {/* Floating Status Options Popover (Matching user screenshot) */}
+                        {isPopoverOpen && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className={`absolute ${cell.dayNum > 18 ? 'bottom-full mb-2' : 'top-full mt-2'} ${
+                              cell.dayOfWeek >= 4 ? 'right-0' : 'left-0'
+                            } z-50 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 w-48 text-left space-y-1 animate-scale-in`}
+                          >
+                            {/* Option 1: Present */}
+                            <button
+                              type="button"
+                              onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, 'Present', 0)}
+                              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition-colors text-left cursor-pointer group/item"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-[#00ba88] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-800 group-hover/item:text-slate-900">Present</span>
+                            </button>
+
+                            {/* Option 2: Absent */}
+                            <button
+                              type="button"
+                              onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, 'Absent', 0)}
+                              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition-colors text-left cursor-pointer group/item"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-[#ff3b5c] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <X className="w-3.5 h-3.5 stroke-[3]" />
+                              </div>
+                              <span className="text-xs font-bold text-slate-800 group-hover/item:text-slate-900">Absent</span>
+                            </button>
+
+                            {/* Option 3: Half Day */}
+                            <button
+                              type="button"
+                              onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, 'Half Day', 0)}
+                              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-slate-50 transition-colors text-left cursor-pointer group/item"
+                            >
+                              <div className="w-6 h-6 rounded-full bg-[#ff9900] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <span className="text-[11px] font-extrabold leading-none">½</span>
+                              </div>
+                              <span className="text-xs font-bold text-slate-800 group-hover/item:text-slate-900">Half Day</span>
+                            </button>
+
+                            {/* Option 4: Overtime (हजर+OT) */}
+                            <div className="bg-purple-50 rounded-xl p-1">
+                              <button
+                                type="button"
+                                onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, 'Present', 1)}
+                                className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-purple-100/70 transition-colors text-left cursor-pointer"
+                                title="Mark Overtime (+1h)"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-6 h-6 rounded-full bg-[#7c3aed] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                    <Clock className="w-3.5 h-3.5 text-white" />
+                                  </div>
+                                  <span className="text-xs font-bold text-purple-700 whitespace-nowrap">Overtime (हजर+OT)</span>
+                                </div>
+                              </button>
+
+                              {/* Quick OT Hours Selector: 1h, 2h, 4h */}
+                              <div className="flex items-center justify-end gap-1 px-1 pt-1 border-t border-purple-200/50">
+                                <span className="text-[10px] font-bold text-purple-600 mr-auto">तास:</span>
+                                {[1, 2, 3, 4].map(h => (
+                                  <button
+                                    key={h}
+                                    type="button"
+                                    onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, 'Present', h)}
+                                    className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-purple-700 border border-purple-200 hover:bg-purple-600 hover:text-white transition-colors cursor-pointer"
+                                  >
+                                    +{h}h
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Option 5: Clear / Reset if status already set */}
+                            {att && att.status && (
+                              <button
+                                type="button"
+                                onClick={() => setEmployeeStatusOnDate(empId, cell.dateKey, null, 0)}
+                                className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors text-left cursor-pointer border-t border-slate-100 mt-1"
+                              >
+                                <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                  <X className="w-3 h-3 text-slate-500" />
+                                </div>
+                                <span className="text-[11px] font-bold">Clear / अनमार्क करा (+)</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
