@@ -106,33 +106,37 @@ export const HRMSModule = () => {
     const initial = {};
     const defaultSiteFor = (idx) => idx === 0 ? 'Head Office, Tarabai Park' : idx === 1 ? 'Royal Palace Commercial Complex' : idx === 2 ? 'Tarabai Park High-Rise' : 'Head Office, Tarabai Park';
 
-    // Seed today
-    initial[todayIso] = hrmsEmployees.map((emp, idx) => ({
+    const makeDay = (status, ot = 0) => hrmsEmployees.map((emp, idx) => ({
       empId: emp.id,
       name: emp.name,
       designation: emp.designation,
       site: defaultSiteFor(idx),
-      inTime: idx === 0 ? '09:00 AM' : idx === 1 ? '08:45 AM' : idx === 2 ? '08:58 AM' : '09:15 AM',
-      outTime: '06:30 PM',
-      status: 'Present',
-      gpsStatus: idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (18m)',
-      overtimeHours: idx === 1 ? 1.5 : idx === 2 ? 2.0 : 0,
-      daysPresentMonth: idx === 0 ? 26 : idx === 1 ? 25 : idx === 2 ? 26 : 24
-    }));
-
-    // Seed 2026-10-28 (Past Date seen in user screenshot)
-    initial['2026-10-28'] = hrmsEmployees.map((emp, idx) => ({
-      empId: emp.id,
-      name: emp.name,
-      designation: emp.designation,
-      site: defaultSiteFor(idx),
-      inTime: idx === 0 ? '09:00 AM' : idx === 1 ? '08:45 AM' : idx === 2 ? '08:58 AM' : '09:15 AM',
-      outTime: '06:30 PM',
-      status: 'Present',
-      gpsStatus: 'Recorded in Historical Ledger',
-      overtimeHours: 0,
+      inTime: idx === 0 ? '09:00 AM' : '08:45 AM',
+      outTime: '06:00 PM',
+      status,
+      gpsStatus: 'Recorded in Ledger',
+      overtimeHours: ot,
       daysPresentMonth: 26
     }));
+
+    // Seed October 2026 days matching user calendar demo
+    initial['2026-10-07'] = makeDay('Present', 12);
+    initial['2026-10-08'] = makeDay('Present', 0);
+    initial['2026-10-09'] = makeDay('Present', 1);
+    initial['2026-10-10'] = makeDay('Present', 2);
+    initial['2026-10-12'] = makeDay('Present', 0);
+    initial['2026-10-13'] = makeDay('Present', 0);
+    initial['2026-10-14'] = makeDay('Present', 1);
+    initial['2026-10-15'] = makeDay('Present', 2);
+    initial['2026-10-16'] = makeDay('Absent', 0);
+    initial['2026-10-17'] = makeDay('Present', 0);
+    initial['2026-10-18'] = makeDay('Present', 0);
+    initial['2026-10-19'] = makeDay('Present', 0);
+    initial['2026-10-20'] = makeDay('Present', 1);
+    initial['2026-10-28'] = makeDay('Present', 0);
+
+    // Seed today
+    initial[todayIso] = makeDay('Present', 0);
 
     return initial;
   });
@@ -238,191 +242,171 @@ export const HRMSModule = () => {
     return currentAttendanceRecords.filter(r => r.site === siteFilter);
   }, [currentAttendanceRecords, siteFilter]);
 
-  // --- Particular / Individual Employee Attendance Modal State ---
+  // --- Particular / Individual Employee Attendance Calendar Modal State (Matching Image 2) ---
   const [individualModalOpen, setIndividualModalOpen] = useState(false);
   const [individualEmployee, setIndividualEmployee] = useState(null);
-  const [individualDate, setIndividualDate] = useState(() => getTodayIso());
-  const [individualStatus, setIndividualStatus] = useState('Present'); // Present, Half Day, Absent, On Leave
-  const [individualOvertime, setIndividualOvertime] = useState(0);
-  const [individualInTime, setIndividualInTime] = useState('09:00 AM');
-  const [individualOutTime, setIndividualOutTime] = useState('06:00 PM');
-  const [individualNote, setIndividualNote] = useState('');
-  
-  // Date Range mode for multiple days entry (e.g. Leave for 3 days)
-  const [isRangeMode, setIsRangeMode] = useState(false);
-  const [rangeFromDate, setRangeFromDate] = useState(() => getTodayIso());
-  const [rangeToDate, setRangeToDate] = useState(() => getTodayIso());
+  const [calendarMonth, setCalendarMonth] = useState(9); // 0-based: 9 = October
+  const [calendarYear, setCalendarYear] = useState(2026);
 
-  // Open individual attendance modal for a specific employee
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Open individual attendance calendar modal for a specific employee
   const handleOpenIndividualAttendance = (emp) => {
     if (!emp) return;
     const targetEmp = hrmsEmployees.find(e => e.id === emp.empId || e.id === emp.id) || emp;
     setIndividualEmployee(targetEmp);
-    const dateToUse = selectedDate || todayIso;
-    setIndividualDate(dateToUse);
-    setRangeFromDate(dateToUse);
-    setRangeToDate(dateToUse);
-    setIsRangeMode(false);
-    setIndividualNote('');
 
-    // Fetch existing attendance for this date if present
-    const existingDateRecords = attendanceByDate[dateToUse] || currentAttendanceRecords;
-    const targetId = targetEmp.id || targetEmp.empId;
-    const existingRec = existingDateRecords.find(r => r.empId === targetId);
-    if (existingRec) {
-      setIndividualStatus(existingRec.status || 'Present');
-      setIndividualOvertime(existingRec.overtimeHours || 0);
-      setIndividualInTime(existingRec.inTime || '09:00 AM');
-      setIndividualOutTime(existingRec.outTime || '06:00 PM');
-    } else {
-      setIndividualStatus('Present');
-      setIndividualOvertime(0);
-      setIndividualInTime('09:00 AM');
-      setIndividualOutTime('06:00 PM');
+    if (selectedDate) {
+      const parts = selectedDate.split('-').map(Number);
+      if (parts.length === 3) {
+        setCalendarYear(parts[0]);
+        setCalendarMonth(parts[1] - 1);
+      }
     }
     setIndividualModalOpen(true);
   };
 
-  // When date is changed in the individual modal
-  const handleIndividualDateChange = (newDate) => {
-    setIndividualDate(newDate);
-    const targetId = individualEmployee?.id || individualEmployee?.empId;
-    const existingDateRecords = attendanceByDate[newDate] || [];
-    const rec = existingDateRecords.find(r => r.empId === targetId);
-    if (rec) {
-      setIndividualStatus(rec.status || 'Present');
-      setIndividualOvertime(rec.overtimeHours || 0);
-      setIndividualInTime(rec.inTime || '09:00 AM');
-      setIndividualOutTime(rec.outTime || '06:00 PM');
+  const handlePrevMonth = () => {
+    if (calendarMonth === 0) {
+      setCalendarMonth(11);
+      setCalendarYear(prev => prev - 1);
     } else {
-      setIndividualStatus('Present');
-      setIndividualOvertime(0);
-      setIndividualInTime('09:00 AM');
-      setIndividualOutTime('06:00 PM');
+      setCalendarMonth(prev => prev - 1);
     }
   };
 
-  // Save single date attendance for this individual employee
-  const handleSaveIndividualSingleDate = (e) => {
-    if (e) e.preventDefault();
-    if (!individualEmployee) return;
-    const targetId = individualEmployee.id || individualEmployee.empId;
-    const isPast = individualDate < todayIso;
-    const isFuture = individualDate > todayIso;
+  const handleNextMonth = () => {
+    if (calendarMonth === 11) {
+      setCalendarMonth(0);
+      setCalendarYear(prev => prev + 1);
+    } else {
+      setCalendarMonth(prev => prev + 1);
+    }
+  };
 
-    updateRecordForDate(individualDate, records => {
-      const exists = records.some(r => r.empId === targetId);
-      if (exists) {
-        return records.map(r => {
-          if (r.empId !== targetId) return r;
-          return {
-            ...r,
-            status: individualStatus,
-            overtimeHours: Number(individualOvertime) || 0,
-            inTime: individualInTime,
-            outTime: individualOutTime,
-            note: individualNote || r.note,
-            gpsStatus: isFuture 
-              ? 'Advance Scheduled' 
-              : isPast 
-              ? 'Historical Entry' 
-              : 'Verified Presence'
-          };
-        });
-      } else {
-        return [
-          ...records,
-          {
-            empId: targetId,
-            name: individualEmployee.name,
-            designation: individualEmployee.designation,
-            site: individualEmployee.site || 'Royal Palace Commercial Complex',
-            inTime: individualInTime,
-            outTime: individualOutTime,
-            status: individualStatus,
-            gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Verified Presence',
-            overtimeHours: Number(individualOvertime) || 0,
-            daysPresentMonth: 26,
-            note: individualNote
-          }
-        ];
+  // Helper to get an employee's attendance on a specific dateKey (YYYY-MM-DD)
+  const getEmployeeAttendanceOnDate = (empId, dateKey) => {
+    const list = attendanceByDate[dateKey];
+    if (list) {
+      const rec = list.find(r => r.empId === empId);
+      if (rec) {
+        return {
+          status: rec.status,
+          overtimeHours: Number(rec.overtimeHours) || 0
+        };
       }
-    });
-
-    showAttendanceToast(
-      `${individualEmployee.name}: ${formatDisplayDate(individualDate)} साठी '${individualStatus}' हजेरी सेव्ह झाली!`
-    );
-    setIndividualModalOpen(false);
+    }
+    return null;
   };
 
-  // Save multiple days / range attendance for this individual employee
-  const handleSaveIndividualDateRange = (e) => {
-    if (e) e.preventDefault();
-    if (!individualEmployee) return;
-    const targetId = individualEmployee.id || individualEmployee.empId;
+  // Cycle/toggle status for employee on a specific day in the calendar
+  const cycleEmployeeDayStatus = (empId, dateKey) => {
+    const current = getEmployeeAttendanceOnDate(empId, dateKey);
+    let nextStatus = 'Present';
+    let nextOT = 0;
 
-    if (rangeFromDate > rangeToDate) {
-      alert("From Date cannot be later than To Date!");
-      return;
-    }
-
-    const dates = [];
-    let curr = new Date(rangeFromDate);
-    const end = new Date(rangeToDate);
-    while (curr <= end) {
-      const y = curr.getFullYear();
-      const m = String(curr.getMonth() + 1).padStart(2, '0');
-      const d = String(curr.getDate()).padStart(2, '0');
-      dates.push(`${y}-${m}-${d}`);
-      curr.setDate(curr.getDate() + 1);
+    if (!current || !current.status) {
+      // Unmarked (+) -> Present (✓)
+      nextStatus = 'Present';
+      nextOT = 0;
+    } else if (current.status === 'Present' && (!current.overtimeHours || current.overtimeHours === 0)) {
+      // Present (✓) -> Absent (✕)
+      nextStatus = 'Absent';
+      nextOT = 0;
+    } else if (current.status === 'Absent') {
+      // Absent (✕) -> Half Day (½)
+      nextStatus = 'Half Day';
+      nextOT = 0;
+    } else if (current.status === 'Half Day') {
+      // Half Day (½) -> Overtime 1h (P +1h)
+      nextStatus = 'Present';
+      nextOT = 1.0;
+    } else if (current.overtimeHours === 1.0) {
+      // Overtime 1h -> Overtime 2h (P +2h)
+      nextStatus = 'Present';
+      nextOT = 2.0;
+    } else if (current.overtimeHours > 0) {
+      // Overtime -> Unmarked (+)
+      nextStatus = null;
+      nextOT = 0;
+    } else {
+      nextStatus = 'Present';
+      nextOT = 0;
     }
 
     setAttendanceByDate(prev => {
-      const updated = { ...prev };
-      dates.forEach(dStr => {
-        const existingForDate = updated[dStr] || currentAttendanceRecords;
-        const isPast = dStr < todayIso;
-        const isFuture = dStr > todayIso;
+      const existing = prev[dateKey] || currentAttendanceRecords;
+      const targetEmp = hrmsEmployees.find(e => e.id === empId) || individualEmployee;
+      
+      if (nextStatus === null) {
+        return {
+          ...prev,
+          [dateKey]: existing.filter(r => r.empId !== empId)
+        };
+      }
 
-        const exists = existingForDate.some(r => r.empId === targetId);
-        if (exists) {
-          updated[dStr] = existingForDate.map(r => {
-            if (r.empId !== targetId) return r;
-            return {
-              ...r,
-              status: individualStatus,
-              overtimeHours: 0,
-              note: individualNote || `${individualStatus} Range`,
-              gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Manual Entry'
-            };
-          });
-        } else {
-          updated[dStr] = [
-            ...existingForDate,
-            {
-              empId: targetId,
-              name: individualEmployee.name,
-              designation: individualEmployee.designation,
-              site: individualEmployee.site || 'Royal Palace Commercial Complex',
-              inTime: '09:00 AM',
-              outTime: '06:00 PM',
-              status: individualStatus,
-              gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Manual Entry',
-              overtimeHours: 0,
-              daysPresentMonth: 26,
-              note: individualNote || `${individualStatus} Range`
-            }
-          ];
-        }
-      });
-      return updated;
+      const exists = existing.some(r => r.empId === empId);
+      let updatedList;
+      if (exists) {
+        updatedList = existing.map(r => {
+          if (r.empId !== empId) return r;
+          return {
+            ...r,
+            status: nextStatus,
+            overtimeHours: nextOT
+          };
+        });
+      } else {
+        updatedList = [
+          ...existing,
+          {
+            empId,
+            name: targetEmp.name,
+            designation: targetEmp.designation,
+            site: targetEmp.site || 'Royal Palace Commercial Complex',
+            inTime: '09:00 AM',
+            outTime: '06:00 PM',
+            status: nextStatus,
+            gpsStatus: dateKey > todayIso ? 'Advance Scheduled' : 'Verified',
+            overtimeHours: nextOT,
+            daysPresentMonth: 26
+          }
+        ];
+      }
+      return {
+        ...prev,
+        [dateKey]: updatedList
+      };
     });
-
-    showAttendanceToast(
-      `${individualEmployee.name}: ${formatDisplayDate(rangeFromDate)} ते ${formatDisplayDate(rangeToDate)} (${dates.length} दिवस) '${individualStatus}' हजेरी लागू केली!`
-    );
-    setIndividualModalOpen(false);
   };
+
+  // Calendar matrix calculation
+  const calendarDays = useMemo(() => {
+    const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay(); // 0 for Sun
+    const totalDays = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    
+    const cells = [];
+    for (let i = 0; i < firstDayIndex; i++) {
+      cells.push({ isEmpty: true, key: `empty-${i}` });
+    }
+    for (let d = 1; d <= totalDays; d++) {
+      const monthStr = String(calendarMonth + 1).padStart(2, '0');
+      const dayStr = String(d).padStart(2, '0');
+      const dateKey = `${calendarYear}-${monthStr}-${dayStr}`;
+      const dayOfWeek = (firstDayIndex + d - 1) % 7;
+      cells.push({
+        isEmpty: false,
+        dayNum: d,
+        dateKey,
+        dayOfWeek,
+        isSunday: dayOfWeek === 0
+      });
+    }
+    return cells;
+  }, [calendarYear, calendarMonth]);
 
   // Onboarding Form State
   const [formData, setFormData] = useState({
@@ -766,29 +750,10 @@ export const HRMSModule = () => {
               {/* Date Selection & Stepper Area */}
               <div className="flex flex-wrap items-center gap-3">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="mb-1">
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                       Attendance Register Date
                     </label>
-                    {/* Date Type Badge */}
-                    {dateCategory === 'past' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
-                        <Clock className="w-2.5 h-2.5 text-amber-600" />
-                        <span>मागील तारीख (Backdated)</span>
-                      </span>
-                    )}
-                    {dateCategory === 'today' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>आजची तारीख (Today)</span>
-                      </span>
-                    )}
-                    {dateCategory === 'future' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                        <CalendarDays className="w-2.5 h-2.5 text-blue-600" />
-                        <span>पुढील तारीख (Advance)</span>
-                      </span>
-                    )}
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -1018,11 +983,10 @@ export const HRMSModule = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenIndividualAttendance(rec)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 hover:text-red-800 border border-red-200/90 rounded-lg text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
-                            title="या कर्मचाऱ्याची मागील किंवा पुढील हजेरी नोंदवा"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 border border-red-200 transition-all shadow-2xs cursor-pointer"
+                            title={`हजेरी कॅलेंडर उघडा (${rec.name})`}
                           >
-                            <CalendarDays className="w-3.5 h-3.5 text-red-600" />
-                            <span>तारीख हजेरी (Set Date)</span>
+                            <Calendar className="w-4 h-4 text-red-600" />
                           </button>
                         </td>
                       </tr>
@@ -1249,349 +1213,241 @@ export const HRMSModule = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: PARTICULAR EMPLOYEE ATTENDANCE & LEAVE REGISTER                    */}
+      {/* MODAL: MONTHLY ATTENDANCE CALENDAR (Matching Image 2)                     */}
       {/* ========================================================================= */}
       {individualModalOpen && individualEmployee && (
-        <Modal
-          isOpen={individualModalOpen}
-          onClose={() => setIndividualModalOpen(false)}
-          title={`वैयक्तिक हजेरी नोंद: ${individualEmployee.name}`}
-          subtitle={`${individualEmployee.id || individualEmployee.empId} • ${individualEmployee.designation || 'Staff'} (मागील किंवा पुढील तारखेची उपस्थिती / सुट्टी नोंदवा)`}
-          maxWidth="max-w-2xl"
-        >
-          <div className="space-y-4 text-xs font-sans">
-            {/* Employee Header Profile Strip */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
-                  {individualEmployee.name?.replace(/^(Er\.|CA|Dr\.|Mr\.|Mrs\.)\s+/i, '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM'}
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setIndividualModalOpen(false)}
+          />
+
+          {/* Modal Container */}
+          <div className="flex min-h-screen items-center justify-center p-3 sm:p-4">
+            <div 
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/90 transform transition-all text-slate-900"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Dark Navy Header (Matching Image 2) */}
+              <div className="bg-[#0b192c] px-6 py-4 flex items-center justify-between text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#003865] border border-blue-400/30 text-amber-400 font-extrabold text-base flex items-center justify-center shadow-inner flex-shrink-0">
+                    {individualEmployee.name ? individualEmployee.name.trim()[0].toUpperCase() : 'S'}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-base leading-snug">
+                      {individualEmployee.name}
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300 mt-0.5">
+                      <span className="inline-flex items-center gap-1 text-slate-300">
+                        <span>✂️</span>
+                        <span>{individualEmployee.department || 'Grafting & Propagation'}</span>
+                      </span>
+                      <span className="text-slate-500">•</span>
+                      <span>{individualEmployee.designation || 'General Worker'}</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
+                        <Phone className="w-3 h-3 text-emerald-400" />
+                        <span>{individualEmployee.phone || '7498953099'}</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-bold text-slate-900 text-sm block leading-tight">{individualEmployee.name}</span>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    {individualEmployee.id || individualEmployee.empId} • {individualEmployee.department || 'Site Execution'} • {individualEmployee.designation || 'Engineer'}
-                  </span>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIndividualModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                  title="Close (बंद करा)"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              {hrmsEmployees.length > 1 && (
-                <div className="flex items-center gap-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">कर्मचारी बदला:</label>
-                  <select
-                    value={individualEmployee.id || individualEmployee.empId}
-                    onChange={(e) => {
-                      const emp = hrmsEmployees.find(item => item.id === e.target.value);
-                      if (emp) handleOpenIndividualAttendance(emp);
-                    }}
-                    className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
-                  >
-                    {hrmsEmployees.map(e => (
-                      <option key={e.id} value={e.id}>{e.name} ({e.id})</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
+              {/* Modal Body */}
+              <div className="p-6 space-y-4">
+                {/* Month & Year Navigation Row */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handlePrevMonth}
+                      className="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 active:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
+                      title="मागील महिना (Previous Month)"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
 
-            {/* Mode Tabs */}
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-              <button
-                type="button"
-                onClick={() => setIsRangeMode(false)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  !isRangeMode 
-                    ? 'bg-red-600 text-white shadow-2xs' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>विशिष्ट तारीख हजेरी (Single Date)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRangeMode(true)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isRangeMode 
-                    ? 'bg-red-600 text-white shadow-2xs' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                <CalendarDays className="w-3.5 h-3.5" />
-                <span>सलग कालावधी सुट्टी / हजेरी (Date Range / Leave)</span>
-              </button>
-            </div>
-
-            {/* MODE 1: Single Date Mode Form */}
-            {!isRangeMode ? (
-              <form onSubmit={handleSaveIndividualSingleDate} className="space-y-4 bg-white p-1">
-                {/* Date Selection */}
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                      हजेरी तारीख निवडा (Select Date)
-                    </label>
-                    {/* Badge */}
-                    {individualDate < todayIso ? (
-                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1">
-                        <Clock className="w-2.5 h-2.5 text-amber-600" />
-                        <span>मागील तारीख (Backdated Entry)</span>
-                      </span>
-                    ) : individualDate === todayIso ? (
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span>आजची तारीख (Current Date)</span>
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-flex items-center gap-1">
-                        <CalendarDays className="w-2.5 h-2.5 text-blue-600" />
-                        <span>पुढील तारीख (Advance / Planned)</span>
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <DatePicker
-                      value={individualDate}
-                      onChange={handleIndividualDateChange}
-                    />
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleIndividualDateChange(shiftDate(todayIso, -1))}
-                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
-                        title="Yesterday"
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 shadow-2xs">
+                      <span className="text-sm">📅</span>
+                      <select
+                        value={calendarMonth}
+                        onChange={(e) => setCalendarMonth(Number(e.target.value))}
+                        className="bg-transparent font-bold text-xs text-slate-800 focus:outline-none cursor-pointer pr-1"
                       >
-                        काल (Yesterday)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleIndividualDateChange(todayIso)}
-                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
-                        title="Today"
-                      >
-                        आज (Today)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleIndividualDateChange(shiftDate(todayIso, 1))}
-                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
-                        title="Tomorrow"
-                      >
-                        उद्या (Tomorrow)
-                      </button>
+                        {monthNames.map((name, idx) => (
+                          <option key={name} value={idx}>{name}</option>
+                        ))}
+                      </select>
                     </div>
+
+                    <div className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 shadow-2xs">
+                      <select
+                        value={calendarYear}
+                        onChange={(e) => setCalendarYear(Number(e.target.value))}
+                        className="bg-transparent font-bold text-xs text-slate-800 focus:outline-none cursor-pointer pr-1"
+                      >
+                        {[2024, 2025, 2026, 2027, 2028].map(yr => (
+                          <option key={yr} value={yr}>{yr}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleNextMonth}
+                      className="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 active:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
+                      title="पुढील महिना (Next Month)"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
+
+                  {hrmsEmployees.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">कर्मचारी बदला:</span>
+                      <select
+                        value={individualEmployee.id || individualEmployee.empId}
+                        onChange={(e) => {
+                          const emp = hrmsEmployees.find(item => item.id === e.target.value);
+                          if (emp) handleOpenIndividualAttendance(emp);
+                        }}
+                        className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
+                      >
+                        {hrmsEmployees.map(e => (
+                          <option key={e.id} value={e.id}>{e.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
-                {/* Status Selection Cards */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    हजेरी स्थिती निवडा (Attendance Status for {formatDisplayDate(individualDate)})
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { key: 'Present', label: 'Present (हजर)', desc: 'पूर्ण दिवस उपस्थित', bg: 'bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border-emerald-300 ring-emerald-500' },
-                      { key: 'Half Day', label: 'Half Day (अर्धा दिवस)', desc: '०.५ दिवस गणना', bg: 'bg-amber-50 hover:bg-amber-100/80 text-amber-800 border-amber-300 ring-amber-500' },
-                      { key: 'Absent', label: 'Absent (गैरहजर)', desc: 'वेतन कपात / सुट्टी नाही', bg: 'bg-rose-50 hover:bg-rose-100/80 text-rose-800 border-rose-300 ring-rose-500' },
-                      { key: 'On Leave', label: 'On Leave (सुट्टीवर)', desc: 'मंजूर सुट्टी / पेड लिव्ह', bg: 'bg-purple-50 hover:bg-purple-100/80 text-purple-800 border-purple-300 ring-purple-500' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => setIndividualStatus(opt.key)}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${opt.bg} ${
-                          individualStatus === opt.key ? 'ring-2 shadow-sm font-extrabold' : 'opacity-70 hover:opacity-100'
-                        }`}
+                {/* Weekdays Header Row */}
+                <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold">
+                  <div className="text-rose-500 font-bold py-1">Sun</div>
+                  <div className="text-slate-600 font-bold py-1">Mon</div>
+                  <div className="text-slate-600 font-bold py-1">Tue</div>
+                  <div className="text-slate-600 font-bold py-1">Wed</div>
+                  <div className="text-slate-600 font-bold py-1">Thu</div>
+                  <div className="text-slate-600 font-bold py-1">Fri</div>
+                  <div className="text-slate-600 font-bold py-1">Sat</div>
+                </div>
+
+                {/* Calendar Days Matrix */}
+                <div className="grid grid-cols-7 gap-2">
+                  {calendarDays.map((cell) => {
+                    if (cell.isEmpty) {
+                      return (
+                        <div
+                          key={cell.key}
+                          className="rounded-2xl border border-slate-100 bg-slate-50/40 min-h-[64px]"
+                        />
+                      );
+                    }
+
+                    const empId = individualEmployee.id || individualEmployee.empId;
+                    const att = getEmployeeAttendanceOnDate(empId, cell.dateKey);
+
+                    return (
+                      <div
+                        key={cell.dateKey}
+                        onClick={() => cycleEmployeeDayStatus(empId, cell.dateKey)}
+                        className="rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white p-2 min-h-[68px] flex flex-col justify-between transition-all hover:shadow-xs cursor-pointer select-none group"
+                        title={`क्लिक करून हजेरी बदला (${cell.dateKey})`}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs">{opt.label}</span>
-                          {individualStatus === opt.key && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-bold leading-none ${
+                            cell.isSunday ? 'text-rose-500' : 'text-slate-800'
+                          }`}>
+                            {cell.dayNum}
+                          </span>
                         </div>
-                        <span className="text-[10px] block opacity-80 font-medium">{opt.desc}</span>
-                      </button>
-                    ))}
-                  </div>
+
+                        <div className="mt-1 flex items-center justify-center">
+                          {!att || !att.status ? (
+                            <div className="w-full py-1 rounded-full bg-slate-50 border border-slate-200/90 text-slate-400 text-xs font-bold flex items-center justify-center group-hover:bg-slate-100 group-hover:text-slate-600 transition-colors">
+                              +
+                            </div>
+                          ) : att.overtimeHours > 0 ? (
+                            <div className="w-full py-0.5 px-1 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center gap-1 shadow-2xs">
+                              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white text-[9px] font-extrabold flex items-center justify-center flex-shrink-0">
+                                P
+                              </span>
+                              <span className="text-[10px] text-purple-700 font-bold leading-none">
+                                +{att.overtimeHours}h
+                              </span>
+                            </div>
+                          ) : att.status === 'Present' ? (
+                            <div className="w-full py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-600 text-xs font-extrabold flex items-center justify-center shadow-2xs">
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            </div>
+                          ) : att.status === 'Absent' ? (
+                            <div className="w-full py-1 rounded-full bg-rose-50 border border-rose-300 text-rose-600 text-xs font-extrabold flex items-center justify-center shadow-2xs">
+                              <X className="w-3.5 h-3.5 stroke-[3]" />
+                            </div>
+                          ) : att.status === 'Half Day' ? (
+                            <div className="w-full py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-700 text-xs font-extrabold flex items-center justify-center shadow-2xs">
+                              ½
+                            </div>
+                          ) : (
+                            <div className="w-full py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center">
+                              {att.status}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {/* Time & Overtime */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">In Time</label>
-                    <input
-                      type="text"
-                      value={individualInTime}
-                      onChange={(e) => setIndividualInTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                    />
+                {/* Bottom Legend Bar (Matching Image 2) */}
+                <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl py-2.5 px-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-700 font-semibold mt-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center shadow-2xs">
+                      <Check className="w-2.5 h-2.5 stroke-[3]" />
+                    </span>
+                    <span>Present</span>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Out Time</label>
-                    <input
-                      type="text"
-                      value={individualOutTime}
-                      onChange={(e) => setIndividualOutTime(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Overtime (Hrs)</label>
-                    <div className="flex items-center border border-slate-200 rounded-lg bg-white px-2 py-1">
-                      <button
-                        type="button"
-                        onClick={() => setIndividualOvertime(prev => Math.max(0, Number((prev - 0.5).toFixed(1))))}
-                        className="text-slate-500 hover:text-slate-900 font-bold px-1.5"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        max="24"
-                        value={individualOvertime}
-                        onChange={(e) => setIndividualOvertime(Number(e.target.value) || 0)}
-                        className="w-full text-center bg-transparent font-bold text-xs outline-none"
-                      />
-                      <span className="text-[10px] text-slate-400 font-bold mr-1">h</span>
-                      <button
-                        type="button"
-                        onClick={() => setIndividualOvertime(prev => Number((prev + 0.5).toFixed(1)))}
-                        className="text-slate-500 hover:text-slate-900 font-bold px-1.5"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Remarks */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    नोंद किंवा कारण (Remarks / Reason - Optional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="उदा. Site Inspection, Medical Leave, Personal Work, Comp-Off..."
-                    value={individualNote}
-                    onChange={(e) => setIndividualNote(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-red-500"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setIndividualModalOpen(false)}
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer"
-                  >
-                    रद्द करा (Cancel)
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>हजेरी सेव्ह करा (Save for {formatDisplayDate(individualDate)})</span>
-                  </button>
-                </div>
-              </form>
-            ) : (
-              /* MODE 2: Date Range Form */
-              <form onSubmit={handleSaveIndividualDateRange} className="space-y-4 bg-white p-1">
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-blue-900 text-xs">
-                  <div className="font-bold flex items-center gap-1.5 mb-1">
-                    <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
-                    <span>सलग कालावधी हजेरी / सुट्टी अर्ज (Date Range Attendance)</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-2xs">
+                      <X className="w-2.5 h-2.5 stroke-[3]" />
+                    </span>
+                    <span>Absent</span>
                   </div>
-                  <p className="text-[11px] opacity-90">
-                    निवडलेल्या दोन्ही तारखांच्या दरम्यानच्या सर्व दिवसांसाठी {individualEmployee.name} यांची हजेरी एकाच क्लिकवर सेट केली जाईल.
-                  </p>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1 uppercase tracking-wider">
-                      या तारखेपासून (From Date)
-                    </label>
-                    <DatePicker
-                      value={rangeFromDate}
-                      onChange={setRangeFromDate}
-                    />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shadow-2xs">
+                      ½
+                    </span>
+                    <span>Half Day</span>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 mb-1 uppercase tracking-wider">
-                      या तारखेपर्यंत (To Date)
-                    </label>
-                    <DatePicker
-                      value={rangeToDate}
-                      onChange={setRangeToDate}
-                    />
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-100 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                      <span className="w-3 h-3 rounded-full bg-emerald-500 text-white text-[8px] font-extrabold flex items-center justify-center">
+                        P
+                      </span>
+                      <span>+OT</span>
+                    </span>
+                    <span>Overtime (हजर + OT)</span>
                   </div>
                 </div>
-
-                {/* Status Selection Cards */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    कालावधीसाठी स्थिती (Status for Selected Range)
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { key: 'On Leave', label: 'On Leave (सुट्टीवर)', bg: 'bg-purple-50 text-purple-800 border-purple-300 ring-purple-500' },
-                      { key: 'Absent', label: 'Absent (गैरहजर)', bg: 'bg-rose-50 text-rose-800 border-rose-300 ring-rose-500' },
-                      { key: 'Present', label: 'Present (हजर)', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-emerald-500' },
-                      { key: 'Half Day', label: 'Half Day (अर्धा दिवस)', bg: 'bg-amber-50 text-amber-800 border-amber-300 ring-amber-500' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => setIndividualStatus(opt.key)}
-                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${opt.bg} ${
-                          individualStatus === opt.key ? 'ring-2 shadow-sm font-extrabold' : 'opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <span className="font-bold text-xs">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Remarks */}
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    सुट्टीचे कारण / नोंद (Reason for Leave / Absence)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="उदा. Paid Leave, Casual Leave, Family Function, Sick Leave..."
-                    value={individualNote}
-                    onChange={(e) => setIndividualNote(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-red-500"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => setIndividualModalOpen(false)}
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer"
-                  >
-                    रद्द करा (Cancel)
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>सलग कालावधी हजेरी लागू करा (Apply Range)</span>
-                  </button>
-                </div>
-              </form>
-            )}
+              </div>
+            </div>
           </div>
-        </Modal>
+        </div>
       )}
 
       {/* ========================================================================= */}
