@@ -164,7 +164,8 @@ export const DataTable = ({
                     } ${col.headerClassName || ''}`}
                     style={{
                       textAlign: col.align || 'left',
-                      ...(col.width ? { width: col.width } : {})
+                      ...(col.width ? { width: col.width } : {}),
+                      ...(col.minWidth ? { minWidth: col.minWidth } : {})
                     }}
                   >
                     <div
@@ -204,7 +205,11 @@ export const DataTable = ({
                       className={`px-2.5 py-1.5 text-[11px] text-slate-700 align-middle ${
                         col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                       } ${col.cellClassName || ''}`}
-                      style={{ textAlign: col.align || 'left' }}
+                      style={{ 
+                        textAlign: col.align || 'left',
+                        ...(col.width ? { width: col.width } : {}),
+                        ...(col.minWidth ? { minWidth: col.minWidth } : {})
+                      }}
                     >
                       {col.render ? col.render(row) : (row[col.key] ?? '—')}
                     </td>
