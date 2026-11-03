@@ -11,7 +11,7 @@ import {
   Users, Calendar, CheckCircle2, DollarSign, Download, Plus, FileText, 
   MapPin, Clock, ShieldCheck, Printer, Eye, Calculator, RefreshCw, 
   AlertCircle, Building2, Briefcase, Phone, Mail, Award, X, Trash2,
-  ChevronLeft, ChevronRight, CalendarDays, Save, UserX, Check
+  ChevronLeft, ChevronRight, CalendarDays, Save, UserX, Check, UserCheck
 } from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
@@ -237,6 +237,192 @@ export const HRMSModule = () => {
     if (siteFilter === 'all') return currentAttendanceRecords;
     return currentAttendanceRecords.filter(r => r.site === siteFilter);
   }, [currentAttendanceRecords, siteFilter]);
+
+  // --- Particular / Individual Employee Attendance Modal State ---
+  const [individualModalOpen, setIndividualModalOpen] = useState(false);
+  const [individualEmployee, setIndividualEmployee] = useState(null);
+  const [individualDate, setIndividualDate] = useState(() => getTodayIso());
+  const [individualStatus, setIndividualStatus] = useState('Present'); // Present, Half Day, Absent, On Leave
+  const [individualOvertime, setIndividualOvertime] = useState(0);
+  const [individualInTime, setIndividualInTime] = useState('09:00 AM');
+  const [individualOutTime, setIndividualOutTime] = useState('06:00 PM');
+  const [individualNote, setIndividualNote] = useState('');
+  
+  // Date Range mode for multiple days entry (e.g. Leave for 3 days)
+  const [isRangeMode, setIsRangeMode] = useState(false);
+  const [rangeFromDate, setRangeFromDate] = useState(() => getTodayIso());
+  const [rangeToDate, setRangeToDate] = useState(() => getTodayIso());
+
+  // Open individual attendance modal for a specific employee
+  const handleOpenIndividualAttendance = (emp) => {
+    if (!emp) return;
+    const targetEmp = hrmsEmployees.find(e => e.id === emp.empId || e.id === emp.id) || emp;
+    setIndividualEmployee(targetEmp);
+    const dateToUse = selectedDate || todayIso;
+    setIndividualDate(dateToUse);
+    setRangeFromDate(dateToUse);
+    setRangeToDate(dateToUse);
+    setIsRangeMode(false);
+    setIndividualNote('');
+
+    // Fetch existing attendance for this date if present
+    const existingDateRecords = attendanceByDate[dateToUse] || currentAttendanceRecords;
+    const targetId = targetEmp.id || targetEmp.empId;
+    const existingRec = existingDateRecords.find(r => r.empId === targetId);
+    if (existingRec) {
+      setIndividualStatus(existingRec.status || 'Present');
+      setIndividualOvertime(existingRec.overtimeHours || 0);
+      setIndividualInTime(existingRec.inTime || '09:00 AM');
+      setIndividualOutTime(existingRec.outTime || '06:00 PM');
+    } else {
+      setIndividualStatus('Present');
+      setIndividualOvertime(0);
+      setIndividualInTime('09:00 AM');
+      setIndividualOutTime('06:00 PM');
+    }
+    setIndividualModalOpen(true);
+  };
+
+  // When date is changed in the individual modal
+  const handleIndividualDateChange = (newDate) => {
+    setIndividualDate(newDate);
+    const targetId = individualEmployee?.id || individualEmployee?.empId;
+    const existingDateRecords = attendanceByDate[newDate] || [];
+    const rec = existingDateRecords.find(r => r.empId === targetId);
+    if (rec) {
+      setIndividualStatus(rec.status || 'Present');
+      setIndividualOvertime(rec.overtimeHours || 0);
+      setIndividualInTime(rec.inTime || '09:00 AM');
+      setIndividualOutTime(rec.outTime || '06:00 PM');
+    } else {
+      setIndividualStatus('Present');
+      setIndividualOvertime(0);
+      setIndividualInTime('09:00 AM');
+      setIndividualOutTime('06:00 PM');
+    }
+  };
+
+  // Save single date attendance for this individual employee
+  const handleSaveIndividualSingleDate = (e) => {
+    if (e) e.preventDefault();
+    if (!individualEmployee) return;
+    const targetId = individualEmployee.id || individualEmployee.empId;
+    const isPast = individualDate < todayIso;
+    const isFuture = individualDate > todayIso;
+
+    updateRecordForDate(individualDate, records => {
+      const exists = records.some(r => r.empId === targetId);
+      if (exists) {
+        return records.map(r => {
+          if (r.empId !== targetId) return r;
+          return {
+            ...r,
+            status: individualStatus,
+            overtimeHours: Number(individualOvertime) || 0,
+            inTime: individualInTime,
+            outTime: individualOutTime,
+            note: individualNote || r.note,
+            gpsStatus: isFuture 
+              ? 'Advance Scheduled' 
+              : isPast 
+              ? 'Historical Entry' 
+              : 'Verified Presence'
+          };
+        });
+      } else {
+        return [
+          ...records,
+          {
+            empId: targetId,
+            name: individualEmployee.name,
+            designation: individualEmployee.designation,
+            site: individualEmployee.site || 'Royal Palace Commercial Complex',
+            inTime: individualInTime,
+            outTime: individualOutTime,
+            status: individualStatus,
+            gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Verified Presence',
+            overtimeHours: Number(individualOvertime) || 0,
+            daysPresentMonth: 26,
+            note: individualNote
+          }
+        ];
+      }
+    });
+
+    showAttendanceToast(
+      `${individualEmployee.name}: ${formatDisplayDate(individualDate)} साठी '${individualStatus}' हजेरी सेव्ह झाली!`
+    );
+    setIndividualModalOpen(false);
+  };
+
+  // Save multiple days / range attendance for this individual employee
+  const handleSaveIndividualDateRange = (e) => {
+    if (e) e.preventDefault();
+    if (!individualEmployee) return;
+    const targetId = individualEmployee.id || individualEmployee.empId;
+
+    if (rangeFromDate > rangeToDate) {
+      alert("From Date cannot be later than To Date!");
+      return;
+    }
+
+    const dates = [];
+    let curr = new Date(rangeFromDate);
+    const end = new Date(rangeToDate);
+    while (curr <= end) {
+      const y = curr.getFullYear();
+      const m = String(curr.getMonth() + 1).padStart(2, '0');
+      const d = String(curr.getDate()).padStart(2, '0');
+      dates.push(`${y}-${m}-${d}`);
+      curr.setDate(curr.getDate() + 1);
+    }
+
+    setAttendanceByDate(prev => {
+      const updated = { ...prev };
+      dates.forEach(dStr => {
+        const existingForDate = updated[dStr] || currentAttendanceRecords;
+        const isPast = dStr < todayIso;
+        const isFuture = dStr > todayIso;
+
+        const exists = existingForDate.some(r => r.empId === targetId);
+        if (exists) {
+          updated[dStr] = existingForDate.map(r => {
+            if (r.empId !== targetId) return r;
+            return {
+              ...r,
+              status: individualStatus,
+              overtimeHours: 0,
+              note: individualNote || `${individualStatus} Range`,
+              gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Manual Entry'
+            };
+          });
+        } else {
+          updated[dStr] = [
+            ...existingForDate,
+            {
+              empId: targetId,
+              name: individualEmployee.name,
+              designation: individualEmployee.designation,
+              site: individualEmployee.site || 'Royal Palace Commercial Complex',
+              inTime: '09:00 AM',
+              outTime: '06:00 PM',
+              status: individualStatus,
+              gpsStatus: isFuture ? 'Advance Scheduled' : isPast ? 'Historical Entry' : 'Manual Entry',
+              overtimeHours: 0,
+              daysPresentMonth: 26,
+              note: individualNote || `${individualStatus} Range`
+            }
+          ];
+        }
+      });
+      return updated;
+    });
+
+    showAttendanceToast(
+      `${individualEmployee.name}: ${formatDisplayDate(rangeFromDate)} ते ${formatDisplayDate(rangeToDate)} (${dates.length} दिवस) '${individualStatus}' हजेरी लागू केली!`
+    );
+    setIndividualModalOpen(false);
+  };
 
   // Onboarding Form State
   const [formData, setFormData] = useState({
@@ -682,6 +868,16 @@ export const HRMSModule = () => {
                   <Save className="w-3.5 h-3.5" />
                   <span>Save Attendance</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenIndividualAttendance(filteredAttendance[0] || hrmsEmployees[0])}
+                  className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  title="Set past or future attendance for a particular employee"
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-slate-600" />
+                  <span>वैयक्तिक हजेरी (Particular Employee)</span>
+                </button>
               </div>
             </div>
           </div>
@@ -724,12 +920,13 @@ export const HRMSModule = () => {
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Attendance Status</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Overtime (Hrs)</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Month Days</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredAttendance.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-4 py-8 text-center text-slate-400 text-xs">
+                      <td colSpan="8" className="px-4 py-8 text-center text-slate-400 text-xs">
                         No employees found matching the selected site filter.
                       </td>
                     </tr>
@@ -825,6 +1022,18 @@ export const HRMSModule = () => {
 
                         <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-900 font-bold text-xs">
                           {rec.daysPresentMonth} / {standardWorkingDays}
+                        </td>
+
+                        <td className="px-3.5 py-2 text-xs text-center whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenIndividualAttendance(rec)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-700 hover:text-red-800 border border-red-200/90 rounded-lg text-[11px] font-bold transition-all shadow-2xs cursor-pointer"
+                            title="या कर्मचाऱ्याची मागील किंवा पुढील हजेरी नोंदवा"
+                          >
+                            <CalendarDays className="w-3.5 h-3.5 text-red-600" />
+                            <span>तारीख हजेरी (Set Date)</span>
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -1047,6 +1256,352 @@ export const HRMSModule = () => {
             })}
           </div>
         </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: PARTICULAR EMPLOYEE ATTENDANCE & LEAVE REGISTER                    */}
+      {/* ========================================================================= */}
+      {individualModalOpen && individualEmployee && (
+        <Modal
+          isOpen={individualModalOpen}
+          onClose={() => setIndividualModalOpen(false)}
+          title={`वैयक्तिक हजेरी नोंद: ${individualEmployee.name}`}
+          subtitle={`${individualEmployee.id || individualEmployee.empId} • ${individualEmployee.designation || 'Staff'} (मागील किंवा पुढील तारखेची उपस्थिती / सुट्टी नोंदवा)`}
+          maxWidth="max-w-2xl"
+        >
+          <div className="space-y-4 text-xs font-sans">
+            {/* Employee Header Profile Strip */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0">
+                  {individualEmployee.name?.replace(/^(Er\.|CA|Dr\.|Mr\.|Mrs\.)\s+/i, '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM'}
+                </div>
+                <div>
+                  <span className="font-bold text-slate-900 text-sm block leading-tight">{individualEmployee.name}</span>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {individualEmployee.id || individualEmployee.empId} • {individualEmployee.department || 'Site Execution'} • {individualEmployee.designation || 'Engineer'}
+                  </span>
+                </div>
+              </div>
+
+              {hrmsEmployees.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase whitespace-nowrap">कर्मचारी बदला:</label>
+                  <select
+                    value={individualEmployee.id || individualEmployee.empId}
+                    onChange={(e) => {
+                      const emp = hrmsEmployees.find(item => item.id === e.target.value);
+                      if (emp) handleOpenIndividualAttendance(emp);
+                    }}
+                    className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500 cursor-pointer"
+                  >
+                    {hrmsEmployees.map(e => (
+                      <option key={e.id} value={e.id}>{e.name} ({e.id})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Mode Tabs */}
+            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <button
+                type="button"
+                onClick={() => setIsRangeMode(false)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  !isRangeMode 
+                    ? 'bg-red-600 text-white shadow-2xs' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>विशिष्ट तारीख हजेरी (Single Date)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRangeMode(true)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isRangeMode 
+                    ? 'bg-red-600 text-white shadow-2xs' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>सलग कालावधी सुट्टी / हजेरी (Date Range / Leave)</span>
+              </button>
+            </div>
+
+            {/* MODE 1: Single Date Mode Form */}
+            {!isRangeMode ? (
+              <form onSubmit={handleSaveIndividualSingleDate} className="space-y-4 bg-white p-1">
+                {/* Date Selection */}
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      हजेरी तारीख निवडा (Select Date)
+                    </label>
+                    {/* Badge */}
+                    {individualDate < todayIso ? (
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5 text-amber-600" />
+                        <span>मागील तारीख (Backdated Entry)</span>
+                      </span>
+                    ) : individualDate === todayIso ? (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>आजची तारीख (Current Date)</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 inline-flex items-center gap-1">
+                        <CalendarDays className="w-2.5 h-2.5 text-blue-600" />
+                        <span>पुढील तारीख (Advance / Planned)</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <DatePicker
+                      value={individualDate}
+                      onChange={handleIndividualDateChange}
+                    />
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleIndividualDateChange(shiftDate(todayIso, -1))}
+                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
+                        title="Yesterday"
+                      >
+                        काल (Yesterday)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleIndividualDateChange(todayIso)}
+                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
+                        title="Today"
+                      >
+                        आज (Today)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleIndividualDateChange(shiftDate(todayIso, 1))}
+                        className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold cursor-pointer"
+                        title="Tomorrow"
+                      >
+                        उद्या (Tomorrow)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Selection Cards */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    हजेरी स्थिती निवडा (Attendance Status for {formatDisplayDate(individualDate)})
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { key: 'Present', label: 'Present (हजर)', desc: 'पूर्ण दिवस उपस्थित', bg: 'bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border-emerald-300 ring-emerald-500' },
+                      { key: 'Half Day', label: 'Half Day (अर्धा दिवस)', desc: '०.५ दिवस गणना', bg: 'bg-amber-50 hover:bg-amber-100/80 text-amber-800 border-amber-300 ring-amber-500' },
+                      { key: 'Absent', label: 'Absent (गैरहजर)', desc: 'वेतन कपात / सुट्टी नाही', bg: 'bg-rose-50 hover:bg-rose-100/80 text-rose-800 border-rose-300 ring-rose-500' },
+                      { key: 'On Leave', label: 'On Leave (सुट्टीवर)', desc: 'मंजूर सुट्टी / पेड लिव्ह', bg: 'bg-purple-50 hover:bg-purple-100/80 text-purple-800 border-purple-300 ring-purple-500' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setIndividualStatus(opt.key)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${opt.bg} ${
+                          individualStatus === opt.key ? 'ring-2 shadow-sm font-extrabold' : 'opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-xs">{opt.label}</span>
+                          {individualStatus === opt.key && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        </div>
+                        <span className="text-[10px] block opacity-80 font-medium">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Time & Overtime */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">In Time</label>
+                    <input
+                      type="text"
+                      value={individualInTime}
+                      onChange={(e) => setIndividualInTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Out Time</label>
+                    <input
+                      type="text"
+                      value={individualOutTime}
+                      onChange={(e) => setIndividualOutTime(e.target.value)}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Overtime (Hrs)</label>
+                    <div className="flex items-center border border-slate-200 rounded-lg bg-white px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => setIndividualOvertime(prev => Math.max(0, Number((prev - 0.5).toFixed(1))))}
+                        className="text-slate-500 hover:text-slate-900 font-bold px-1.5"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        max="24"
+                        value={individualOvertime}
+                        onChange={(e) => setIndividualOvertime(Number(e.target.value) || 0)}
+                        className="w-full text-center bg-transparent font-bold text-xs outline-none"
+                      />
+                      <span className="text-[10px] text-slate-400 font-bold mr-1">h</span>
+                      <button
+                        type="button"
+                        onClick={() => setIndividualOvertime(prev => Number((prev + 0.5).toFixed(1)))}
+                        className="text-slate-500 hover:text-slate-900 font-bold px-1.5"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Remarks */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    नोंद किंवा कारण (Remarks / Reason - Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="उदा. Site Inspection, Medical Leave, Personal Work, Comp-Off..."
+                    value={individualNote}
+                    onChange={(e) => setIndividualNote(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-red-500"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setIndividualModalOpen(false)}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  >
+                    रद्द करा (Cancel)
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>हजेरी सेव्ह करा (Save for {formatDisplayDate(individualDate)})</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* MODE 2: Date Range Form */
+              <form onSubmit={handleSaveIndividualDateRange} className="space-y-4 bg-white p-1">
+                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-blue-900 text-xs">
+                  <div className="font-bold flex items-center gap-1.5 mb-1">
+                    <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
+                    <span>सलग कालावधी हजेरी / सुट्टी अर्ज (Date Range Attendance)</span>
+                  </div>
+                  <p className="text-[11px] opacity-90">
+                    निवडलेल्या दोन्ही तारखांच्या दरम्यानच्या सर्व दिवसांसाठी {individualEmployee.name} यांची हजेरी एकाच क्लिकवर सेट केली जाईल.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 uppercase tracking-wider">
+                      या तारखेपासून (From Date)
+                    </label>
+                    <DatePicker
+                      value={rangeFromDate}
+                      onChange={setRangeFromDate}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 uppercase tracking-wider">
+                      या तारखेपर्यंत (To Date)
+                    </label>
+                    <DatePicker
+                      value={rangeToDate}
+                      onChange={setRangeToDate}
+                    />
+                  </div>
+                </div>
+
+                {/* Status Selection Cards */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    कालावधीसाठी स्थिती (Status for Selected Range)
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { key: 'On Leave', label: 'On Leave (सुट्टीवर)', bg: 'bg-purple-50 text-purple-800 border-purple-300 ring-purple-500' },
+                      { key: 'Absent', label: 'Absent (गैरहजर)', bg: 'bg-rose-50 text-rose-800 border-rose-300 ring-rose-500' },
+                      { key: 'Present', label: 'Present (हजर)', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-emerald-500' },
+                      { key: 'Half Day', label: 'Half Day (अर्धा दिवस)', bg: 'bg-amber-50 text-amber-800 border-amber-300 ring-amber-500' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setIndividualStatus(opt.key)}
+                        className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${opt.bg} ${
+                          individualStatus === opt.key ? 'ring-2 shadow-sm font-extrabold' : 'opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <span className="font-bold text-xs">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Remarks */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    सुट्टीचे कारण / नोंद (Reason for Leave / Absence)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="उदा. Paid Leave, Casual Leave, Family Function, Sick Leave..."
+                    value={individualNote}
+                    onChange={(e) => setIndividualNote(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-red-500"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setIndividualModalOpen(false)}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold cursor-pointer"
+                  >
+                    रद्द करा (Cancel)
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>सलग कालावधी हजेरी लागू करा (Apply Range)</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </Modal>
       )}
 
       {/* ========================================================================= */}
