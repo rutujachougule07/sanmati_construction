@@ -1168,7 +1168,7 @@ export const HRMSModule = () => {
       {activeTab === 'payslips' && (
         <div className="space-y-5">
           {/* Header Action Bar */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
             <div>
               <h4 className="font-bold text-slate-900 text-sm font-heading">
                 Monthly Payslip Generation & Distribution ({selectedMonth})
@@ -1176,18 +1176,6 @@ export const HRMSModule = () => {
               <p className="text-[11px] text-slate-500">
                 Official payroll vouchers with SANMATI CONSTRUCTIONS seal, PAN, and authorized signatures.
               </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  hrmsEmployees.forEach(emp => generatePayslipPDF(emp, selectedMonth));
-                }}
-                className="erp-btn-primary text-xs flex items-center gap-1.5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download All Payslips (Bulk PDF)</span>
-              </button>
             </div>
           </div>
 
