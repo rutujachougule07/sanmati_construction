@@ -148,8 +148,8 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Primary KPI Grid (10 Key Metric Cards) - Matching Screenshot Color Palette */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Primary KPI Grid (10 Key Metric Cards) - Responsive for all window screens */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 md:gap-4">
         <StatCard
           title="Active Projects"
           value={`${activeProjectsCount} / ${projects.length}`}

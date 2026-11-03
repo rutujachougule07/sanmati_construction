@@ -68,8 +68,8 @@ export const StatCard = ({
       </div>
 
       {/* Middle: Big Value */}
-      <div className="my-3">
-        <h3 className="text-2xl font-black font-heading text-slate-900 tracking-tight">
+      <div className="my-2.5 sm:my-3 min-w-0">
+        <h3 className="text-xl sm:text-2xl font-black font-heading text-slate-900 tracking-tight truncate" title={String(value)}>
           {value}
         </h3>
       </div>

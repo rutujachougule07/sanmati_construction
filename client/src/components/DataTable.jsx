@@ -128,8 +128,8 @@ export const DataTable = ({
       </div>
 
       {/* Table Viewport with Screenshot Royal Navy Blue Header */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto w-full">
+        <table className="w-full text-left border-collapse min-w-[760px]">
           <thead>
             <tr className="bg-[#103a6c] !text-white text-white">
               {columns.map((col) => (
