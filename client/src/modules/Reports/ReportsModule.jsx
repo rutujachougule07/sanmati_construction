@@ -452,7 +452,7 @@ export const ReportsModule = () => {
           {/* Quick presets */}
           <div className="flex flex-wrap gap-2">
             <span className="text-xs text-slate-500 self-center">Quick:</span>
-            {[['today', 'आज'], ['week', 'या आठवड्यात'], ['month', 'या महिन्यात'], ['fy', 'Full FY']].map(([k, l]) => (
+            {[['today', 'Today'], ['week', 'This Week'], ['month', 'This Month'], ['fy', 'Full FY']].map(([k, l]) => (
               <button key={k} onClick={() => setQuickRange(k)}
                 className="px-3 py-1.5 text-xs font-medium border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
                 {l}
