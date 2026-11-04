@@ -3,10 +3,15 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   FileText, Download, Calendar, Building, Users, Printer, Eye, 
-  FileSpreadsheet, Filter, CheckCircle2, ArrowRight, TrendingUp, DollarSign 
+  FileSpreadsheet, Filter, CheckCircle2, AlertCircle, ArrowRight, TrendingUp, DollarSign 
 } from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
-import { generatePDFReport, exportToExcel, exportToCSV } from '../../services/exportService';
+import { 
+  generatePDFReport, 
+  generateProjectDossierPDF, 
+  exportToExcel, 
+  exportToCSV 
+} from '../../services/exportService';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { DatePicker } from '../../components/DatePicker';
 
@@ -18,6 +23,14 @@ export const ReportsModule = () => {
   const [reportType, setReportType] = useState('projectBilling');
   const [selectedProjectId, setSelectedProjectId] = useState('ALL');
   const [dateRange, setDateRange] = useState({ from: '2026-01-01', to: '2026-12-31' });
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3800);
+  };
 
   // Generate Report Dataset dynamically
   const getReportData = (type = reportType, projId = selectedProjectId) => {
@@ -98,26 +111,72 @@ export const ReportsModule = () => {
 
   const reportData = getReportData(reportType, selectedProjectId);
 
+  const handleDownloadProjectDossier = (project) => {
+    try {
+      const client = clients.find(c => c.id === project.clientId) || { name: project.clientName };
+      const projectBills = raBills.filter(b => b.projectId === project.id);
+      const ok = generateProjectDossierPDF(project, client, projectBills);
+      if (ok) {
+        showToast(`Project Dossier डाऊनलोड झाले: ${project.id} (${project.name})`);
+      } else {
+        showToast(`Project Dossier डाऊनलोड अयशस्वी झाले.`, 'error');
+      }
+    } catch (err) {
+      console.error('Project Dossier download error:', err);
+      showToast(`Project Dossier डाऊनलोड अयशस्वी झाले.`, 'error');
+    }
+  };
+
   const handleExportPDF = (type = reportType, projId = selectedProjectId) => {
-    const data = getReportData(type, projId);
-    generatePDFReport({
-      title: data.title,
-      subtitle: `SANMATI CONSTRUCTIONS | Kolhapur, Maharashtra | Date: ${formatDate(new Date().toISOString())}`,
-      headers: data.headers,
-      rows: data.rows,
-      fileName: `Sanmati_${type}_Report`,
-      orientation: type === 'projectProfitability' ? 'landscape' : 'portrait'
-    });
+    try {
+      const data = getReportData(type, projId);
+      const ok = generatePDFReport({
+        title: data.title,
+        subtitle: `SANMATI CONSTRUCTIONS | Kolhapur, Maharashtra | Date: ${formatDate(new Date().toISOString())}`,
+        headers: data.headers,
+        rows: data.rows,
+        fileName: `Sanmati_${type}_Report`,
+        orientation: type === 'projectProfitability' ? 'landscape' : 'portrait'
+      });
+      if (ok) {
+        showToast(`PDF Report डाऊनलोड झाले.`);
+      } else {
+        showToast(`PDF Report डाऊनलोड अयशस्वी झाले.`, 'error');
+      }
+    } catch (err) {
+      console.error('PDF export error:', err);
+      showToast(`PDF Report डाऊनलोड अयशस्वी झाले.`, 'error');
+    }
   };
 
   const handleExportExcel = (type = reportType, projId = selectedProjectId) => {
-    const data = getReportData(type, projId);
-    exportToExcel(data.raw, `Sanmati_${type}_Report`);
+    try {
+      const data = getReportData(type, projId);
+      const ok = exportToExcel(data.raw, `Sanmati_${type}_Report`);
+      if (ok) {
+        showToast(`Excel (.xlsx) रिपोर्ट डाऊनलोड झाला.`);
+      } else {
+        showToast(`Excel फाईल डाऊनलोड अयशस्वी झाली.`, 'error');
+      }
+    } catch (err) {
+      console.error('Excel export error:', err);
+      showToast(`Excel फाईल डाऊनलोड अयशस्वी झाली.`, 'error');
+    }
   };
 
   const handleExportCSV = (type = reportType, projId = selectedProjectId) => {
-    const data = getReportData(type, projId);
-    exportToCSV(data.raw, `Sanmati_${type}_Report`);
+    try {
+      const data = getReportData(type, projId);
+      const ok = exportToCSV(data.raw, `Sanmati_${type}_Report`);
+      if (ok) {
+        showToast(`CSV डेटा फाईल डाऊनलोड झाली.`);
+      } else {
+        showToast(`CSV फाईल डाऊनलोड अयशस्वी झाली.`, 'error');
+      }
+    } catch (err) {
+      console.error('CSV export error:', err);
+      showToast(`CSV फाईल डाऊनलोड अयशस्वी झाली.`, 'error');
+    }
   };
 
   return (
@@ -394,10 +453,11 @@ export const ReportsModule = () => {
                   </div>
 
                   <button
-                    onClick={() => handleExportPDF('projectProfitability', p.id)}
-                    className="w-full py-1.5 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition-colors"
+                    onClick={() => handleDownloadProjectDossier(p)}
+                    className="w-full py-2 px-3 rounded-xl border border-purple-200 bg-purple-50/80 hover:bg-purple-100 text-xs font-bold text-purple-900 flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+                    title={`Download ${p.id} Project Dossier PDF`}
                   >
-                    <Download className="w-3.5 h-3.5 text-slate-500" />
+                    <Download className="w-3.5 h-3.5 text-purple-700" />
                     <span>Download Project Dossier</span>
                   </button>
                 </div>
@@ -562,6 +622,18 @@ export const ReportsModule = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Floating Action Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-slate-700 pointer-events-auto">
+          {toast.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          )}
+          <span>{toast.message}</span>
         </div>
       )}
     </div>
