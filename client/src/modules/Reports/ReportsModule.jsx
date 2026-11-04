@@ -74,7 +74,7 @@ const ReportTable = ({ headers, rows, emptyMsg = 'कोणतेही Records 
   </div>
 );
 
-const ExportBar = ({ onPDF, onExcel, onCSV, label = '' }) => (
+const ExportBar = ({ onPDF, onExcel, label = '' }) => (
   <div className="flex flex-wrap items-center gap-2 mt-3">
     {label && <span className="text-xs text-slate-500 mr-1">{label}</span>}
     <button onClick={onPDF}
@@ -84,10 +84,6 @@ const ExportBar = ({ onPDF, onExcel, onCSV, label = '' }) => (
     <button onClick={onExcel}
       className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors">
       <FileSpreadsheet size={13} /> Excel
-    </button>
-    <button onClick={onCSV}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-medium rounded-lg transition-colors">
-      <Download size={13} /> CSV
     </button>
   </div>
 );
