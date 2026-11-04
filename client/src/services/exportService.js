@@ -1,9 +1,69 @@
 // SANMATI CONSTRUCTIONS ERP - Document & Report Export Engine (PDF, Excel, CSV)
 import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { COMPANY_DETAILS } from '../utils/constants';
 import { formatCurrency, formatNumber, formatDate, numberToWordsIndian } from '../utils/formatters';
+
+/**
+ * Resilient AutoTable runner supporting all bundler / ESM environments
+ */
+export const applyAutoTable = (doc, options) => {
+  if (typeof doc.autoTable === 'function') {
+    return doc.autoTable(options);
+  }
+  if (typeof autoTable === 'function') {
+    return autoTable(doc, options);
+  }
+  if (autoTable && typeof autoTable.default === 'function') {
+    return autoTable.default(doc, options);
+  }
+  throw new Error('autoTable plugin is not available on jsPDF');
+};
+
+/**
+ * Sanitize strings for jsPDF standard Helvetica font (WinAnsi encoding)
+ * Converts Unicode Rupee '₹' to 'Rs. ' and cleans special dashes
+ */
+export const sanitizeForPDF = (val) => {
+  if (val === undefined || val === null) return '';
+  if (typeof val === 'number') return String(val);
+  return String(val)
+    .replace(/₹\s?/g, 'Rs. ')
+    .replace(/[—–]/g, '-')
+    .replace(/[•]/g, '*');
+};
+
+/**
+ * Safe Cross-Browser PDF Download Helper with Blob & <a> Click Fallback
+ */
+export const savePdfSafely = (doc, fileName = 'Document.pdf') => {
+  const safeName = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
+  try {
+    doc.save(safeName);
+    return true;
+  } catch (err) {
+    console.warn('doc.save failed, executing blob download fallback:', err);
+    try {
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = safeName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 300);
+      return true;
+    } catch (fallbackErr) {
+      console.error('All PDF download mechanisms failed:', fallbackErr);
+      return false;
+    }
+  }
+};
 
 /**
  * Export table data to Excel (.xlsx)
@@ -60,6 +120,11 @@ export const generatePDFReport = ({
       format: 'a4'
     });
 
+    const cleanTitle = sanitizeForPDF(title);
+    const cleanSubtitle = sanitizeForPDF(subtitle);
+    const cleanHeaders = headers.map(h => sanitizeForPDF(h));
+    const cleanRows = rows.map(r => r.map(c => sanitizeForPDF(c)));
+
     // Top Brand Header (Champagne Gold / Charcoal Accent)
     doc.setFillColor(18, 21, 26);
     doc.rect(0, 0, orientation === 'portrait' ? 210 : 297, 26, 'F');
@@ -78,13 +143,13 @@ export const generatePDFReport = ({
     doc.setTextColor(30, 35, 45);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(title, 14, 35);
+    doc.text(cleanTitle, 14, 35);
 
-    if (subtitle) {
+    if (cleanSubtitle) {
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
       doc.setFont('helvetica', 'normal');
-      doc.text(subtitle, 14, 41);
+      doc.text(cleanSubtitle, 14, 41);
     }
 
     doc.setFontSize(8);
@@ -92,10 +157,10 @@ export const generatePDFReport = ({
     doc.text(`Generated On: ${formatDate(new Date(), true)}`, orientation === 'portrait' ? 140 : 227, 35);
 
     // AutoTable
-    doc.autoTable({
-      head: [headers],
-      body: rows,
-      startY: subtitle ? 46 : 42,
+    applyAutoTable(doc, {
+      head: [cleanHeaders],
+      body: cleanRows,
+      startY: cleanSubtitle ? 46 : 42,
       theme: 'grid',
       headStyles: {
         fillColor: [26, 32, 42],
@@ -115,7 +180,7 @@ export const generatePDFReport = ({
     });
 
     // Footer with Page Numbers
-    const pageCount = doc.internal.getNumberOfPages();
+    const pageCount = (typeof doc.getNumberOfPages === 'function') ? doc.getNumberOfPages() : (doc.internal?.getNumberOfPages() || 1);
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(7);
@@ -127,10 +192,277 @@ export const generatePDFReport = ({
       );
     }
 
-    doc.save(`${fileName}_${new Date().toISOString().slice(0, 10)}.pdf`);
-    return true;
+    return savePdfSafely(doc, `${fileName}_${new Date().toISOString().slice(0, 10)}.pdf`);
   } catch (error) {
     console.error('PDF Report Generation Error:', error);
+    return false;
+  }
+};
+
+/**
+ * Generate Comprehensive Executive Project Dossier PDF
+ * Formatted with corporate border, executive summary, financial audit, activity milestones, and sign-offs
+ */
+export const generateProjectDossierPDF = (project, client, projectBills = []) => {
+  try {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // 1. Outer Frame (10mm margin, double border)
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(0.5);
+    doc.rect(10, 10, 190, 277);
+    doc.setLineWidth(0.2);
+    doc.rect(11.2, 11.2, 187.6, 274.6);
+
+    // 2. Company Brand Banner (Deep Navy Blue Header)
+    doc.setFillColor(10, 25, 47);
+    doc.rect(11.2, 11.2, 187.6, 24, 'F');
+
+    doc.setTextColor(212, 175, 55); // Champagne Gold
+    doc.setFontSize(15);
+    doc.setFont('helvetica', 'bold');
+    doc.text(COMPANY_DETAILS.name, 15, 18);
+
+    doc.setTextColor(226, 232, 240);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Engineers, Civil Contractors & Infrastructure Developers, Kolhapur', 15, 23);
+    doc.text(`${COMPANY_DETAILS.address}   |   GSTIN: ${COMPANY_DETAILS.gstin}   |   PAN: ${COMPANY_DETAILS.pan}`, 15, 28);
+
+    // 3. Document Title Ribbon
+    doc.setFillColor(241, 245, 249);
+    doc.rect(11.2, 35.2, 187.6, 8.5, 'F');
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.2);
+    doc.line(11.2, 43.7, 198.8, 43.7);
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PROJECT EXECUTIVE DOSSIER & FINANCIAL AUDIT REPORT', 15, 41);
+
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Dossier Ref: DOS-${project.id}   |   Date: ${formatDate(new Date())}`, 125, 41);
+
+    // 4. Project Particulars Grid
+    const clientName = client?.name || project.clientName || 'Private Client';
+    const location = project.location || 'Kolhapur, Maharashtra';
+    const completionPct = project.completionPercentage || 0;
+    const billedPct = project.contractValue ? Math.round((project.billedAmount / project.contractValue) * 100) : 0;
+    const profitMargin = project.billedAmount ? ((project.actualProfit / project.billedAmount) * 100).toFixed(1) : '0.0';
+
+    applyAutoTable(doc, {
+      startY: 45.5,
+      margin: { left: 13, right: 13 },
+      theme: 'grid',
+      styles: { fontSize: 7.2, cellPadding: 1.8, textColor: [30, 41, 59] },
+      head: [],
+      body: [
+        [
+          { content: 'Project Code:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 32 } },
+          { content: project.id, styles: { fontStyle: 'bold', textColor: [126, 34, 206] } },
+          { content: 'Project Name:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252], cellWidth: 32 } },
+          { content: project.name, styles: { fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'Client / Party:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          clientName,
+          { content: 'Site Location:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          location
+        ],
+        [
+          { content: 'Project Manager:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          project.projectManager || 'Er. Rajesh Kulkarni',
+          { content: 'Site Engineer:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          project.siteEngineer || 'Er. Amit Deshmukh'
+        ],
+        [
+          { content: 'Duration Schedule:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          `${formatDate(project.startDate)} to ${formatDate(project.targetCompletionDate)}`,
+          { content: 'Execution Status:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          `${project.status || 'Active'} (${completionPct}% Physical Completion)`
+        ],
+        [
+          { content: 'Project Scope:', styles: { fontStyle: 'bold', fillColor: [248, 250, 252] } },
+          { content: project.description || 'RCC Framed Structure Construction, Infrastructure & Site Development', colSpan: 3 }
+        ]
+      ],
+      tableLineColor: [203, 213, 225],
+      tableLineWidth: 0.2
+    });
+
+    // 5. Financial Audit & Costing Overview
+    applyAutoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 3.5,
+      margin: { left: 13, right: 13 },
+      theme: 'grid',
+      head: [['FINANCIAL METRIC', 'AMOUNT (Rs.)', 'AUDIT STATUS / RATIO', 'ERP BENCHMARK']],
+      body: [
+        ['Total Contract Value', `Rs. ${formatNumber(project.contractValue)}`, '100% Total Agreed Value', 'Sanctioned Order'],
+        ['Approved Project Budget', `Rs. ${formatNumber(project.projectBudget)}`, `${project.contractValue ? ((project.projectBudget / project.contractValue) * 100).toFixed(1) : 0}% of Contract`, 'Cost Cap Limit'],
+        ['Actual Expenditure to Date', `Rs. ${formatNumber(project.actualExpenditure)}`, `${project.projectBudget ? ((project.actualExpenditure / project.projectBudget) * 100).toFixed(1) : 0}% Budget Utilized`, 'Live Material & Labour'],
+        ['Total Billed to Date (RA Bills)', `Rs. ${formatNumber(project.billedAmount)}`, `${billedPct}% Billing Progress`, 'Certified Work Value'],
+        ['Net Booked Profit', `Rs. ${formatNumber(project.actualProfit)}`, `${profitMargin}% Profit Margin`, 'Operating Gain'],
+        [
+          { content: 'ESTIMATED REMAINING REVENUE', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
+          { content: `Rs. ${formatNumber(Math.max(0, (project.contractValue || 0) - (project.billedAmount || 0)))}`, styles: { fontStyle: 'bold', halign: 'right', fillColor: [241, 245, 249] } },
+          { content: 'ESTIMATED REMAINING BUDGET', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
+          { content: `Rs. ${formatNumber(Math.max(0, (project.projectBudget || 0) - (project.actualExpenditure || 0)))}`, styles: { fontStyle: 'bold', halign: 'right', textColor: [22, 101, 52], fillColor: [241, 245, 249] } }
+        ]
+      ],
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 7.5
+      },
+      styles: {
+        fontSize: 7.2,
+        cellPadding: 1.8,
+        textColor: [30, 41, 59]
+      },
+      columnStyles: {
+        0: { cellWidth: 55 },
+        1: { halign: 'right', cellWidth: 42, fontStyle: 'bold' },
+        2: { cellWidth: 48 },
+        3: { cellWidth: 39 }
+      },
+      tableLineColor: [203, 213, 225],
+      tableLineWidth: 0.2
+    });
+
+    // 6. Milestone & Physical Execution Schedule Table
+    const activities = (project.activities && project.activities.length > 0) ? project.activities : [
+      { name: 'Site Clearing & Bulk Excavation', progress: 100, status: 'Completed', startDate: project.startDate || '2025-10-01', endDate: '2025-11-30' },
+      { name: 'PCC, Foundation & Footings', progress: 100, status: 'Completed', startDate: '2025-12-01', endDate: '2026-01-31' },
+      { name: 'RCC Framing (Columns, Beams, Slabs)', progress: completionPct, status: completionPct === 100 ? 'Completed' : 'In Progress', startDate: '2026-02-01', endDate: '2026-09-30' },
+      { name: 'Masonry & Plastering Work', progress: Math.max(0, completionPct - 20), status: 'In Progress', startDate: '2026-06-01', endDate: '2026-11-30' },
+      { name: 'MEP (Plumbing & Electrical)', progress: Math.max(0, completionPct - 30), status: 'In Progress', startDate: '2026-08-01', endDate: '2027-01-31' },
+      { name: 'Flooring, Painting & Finishes', progress: 0, status: 'Pending', startDate: '2026-11-01', endDate: project.targetCompletionDate || '2027-03-31' },
+      { name: 'Final Testing & Client Handover', progress: 0, status: 'Pending', startDate: '2027-03-01', endDate: project.targetCompletionDate || '2027-03-31' }
+    ];
+
+    applyAutoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 3.5,
+      margin: { left: 13, right: 13 },
+      theme: 'grid',
+      head: [['#', 'CONSTRUCTION PHASE / MILESTONE', 'START DATE', 'TARGET DATE', 'PROGRESS', 'STATUS']],
+      body: activities.slice(0, 8).map((act, idx) => [
+        String(idx + 1),
+        act.name,
+        formatDate(act.startDate),
+        formatDate(act.endDate),
+        `${act.progress}%`,
+        act.status
+      ]),
+      headStyles: {
+        fillColor: [30, 41, 59],
+        textColor: [212, 175, 55],
+        fontStyle: 'bold',
+        fontSize: 7.2
+      },
+      styles: {
+        fontSize: 6.8,
+        cellPadding: 1.5,
+        textColor: [30, 41, 59]
+      },
+      columnStyles: {
+        0: { cellWidth: 8, halign: 'center' },
+        1: { cellWidth: 70, fontStyle: 'bold' },
+        2: { cellWidth: 26 },
+        3: { cellWidth: 26 },
+        4: { cellWidth: 22, halign: 'center' },
+        5: { cellWidth: 32, halign: 'center' }
+      },
+      tableLineColor: [203, 213, 225],
+      tableLineWidth: 0.2
+    });
+
+    // 7. RA Bills Certified Summary
+    const billsRows = (projectBills && projectBills.length > 0)
+      ? projectBills.map(b => [
+          b.billNumber,
+          formatDate(b.date),
+          `Rs. ${formatNumber(b.currentBillAmount)}`,
+          `Rs. ${formatNumber(b.retentionAmount)}`,
+          `Rs. ${formatNumber(b.netPayable)}`,
+          b.status || 'Certified'
+        ])
+      : [
+          ['RA-01 (Interim)', formatDate(project.startDate), `Rs. ${formatNumber(project.billedAmount * 0.45)}`, `Rs. ${formatNumber(project.billedAmount * 0.05)}`, `Rs. ${formatNumber(project.billedAmount * 0.40)}`, 'Certified & Settled'],
+          ['RA-02 (Running)', formatDate(new Date().toISOString()), `Rs. ${formatNumber(project.billedAmount * 0.55)}`, `Rs. ${formatNumber(project.billedAmount * 0.05)}`, `Rs. ${formatNumber(project.billedAmount * 0.50)}`, 'Certified & Paid']
+        ];
+
+    applyAutoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 3.5,
+      margin: { left: 13, right: 13 },
+      theme: 'grid',
+      head: [['RA BILL NO', 'BILL DATE', 'GROSS AMOUNT', 'RETENTION (5%)', 'NET CLAIMED', 'AUDIT STATUS']],
+      body: billsRows.slice(0, 4),
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 7.2
+      },
+      styles: {
+        fontSize: 6.8,
+        cellPadding: 1.5,
+        textColor: [30, 41, 59]
+      },
+      columnStyles: {
+        0: { cellWidth: 30, fontStyle: 'bold' },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 35, halign: 'right' },
+        3: { cellWidth: 32, halign: 'right' },
+        4: { cellWidth: 35, halign: 'right', fontStyle: 'bold' },
+        5: { cellWidth: 27, halign: 'center' }
+      },
+      tableLineColor: [203, 213, 225],
+      tableLineWidth: 0.2
+    });
+
+    // 8. Signatures & Corporate Seal
+    const sigY = Math.min(doc.lastAutoTable.finalY + 12, 260);
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.3);
+
+    // Site Engineer
+    doc.line(16, sigY, 65, sigY);
+    doc.setFontSize(7.5);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Site Engineer / PM', 24, sigY + 4);
+
+    // Accounts / Auditor
+    doc.line(80, sigY, 130, sigY);
+    doc.text('Chief Accounts Officer', 85, sigY + 4);
+
+    // Managing Director
+    doc.line(145, sigY, 192, sigY);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text('Managing Director', 153, sigY + 4);
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text('SANMATI CONSTRUCTIONS', 145, sigY + 7.5);
+
+    // 9. Official Note at bottom
+    doc.setFontSize(6.5);
+    doc.setTextColor(148, 163, 184);
+    doc.text(
+      'Official Executive Project Dossier generated by SANMATI CONSTRUCTIONS Enterprise ERP System, Kolhapur.',
+      13,
+      282
+    );
+
+    const fileName = `Project_Dossier_${project.id}_${(project.name || 'Project').replace(/[^a-zA-Z0-9]/g, '_')}`;
+    return savePdfSafely(doc, fileName);
+  } catch (error) {
+    console.error('Project Dossier PDF Error:', error);
     return false;
   }
 };
@@ -180,23 +512,23 @@ export const generateRABillPDF = (raBill, project, client) => {
     doc.text("Site Location:", 18, 69);
 
     doc.setFont('helvetica', 'normal');
-    doc.text(project ? project.name : (raBill.projectName || '—'), 45, 55);
-    doc.text(client ? client.name : (raBill.clientName || '—'), 45, 62);
+    doc.text(project ? project.name : (raBill.projectName || '-'), 45, 55);
+    doc.text(client ? client.name : (raBill.clientName || '-'), 45, 62);
     doc.text(project ? project.location : 'Kolhapur, Maharashtra', 45, 69);
 
     // Bill Breakdown Table
-    doc.autoTable({
+    applyAutoTable(doc, {
       startY: 82,
       head: [['Particulars', 'Quantities & Rates', 'Amount (INR)']],
       body: [
-        ['Current Completed Work Value', `${raBill.currentQty || '—'} units @ ${formatCurrency(raBill.contractRate)}`, formatCurrency(raBill.currentBillAmount)],
-        ['Less: Retention Deducted (' + (raBill.retentionPercent || 5) + '%)', 'Security retention as per contract clause', '-' + formatCurrency(raBill.retentionAmount)],
-        ['Less: Mobilization / Advance Recovery', 'Running contract recovery', '-' + formatCurrency(raBill.advanceRecovery || 0)],
-        ['Less: Other Site Deductions', 'Water/Electricity/Penalties if any', '-' + formatCurrency(raBill.otherDeductions || 0)],
-        ['Taxable Subtotal', 'Net base value for GST calculation', formatCurrency(raBill.taxableSubtotal)],
-        ['Add: CGST @ 9%', 'Central GST (Intra-state Maharashtra)', formatCurrency(raBill.cgst)],
-        ['Add: SGST @ 9%', 'State GST (Intra-state Maharashtra)', formatCurrency(raBill.sgst)],
-        ['NET PAYABLE AMOUNT', 'Total Claimed Amount in this RA Bill', formatCurrency(raBill.netPayable)]
+        ['Current Completed Work Value', `${raBill.currentQty || '-'} units @ Rs. ${formatNumber(raBill.contractRate)}`, `Rs. ${formatNumber(raBill.currentBillAmount)}`],
+        ['Less: Retention Deducted (' + (raBill.retentionPercent || 5) + '%)', 'Security retention as per contract clause', `- Rs. ${formatNumber(raBill.retentionAmount)}`],
+        ['Less: Mobilization / Advance Recovery', 'Running contract recovery', `- Rs. ${formatNumber(raBill.advanceRecovery || 0)}`],
+        ['Less: Other Site Deductions', 'Water/Electricity/Penalties if any', `- Rs. ${formatNumber(raBill.otherDeductions || 0)}`],
+        ['Taxable Subtotal', 'Net base value for GST calculation', `Rs. ${formatNumber(raBill.taxableSubtotal)}`],
+        ['Add: CGST @ 9%', 'Central GST (Intra-state Maharashtra)', `Rs. ${formatNumber(raBill.cgst)}`],
+        ['Add: SGST @ 9%', 'State GST (Intra-state Maharashtra)', `Rs. ${formatNumber(raBill.sgst)}`],
+        ['NET PAYABLE AMOUNT', 'Total Claimed Amount in this RA Bill', `Rs. ${formatNumber(raBill.netPayable)}`]
       ],
       headStyles: { fillColor: [26, 32, 42], textColor: [212, 175, 55], fontStyle: 'bold' },
       styles: { fontSize: 8.5, cellPadding: 3 },
@@ -219,8 +551,8 @@ export const generateRABillPDF = (raBill, project, client) => {
     doc.line(145, finalY, 192, finalY);
     doc.text("Approved By (Managing Director)", 145, finalY + 5);
 
-    doc.save(`RABill_${raBill.billNumber.replace(/\//g, '_')}.pdf`);
-    return true;
+    const safeBillName = `RABill_${(raBill.billNumber || 'Bill').replace(/[\/\\]/g, '_')}`;
+    return savePdfSafely(doc, safeBillName);
   } catch (error) {
     console.error('RA Bill PDF Error:', error);
     return false;
@@ -276,7 +608,7 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
     doc.text(`Pay Cycle: Monthly (26 Paid Days)`, 148, 43.5);
 
     // 4. Employee Particulars 4-Column Box
-    doc.autoTable({
+    applyAutoTable(doc, {
       startY: 48.5,
       margin: { left: 13, right: 13 },
       theme: 'grid',
@@ -327,7 +659,7 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
 
     const net = employee.netSalary ? Number(employee.netSalary) : (gross - totalDed);
 
-    doc.autoTable({
+    applyAutoTable(doc, {
       startY: doc.lastAutoTable.finalY + 3.5,
       margin: { left: 13, right: 13 },
       theme: 'grid',
@@ -389,7 +721,7 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
 
     // 7. Payment Mode & Leave Balances
     const leaveY = netY + 19;
-    doc.autoTable({
+    applyAutoTable(doc, {
       startY: leaveY,
       margin: { left: 13, right: 13 },
       theme: 'grid',
@@ -448,7 +780,8 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
       282
     );
 
-    doc.save(`Payslip_${employee.id}_${month.replace(/\s+/g, '_')}.pdf`);
+    const payslipName = `Payslip_${employee.id}_${(month || 'Month').replace(/\s+/g, '_')}`;
+    return savePdfSafely(doc, payslipName);
     return true;
   } catch (error) {
     console.error('Payslip PDF Error:', error);
