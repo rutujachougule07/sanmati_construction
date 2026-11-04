@@ -78,7 +78,7 @@ const ExportBar = ({ onPDF, onExcel, label = '' }) => (
   <div className="flex flex-wrap items-center gap-2 mt-3">
     {label && <span className="text-xs text-slate-500 mr-1">{label}</span>}
     <button onClick={onPDF}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium rounded-lg transition-colors">
+      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-medium rounded-lg transition-colors">
       <FileText size={13} /> PDF
     </button>
     <button onClick={onExcel}
@@ -362,7 +362,7 @@ export const ReportsModule = () => {
         </div>
         <div className="mt-4 flex items-center gap-3">
           <button onClick={() => setPreviewMode(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors">
             <Eye size={16} /> Report Preview करा
           </button>
           {previewMode && (
@@ -582,7 +582,7 @@ export const ReportsModule = () => {
                 <p className="text-xs text-slate-400 mt-1">Client: {getClientName(selProject.id)}</p>
               </div>
               <button onClick={() => handleDossierDownload(selProject)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">
+                className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors">
                 <Download size={16} /> Executive Dossier PDF डाऊनलोड
               </button>
             </div>
@@ -693,7 +693,7 @@ export const ReportsModule = () => {
               <p className="font-semibold text-slate-800 text-sm mt-2 mb-1">{p.projectName}</p>
               <p className="text-xs text-slate-500 mb-3">{p.location || p.siteAddress || '—'}</p>
               <button onClick={() => handleDossierDownload(p)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold rounded-lg transition-colors">
                 <Download size={13} /> Dossier PDF डाऊनलोड
               </button>
             </div>
