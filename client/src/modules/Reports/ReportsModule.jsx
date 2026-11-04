@@ -740,19 +740,6 @@ export const ReportsModule = () => {
     <div className="p-6 min-h-screen bg-slate-50 relative">
       <Toast toast={toast} />
 
-      {/* Page Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-indigo-100 rounded-xl">
-            <FileText size={24} className="text-indigo-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Custom Reports</h1>
-            <p className="text-slate-500 text-sm">Advanced report generation, date-wise analysis, project insights & multi-format exports.</p>
-          </div>
-        </div>
-      </div>
-
       {/* Content based on active tab */}
       {activeTab === 'custom' && renderCustom()}
       {activeTab === 'datewise' && renderDatewise()}
