@@ -1,5 +1,5 @@
 // MODULE 10: CONSTRUCTION PROJECT MANAGEMENT (CORE MODULE)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   HardHat, Plus, MapPin, Calendar, Users, DollarSign, TrendingUp, 
   CheckCircle2, Clock, Layers, FileText, Camera, ArrowRight, ShieldCheck, 
@@ -18,6 +18,14 @@ export const ProjectsModule = () => {
   const { currentUser } = useAuth();
 
   const [selectedProject, setSelectedProject] = useState(projects[0] || null);
+
+  useEffect(() => {
+    if (!selectedProject && projects.length > 0) {
+      setSelectedProject(projects[0]);
+    } else if (selectedProject && !projects.find(p => p.id === selectedProject.id)) {
+      setSelectedProject(projects[0] || null);
+    }
+  }, [projects, selectedProject]);
   const [activeTab, setActiveTab] = useState('overview'); // overview, activities, boq, dpr, profitability
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const [isBOQModalOpen, setIsBOQModalOpen] = useState(false);
@@ -153,15 +161,19 @@ export const ProjectsModule = () => {
           <div className="flex items-center gap-2.5 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
             <span className="text-sm text-slate-500 font-semibold">Site:</span>
             <select
-              value={selectedProject?.id}
-              onChange={(e) => setSelectedProject(projects.find(p => p.id === e.target.value))}
+              value={selectedProject?.id || ''}
+              onChange={(e) => setSelectedProject(projects.find(p => p.id === e.target.value) || null)}
               className="bg-transparent text-sm font-bold text-slate-900 focus:outline-none cursor-pointer"
             >
-              {projects.map(p => (
-                <option key={p.id} value={p.id} className="bg-white text-slate-900 font-semibold">
-                  {p.id}: {p.name}
-                </option>
-              ))}
+              {projects.length === 0 ? (
+                <option value="">No Projects Registered</option>
+              ) : (
+                projects.map(p => (
+                  <option key={p.id} value={p.id} className="bg-white text-slate-900 font-semibold">
+                    {p.id}: {p.name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
@@ -239,7 +251,25 @@ export const ProjectsModule = () => {
         </div>
       )}
 
-      {/* Module Tabs Navigation */}
+      {/* Empty State Banner when no projects exist */}
+      {!selectedProject && (
+        <div className="p-12 text-center bg-white border border-slate-200/90 rounded-2xl shadow-2xs">
+          <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 border border-red-200/80 flex items-center justify-center mx-auto mb-3">
+            <HardHat className="w-6 h-6" />
+          </div>
+          <h4 className="text-base font-bold text-slate-800 font-heading">No Projects Registered</h4>
+          <p className="text-xs text-slate-500 mt-1 mb-4 max-w-md mx-auto">
+            There are no construction projects registered in the system yet. Click "+ New Project" to add your live project.
+          </p>
+          <button
+            onClick={() => setIsNewProjectModalOpen(true)}
+            className="erp-btn-primary text-xs font-bold px-4 py-2 inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Add Live Project</span>
+          </button>
+        </div>
+      )}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-1 overflow-x-auto">
         <button
           onClick={() => setActiveTab('overview')}

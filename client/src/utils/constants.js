@@ -57,7 +57,8 @@ export const MODULES_CONFIG = [
       { id: 'acc-records', name: 'i. Income and expense records', path: '/accounts?tab=records', icon: 'Receipt', tab: 'records' },
       { id: 'acc-payments', name: 'ii. Payment tracking', path: '/accounts?tab=payments', icon: 'CreditCard', tab: 'payments' },
       { id: 'acc-ledger', name: 'iii. Account ledger', path: '/accounts?tab=ledger', icon: 'BookOpen', tab: 'ledger' },
-      { id: 'acc-summaries', name: 'iv. Financial summaries', path: '/accounts?tab=summaries', icon: 'BarChart3', tab: 'summaries' }
+      { id: 'acc-summaries', name: 'iv. Financial summaries', path: '/accounts?tab=summaries', icon: 'BarChart3', tab: 'summaries' },
+      { id: 'acc-nfd', name: 'v. NDT', path: '/accounts?tab=nfd', icon: 'FileSpreadsheet', tab: 'nfd' }
     ]
   },
   { 

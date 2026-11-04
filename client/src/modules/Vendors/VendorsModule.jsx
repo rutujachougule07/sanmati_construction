@@ -297,7 +297,7 @@ export const VendorsModule = () => {
       date: today,
       dueDate: due,
       vendorName: vendors[0]?.name || '',
-      projectName: projects[0]?.name || 'Royal Palace Commercial Complex',
+      projectName: projects[0]?.name || '',
       materialCategory: 'Cement & Aggregates',
       itemDescription: '',
       quantity: 1,
@@ -1308,7 +1308,7 @@ export const VendorsModule = () => {
                 required
                 value={vendorForm.name}
                 onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
-                placeholder="e.g. Kolhapur UltraTech Cement Depot"
+                placeholder="Enter vendor / supplier name"
                 className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
               />
             </div>
@@ -1318,7 +1318,7 @@ export const VendorsModule = () => {
                 type="text"
                 value={vendorForm.companyName}
                 onChange={(e) => setVendorForm({ ...vendorForm, companyName: e.target.value })}
-                placeholder="e.g. UltraTech Cement Limited"
+                placeholder="Enter company / firm legal name"
                 className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
               />
             </div>
@@ -1343,7 +1343,7 @@ export const VendorsModule = () => {
                 type="text"
                 value={vendorForm.contactPerson}
                 onChange={(e) => setVendorForm({ ...vendorForm, contactPerson: e.target.value })}
-                placeholder="e.g. Er. Suresh Jadhav"
+                placeholder="Enter contact person name"
                 className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
               />
             </div>
@@ -1356,7 +1356,7 @@ export const VendorsModule = () => {
                 type="tel"
                 value={vendorForm.phone}
                 onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
-                placeholder="+91 98220 54321"
+                placeholder="+91 XXXXX XXXXX"
                 className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
               />
             </div>
@@ -1366,7 +1366,7 @@ export const VendorsModule = () => {
                 type="email"
                 value={vendorForm.email}
                 onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
-                placeholder="sales@ultratech-kolhapur.com"
+                placeholder="vendor@email.com"
                 className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
               />
             </div>
@@ -1498,7 +1498,7 @@ export const VendorsModule = () => {
       >
         {selectedVendorDossier && (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-[#103a6c] to-[#dc2626] rounded-2xl text-white flex items-center justify-between">
+            <div className="p-4 bg-gradient-to-r from-slate-900 to-[#dc2626] rounded-2xl text-white flex items-center justify-between">
               <div>
                 <span className="text-[11px] font-mono text-red-200 block">{selectedVendorDossier.id}</span>
                 <h3 className="text-lg font-black">{selectedVendorDossier.name}</h3>
@@ -2069,7 +2069,7 @@ export const VendorsModule = () => {
             <div id="vendor-printable-voucher" className="p-6 bg-white border border-slate-300 rounded-2xl shadow-sm text-slate-900 space-y-4">
               {/* Header */}
               <div className="text-center border-b border-slate-200 pb-3">
-                <h2 className="text-base font-black tracking-tight uppercase text-[#103a6c]">SANMATI CONSTRUCTIONS</h2>
+                <h2 className="text-base font-black tracking-tight uppercase text-red-700">SANMATI CONSTRUCTIONS</h2>
                 <p className="text-[10px] text-slate-500">Kolhapur, Maharashtra, India • GSTIN: 27AAYCS9281Q1ZU</p>
                 <div className="inline-block mt-1 px-3 py-0.5 bg-slate-100 rounded-full text-[10px] font-bold uppercase tracking-wider text-slate-700">
                   Vendor Disbursement Voucher
