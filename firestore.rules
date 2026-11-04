@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for Role-Based Access Control
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && (getUserData().role == 'Super Admin / Owner' || request.auth.token.role == 'Super Admin / Owner');
+    }
+    
+    function isProjectManager() {
+      return isAuthenticated() && (getUserData().role == 'Project Manager' || isSuperAdmin());
+    }
+    
+    function isAccountant() {
+      return isAuthenticated() && (getUserData().role == 'Accountant' || isSuperAdmin());
+    }
+    
+    function isSiteEngineer() {
+      return isAuthenticated() && (getUserData().role == 'Site Engineer' || isProjectManager());
+    }
+
+    // Projects: Readable by all authenticated staff, writeable by PM and Super Admin
+    match /projects/{projectId} {
+      allow read: if isAuthenticated();
+      allow write: if isProjectManager();
+    }
+
+    // BOQ Items & Project Activities
+    match /boqItems/{boqId} {
+      allow read: if isAuthenticated();
+      allow write: if isProjectManager() || isAccountant();
+    }
+
+    // RA Billing: Read/write by Accountant, PM, and Super Admin
+    match /raBills/{billId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAccountant() || isProjectManager();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Accounts, Ledgers & Invoices: Strictly Accountant and Super Admin
+    match /invoices/{invoiceId} {
+      allow read, write: if isAccountant();
+    }
+
+    // Inventory & Material Movements: Storekeeper, Purchase Manager, and Super Admin
+    match /inventory/{matId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // GPS Logs: Authorized for every authenticated user for their attendance
+    match /gpsLogs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // Approvals: Viewable by relevant parties, modifiable by approvers
+    match /approvals/{appId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isProjectManager() || isSuperAdmin() || isAccountant();
+    }
+
+    // Users and Roles: Super Admin exclusive
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+  }
+}
