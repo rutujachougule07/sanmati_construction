@@ -28,8 +28,8 @@ const Toast = ({ toast }) => {
 
 const StepBadge = ({ n, label }) => (
   <div className="flex items-center gap-2 mb-3">
-    <span className="w-7 h-7 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center shrink-0">{n}</span>
-    <span className="text-xs font-semibold text-red-700 uppercase tracking-widest">{label}</span>
+    <span className="w-7 h-7 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
+    <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</span>
   </div>
 );
 
@@ -47,11 +47,11 @@ const SummaryCard = ({ label, value, icon: Icon, color }) => (
 
 const StatusPill = ({ status }) => {
   const map = {
-    Synced: 'bg-emerald-100 text-emerald-700',
-    Verified: 'bg-blue-100 text-blue-700',
-    Pending: 'bg-amber-100 text-amber-700',
-    Failed: 'bg-rose-100 text-rose-700',
-    Mismatch: 'bg-red-100 text-red-700',
+    Synced: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    Verified: 'bg-blue-50 text-blue-700 border border-blue-200',
+    Pending: 'bg-amber-50 text-amber-700 border border-amber-200',
+    Failed: 'bg-rose-50 text-rose-700 border border-rose-200',
+    Mismatch: 'bg-red-50 text-red-600 border border-red-200',
   };
   return (
     <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${map[status] || 'bg-slate-100 text-slate-600'}`}>
@@ -109,7 +109,7 @@ const VERIFICATION_DATA = [
 const VOUCHER_TYPES = [
   { key: 'Sales Voucher', icon: IndianRupee, color: 'border-emerald-200 bg-emerald-50 text-emerald-700', desc: 'RA Bills & Client Invoices' },
   { key: 'Purchase Voucher', icon: Building, color: 'border-amber-200 bg-amber-50 text-amber-700', desc: 'Material Purchase Bills' },
-  { key: 'Payment Voucher', icon: ArrowRightLeft, color: 'border-red-200 bg-red-50 text-red-700', desc: 'Vendor & Supplier Payments' },
+  { key: 'Payment Voucher', icon: ArrowRightLeft, color: 'border-red-100 bg-red-50/60 text-red-600', desc: 'Vendor & Supplier Payments' },
   { key: 'Receipt Voucher', icon: CheckCircle2, color: 'border-blue-200 bg-blue-50 text-blue-700', desc: 'Client Payment Receipts' },
   { key: 'Journal Voucher', icon: FileText, color: 'border-purple-200 bg-purple-50 text-purple-700', desc: 'Adjustments & Provisions' },
   { key: 'Contra Voucher', icon: RefreshCw, color: 'border-slate-200 bg-slate-50 text-slate-700', desc: 'Cash ↔ Bank Transfers' },
@@ -233,7 +233,7 @@ export const TallyModule = () => {
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SummaryCard label="Company Name" value={TALLY_COMPANY.name} icon={Building} color="border-red-200 bg-red-50 text-red-700" />
+          <SummaryCard label="Company Name" value={TALLY_COMPANY.name} icon={Building} color="border-red-100 bg-red-50/60 text-red-600" />
           <SummaryCard label="Financial Year" value={TALLY_COMPANY.fy} icon={Clock} color="border-amber-200 bg-amber-50 text-amber-700" />
           <SummaryCard label="Total Ledgers" value={`${LEDGERS.length} Ledgers`} icon={Database} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
         </div>
@@ -254,7 +254,7 @@ export const TallyModule = () => {
             <tbody className="divide-y divide-slate-100">
               {LEDGERS.map(l => (
                 <tr key={l.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-red-600 font-bold">{l.id}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-700 font-semibold">{l.id}</td>
                   <td className="px-4 py-3 font-semibold text-slate-800">{l.name}</td>
                   <td className="px-4 py-3 text-slate-500 text-xs">{l.group}</td>
                   <td className="px-4 py-3 font-mono font-bold text-slate-800">{formatCurrency(l.balance)}</td>
@@ -287,7 +287,7 @@ export const TallyModule = () => {
           </button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SummaryCard label="Total Ledgers" value={LEDGERS.length} icon={Database} color="border-red-200 bg-red-50 text-red-700" />
+          <SummaryCard label="Total Ledgers" value={LEDGERS.length} icon={Database} color="border-red-100 bg-red-50/60 text-red-600" />
           <SummaryCard label="Synced" value={LEDGERS.filter(l => l.synced).length} icon={CheckCircle2} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
           <SummaryCard label="Pending" value={LEDGERS.filter(l => !l.synced).length} icon={Clock} color="border-amber-200 bg-amber-50 text-amber-700" />
           <SummaryCard label="Total Balance" value={formatCurrency(LEDGERS.reduce((s, l) => s + l.balance, 0))} icon={IndianRupee} color="border-blue-200 bg-blue-50 text-blue-700" />
@@ -311,7 +311,7 @@ export const TallyModule = () => {
                 const isSynced = l.synced || syncedLedgers.includes(l.id);
                 return (
                   <tr key={l.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-red-600 font-bold">{l.id}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-700 font-semibold">{l.id}</td>
                     <td className="px-4 py-3 font-semibold text-slate-800">{l.name}</td>
                     <td className="px-4 py-3 text-xs text-slate-500">{l.group}</td>
                     <td className="px-4 py-3 font-mono font-bold">{formatCurrency(l.balance)}</td>
@@ -400,7 +400,7 @@ export const TallyModule = () => {
                   const isTransferred = v.status === 'Synced' || syncedVouchers.includes(v.id);
                   return (
                     <tr key={v.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-red-600 font-bold">{v.no}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-700 font-semibold">{v.no}</td>
                       <td className="px-4 py-3 text-xs text-slate-600">{formatDate(v.date)}</td>
                       <td className="px-4 py-3 text-sm font-medium text-slate-800">{v.party}</td>
                       <td className="px-4 py-3 font-mono font-bold text-slate-800">{formatCurrency(v.amount)}</td>
@@ -469,10 +469,10 @@ export const TallyModule = () => {
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <StepBadge n="1" label="Data Verification Summary" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <SummaryCard label="Total Checks" value={VERIFICATION_DATA.length} icon={BarChart3} color="border-red-200 bg-red-50 text-red-700" />
-            <SummaryCard label="Verified" value={verified.length} icon={CheckCircle2} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
-            <SummaryCard label="Mismatches" value={mismatches.length} icon={AlertTriangle} color="border-amber-200 bg-amber-50 text-amber-700" />
-            <SummaryCard label="Total Diff" value={formatCurrency(VERIFICATION_DATA.reduce((s, v) => s + v.diff, 0))} icon={IndianRupee} color="border-rose-200 bg-rose-50 text-rose-700" />
+            <SummaryCard label="Total Checks" value={VERIFICATION_DATA.length} icon={BarChart3} color="border-red-100 bg-red-50/60 text-red-600" />
+            <SummaryCard label="Verified" value={verified.length} icon={CheckCircle2} color="border-emerald-100 bg-emerald-50/60 text-emerald-700" />
+            <SummaryCard label="Mismatches" value={mismatches.length} icon={AlertTriangle} color="border-amber-100 bg-amber-50/60 text-amber-700" />
+            <SummaryCard label="Total Diff" value={formatCurrency(VERIFICATION_DATA.reduce((s, v) => s + v.diff, 0))} icon={IndianRupee} color="border-rose-100 bg-rose-50/60 text-rose-600" />
           </div>
         </div>
 
@@ -514,7 +514,7 @@ export const TallyModule = () => {
               <tbody className="divide-y divide-slate-100">
                 {VERIFICATION_DATA.map(v => (
                   <tr key={v.id} className={`hover:bg-slate-50 transition-colors ${v.diff > 0 ? 'bg-amber-50/40' : ''}`}>
-                    <td className="px-4 py-3 font-mono text-xs text-red-600 font-bold">{v.id}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-700 font-semibold">{v.id}</td>
                     <td className="px-4 py-3 font-semibold text-slate-800">{v.entity}</td>
                     <td className="px-4 py-3 font-mono font-bold text-slate-700">{formatCurrency(v.erp)}</td>
                     <td className="px-4 py-3 font-mono font-bold text-slate-700">{formatCurrency(v.tally)}</td>

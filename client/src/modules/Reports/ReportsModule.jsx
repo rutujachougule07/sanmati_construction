@@ -32,8 +32,8 @@ const Toast = ({ toast }) => {
 
 const StepBadge = ({ n, label }) => (
   <div className="flex items-center gap-2 mb-3">
-    <span className="w-7 h-7 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center shrink-0">{n}</span>
-    <span className="text-xs font-semibold text-red-700 uppercase tracking-widest">{label}</span>
+    <span className="w-7 h-7 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
+    <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</span>
   </div>
 );
 
