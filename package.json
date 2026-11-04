@@ -4,8 +4,6 @@
   "type": "module",
   "description": "SANMATI CONSTRUCTIONS – Construction ERP System, Kolhapur, Maharashtra, India",
   "scripts": {
-    "postinstall": "npm --prefix client install && npm --prefix server install",
-    "install:all": "npm --prefix client install && npm --prefix server install",
     "dev": "node run-dev.js",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",

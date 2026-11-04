@@ -21,14 +21,12 @@ import { calculateHaversineDistance, calculateBOQItem, calculateRABill } from '.
 const ERPDataContext = createContext(null);
 
 export const ERPDataProvider = ({ children }) => {
-  // Clear any existing cached dummy records in localStorage so modules 1, 2, and 3 start completely blank
-  const DATA_VERSION = 'v9_zero_dummy_projects_strictly_empty';
+  // Clear any existing cached dummy records in localStorage so everything starts completely blank
+  const DATA_VERSION = 'v3_blank_slate_clean';
   if (typeof window !== 'undefined' && localStorage.getItem('sanmati_data_version') !== DATA_VERSION) {
     const keys = [
-      'clients', 'leads', 'followUps', 'customerActivities',
-      'incomeRecords', 'expenseRecords', 'paymentTracking', 'ledgerEntries',
-      'vendors', 'vendorContacts', 'vendorPurchases', 'vendorPayments',
-      'projects', 'boqItems', 'raBills', 'expenses'
+      'projects', 'clients', 'vendors', 'boqItems', 'raBills', 'inventory',
+      'gpsLogs', 'hrmsEmployees', 'tallyConfig', 'approvals', 'tenders', 'quotations', 'expenses', 'notifications'
     ];
     keys.forEach(k => localStorage.removeItem(`sanmati_${k}`));
     localStorage.setItem('sanmati_data_version', DATA_VERSION);
@@ -41,36 +39,9 @@ export const ERPDataProvider = ({ children }) => {
       if (saved) {
         try {
           let parsed = JSON.parse(saved);
-          if (key === 'projects' && Array.isArray(parsed)) {
-            const DUMMY_PRJ_IDS = ['PRJ-KLP-001', 'PRJ-KLP-002', 'PRJ-KLP-003'];
-            parsed = parsed.filter(p => !DUMMY_PRJ_IDS.includes(p.id) && !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'clients' && Array.isArray(parsed)) {
-            const DUMMY_CLI_IDS = ['CLI-001', 'CLI-002', 'CLI-003', 'CLI-004'];
-            parsed = parsed.filter(c => !DUMMY_CLI_IDS.includes(c.id) && !c.name?.includes('Kolhapur Municipal Corporation') && !c.name?.includes('D. Y. Patil') && !c.name?.includes('Chhatrapati Shahu') && !c.name?.includes('Tarabai Heights'));
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'vendors' && Array.isArray(parsed)) {
-            const DUMMY_VND_IDS = ['VND-001', 'VND-002', 'VND-003', 'VND-004'];
-            parsed = parsed.filter(v => !DUMMY_VND_IDS.includes(v.id) && !v.name?.includes('Rajaram Steel') && !v.name?.includes('Ultratech Cement') && !v.name?.includes('Kolhapur Earthmovers') && !v.name?.includes('Mahavir Hardware'));
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
           if (key === 'hrmsEmployees' && Array.isArray(parsed)) {
             const DUMMY_IDS = ['EMP-KLP-01', 'EMP-KLP-02', 'EMP-KLP-03', 'EMP-KLP-04'];
             parsed = parsed.filter(emp => !DUMMY_IDS.includes(emp.id) && emp.name !== 'Sanmati Patil' && emp.name !== 'Er. Rajesh Kulkarni' && emp.name !== 'Er. Amit Deshmukh' && emp.name !== 'CA Sneha Shinde');
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'leads' && Array.isArray(parsed)) {
-            parsed = parsed.map(l => l.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...l, assignedEmployee: '' } : l);
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'followUps' && Array.isArray(parsed)) {
-            parsed = parsed.map(f => f.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...f, assignedEmployee: '' } : f);
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'customerActivities' && Array.isArray(parsed)) {
-            parsed = parsed.map(a => a.employeeName === 'Er. Rajesh Kulkarni' ? { ...a, employeeName: '' } : a);
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           return parsed;
@@ -99,18 +70,6 @@ export const ERPDataProvider = ({ children }) => {
   const [expenses, setExpenses] = usePersistedState('expenses', INITIAL_EXPENSES);
   const [notifications, setNotifications] = usePersistedState('notifications', INITIAL_NOTIFICATIONS);
 
-  // Live project guarantee: ensure dummy projects (PRJ-KLP-001, 002, 003) are never shown
-  useEffect(() => {
-    setProjects(prev => {
-      const filtered = (prev || []).filter(p => p.id !== 'PRJ-KLP-001' && p.id !== 'PRJ-KLP-002' && p.id !== 'PRJ-KLP-003' && !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
-      if (filtered.length !== prev.length) {
-        localStorage.setItem('sanmati_projects', JSON.stringify(filtered));
-        return filtered;
-      }
-      return prev;
-    });
-  }, [setProjects]);
-
   // CRM Dedicated States
   const [leads, setLeads] = usePersistedState('leads', []);
   const [followUps, setFollowUps] = usePersistedState('followUps', []);
@@ -121,7 +80,6 @@ export const ERPDataProvider = ({ children }) => {
   const [expenseRecords, setExpenseRecords] = usePersistedState('expenseRecords', []);
   const [paymentTracking, setPaymentTracking] = usePersistedState('paymentTracking', []);
   const [ledgerEntries, setLedgerEntries] = usePersistedState('ledgerEntries', []);
-  const [nfdRecords, setNfdRecords] = usePersistedState('nfdRecords', []);
 
   // Vendor Management Dedicated States
   const [vendorContacts, setVendorContacts] = usePersistedState('vendorContacts', []);
@@ -461,19 +419,13 @@ export const ERPDataProvider = ({ children }) => {
       id: customerData.id || `CLI-${String(clients.length + 1).padStart(3, '0')}`,
       name: customerData.name || '',
       companyName: customerData.companyName || customerData.name || '',
-      category: customerData.category || 'Company',
-      designation: customerData.designation || '',
       phone: customerData.phone || customerData.mobileNumber || '',
-      alternatePhone: customerData.alternatePhone || '',
       email: customerData.email || '',
       address: customerData.address || '',
       city: customerData.city || 'Kolhapur',
       state: customerData.state || 'Maharashtra',
-      pincode: customerData.pincode || '',
       gstin: customerData.gstin || '',
-      pan: customerData.pan || '',
       customerType: customerData.customerType || 'Company',
-      leadSource: customerData.leadSource || '',
       assignedProject: customerData.assignedProject || '',
       status: customerData.status || 'Active',
       totalBilled: Number(customerData.totalBilled) || 0,
@@ -497,64 +449,38 @@ export const ERPDataProvider = ({ children }) => {
   };
 
   const addLead = (leadData) => {
-    let maxNum = 0;
-    leads.forEach(l => {
-      const m = l.id?.match(/LED-(\d+)/) || l.id?.match(/LEAD-(\d+)/);
-      if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
-    });
-    const nextId = leadData.id || `LED-${String(maxNum + 1).padStart(3, '0')}`;
-
     const newLead = {
-      id: nextId,
-      leadTitle: leadData.leadTitle || 'Construction Inquiry',
-      leadDate: leadData.leadDate || new Date().toISOString().split('T')[0],
+      id: `LEAD-${String(leads.length + 1).padStart(3, '0')}`,
+      leadTitle: leadData.leadTitle || 'New Construction Inquiry',
       customerName: leadData.customerName || '',
-      companyName: leadData.companyName || '',
       mobileNumber: leadData.mobileNumber || '',
-      alternateMobileNumber: leadData.alternateMobileNumber || '',
       email: leadData.email || '',
-      projectType: leadData.projectType || leadData.enquiryType || 'Residential Building',
+      enquiryType: leadData.enquiryType || 'Residential',
       projectName: leadData.projectName || '',
       projectLocation: leadData.projectLocation || 'Kolhapur',
-      city: leadData.city || 'Kolhapur',
-      state: leadData.state || 'Maharashtra',
-      pincode: leadData.pincode || '',
       estimatedBudget: Number(leadData.estimatedBudget) || 0,
+      leadSource: leadData.leadSource || 'Direct Inquiry',
+      assignedEmployee: leadData.assignedEmployee || 'Er. Rajesh Kulkarni',
+      followUpDate: leadData.followUpDate || new Date().toISOString().split('T')[0],
       leadDescription: leadData.leadDescription || '',
-      leadSource: leadData.leadSource || 'Website',
-      assignedEmployee: leadData.assignedEmployee || '',
-      department: leadData.department || 'Civil Engineering',
-      nextFollowUpDate: leadData.nextFollowUpDate || leadData.followUpDate || '',
-      priority: leadData.priority || 'Medium',
       status: leadData.status || 'New',
-      notes: leadData.notes || '',
-      attachments: Array.isArray(leadData.attachments) ? leadData.attachments : [],
-      statusHistory: [
-        {
-          status: leadData.status || 'New',
-          date: new Date().toISOString(),
-          updatedBy: leadData.assignedEmployee || 'Super Admin'
-        }
-      ],
-      createdDate: leadData.leadDate || new Date().toISOString().split('T')[0],
-      updatedDate: new Date().toISOString().split('T')[0]
+      createdDate: new Date().toISOString().split('T')[0]
     };
-
     setLeads(prev => [newLead, ...prev]);
-    addNotification('Lead Created', `New lead "${newLead.leadTitle}" (${newLead.id}) registered for ${newLead.customerName}.`, 'success');
+    addNotification('Lead Created', `New lead "${newLead.leadTitle}" added for ${newLead.customerName}.`, 'success');
 
     // Auto-create initial follow-up if follow-up date specified
-    if (newLead.nextFollowUpDate) {
+    if (newLead.followUpDate) {
       addFollowUp({
         entityType: 'Lead',
         entityId: newLead.id,
         customerName: newLead.customerName,
         contactNumber: newLead.mobileNumber,
-        followUpDate: newLead.nextFollowUpDate,
+        followUpDate: newLead.followUpDate,
         followUpTime: '11:00',
         followUpType: 'Call',
         assignedEmployee: newLead.assignedEmployee,
-        reminderNotes: `Initial follow-up for construction lead: ${newLead.leadTitle}`,
+        reminderNotes: `Initial follow-up for lead: ${newLead.leadTitle}`,
         status: 'Pending'
       });
     }
@@ -562,25 +488,7 @@ export const ERPDataProvider = ({ children }) => {
   };
 
   const updateLead = (id, updatedFields) => {
-    setLeads(prev => prev.map(l => {
-      if (l.id === id) {
-        const history = [...(l.statusHistory || [])];
-        if (updatedFields.status && updatedFields.status !== l.status) {
-          history.push({
-            status: updatedFields.status,
-            date: new Date().toISOString(),
-            updatedBy: updatedFields.assignedEmployee || l.assignedEmployee || 'Super Admin'
-          });
-        }
-        return {
-          ...l,
-          ...updatedFields,
-          statusHistory: history,
-          updatedDate: new Date().toISOString().split('T')[0]
-        };
-      }
-      return l;
-    }));
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, ...updatedFields } : l));
     addNotification('Lead Updated', `Lead ${id} details updated.`, 'info');
   };
 
@@ -590,48 +498,32 @@ export const ERPDataProvider = ({ children }) => {
     addNotification('Lead Deleted', `Lead "${lead?.leadTitle || id}" removed.`, 'warning');
   };
 
-  const convertLeadToCustomer = (leadId, additionalData = {}) => {
+  const convertLeadToCustomer = (leadId) => {
     const lead = leads.find(l => l.id === leadId);
     if (!lead) return null;
 
-    const cleanLeadPhone = lead.mobileNumber ? lead.mobileNumber.replace(/\D/g, '') : '';
-
-    // Check if customer already exists (by 10-digit mobile or email) to prevent duplicates
-    let matchedCustomer = clients.find(c => {
-      const cleanCustPhone = c.phone ? c.phone.replace(/\D/g, '') : '';
-      const phoneMatch = cleanLeadPhone && cleanCustPhone && cleanLeadPhone.slice(-10) === cleanCustPhone.slice(-10);
-      const emailMatch = lead.email && c.email && c.email.toLowerCase().trim() === lead.email.toLowerCase().trim();
-      return phoneMatch || emailMatch;
-    });
+    // Check if customer already exists (by mobile or email or name) to prevent duplicates
+    let matchedCustomer = clients.find(c => 
+      (lead.mobileNumber && c.phone === lead.mobileNumber) ||
+      (lead.email && c.email && c.email.toLowerCase() === lead.email.toLowerCase()) ||
+      (lead.customerName && c.name.toLowerCase() === lead.customerName.toLowerCase())
+    );
 
     let customerId = matchedCustomer?.id;
 
     if (!matchedCustomer) {
-      let maxNum = 0;
-      clients.forEach(c => {
-        const m = c.id?.match(/CLI-(\d+)/);
-        if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
-      });
-      const nextCustId = `CLI-${String(maxNum + 1).padStart(3, '0')}`;
-
       const newCust = {
-        id: nextCustId,
+        id: `CLI-${String(clients.length + 1).padStart(3, '0')}`,
         name: lead.customerName,
-        companyName: lead.companyName || lead.projectName || lead.customerName,
-        category: lead.projectType?.toLowerCase().includes('commercial') ? 'Company' : 'Individual',
-        designation: 'Client / Developer',
+        companyName: lead.projectName || lead.customerName,
         phone: lead.mobileNumber,
-        alternatePhone: lead.alternateMobileNumber || '',
         email: lead.email || '',
         address: lead.projectLocation || 'Kolhapur',
-        city: lead.city || 'Kolhapur',
-        state: lead.state || 'Maharashtra',
-        pincode: lead.pincode || '',
+        city: 'Kolhapur',
+        state: 'Maharashtra',
         gstin: '',
-        pan: '',
-        customerType: lead.projectType?.toLowerCase().includes('commercial') ? 'Commercial' : 'Residential',
-        leadSource: lead.leadSource || 'Website',
-        assignedProject: additionalData.assignedProject || lead.projectName || '',
+        customerType: 'Company',
+        assignedProject: lead.projectName || '',
         status: 'Active',
         totalBilled: 0,
         outstanding: 0,
@@ -642,20 +534,11 @@ export const ERPDataProvider = ({ children }) => {
       matchedCustomer = newCust;
     }
 
-    // Mark lead as converted with history
-    const history = [...(lead.statusHistory || [])];
-    history.push({
-      status: 'Converted',
-      date: new Date().toISOString(),
-      updatedBy: 'Lead Conversion'
-    });
-
+    // Mark lead as converted
     setLeads(prev => prev.map(l => l.id === leadId ? {
       ...l,
       status: 'Converted',
-      convertedCustomerId: customerId,
-      statusHistory: history,
-      updatedDate: new Date().toISOString().split('T')[0]
+      convertedCustomerId: customerId
     } : l));
 
     // Log Activity into Customer History
@@ -664,13 +547,13 @@ export const ERPDataProvider = ({ children }) => {
       customerName: lead.customerName,
       dateTime: new Date().toISOString().replace('T', ' ').substring(0, 16),
       activityType: 'Meeting',
-      discussionDetails: `Lead "${lead.leadTitle}" (${lead.id}) converted to customer. Project: ${lead.projectName || lead.projectType || 'Civil Work'}, Est. Budget: ₹${(Number(lead.estimatedBudget) || 0).toLocaleString('en-IN')}`,
-      employeeName: lead.assignedEmployee || 'Super Admin',
+      discussionDetails: `Lead "${lead.leadTitle}" successfully converted to customer. Project: ${lead.projectName || 'Civil Project'}, Estimated Budget: ₹${(lead.estimatedBudget || 0).toLocaleString('en-IN')}`,
+      employeeName: lead.assignedEmployee || 'Er. Rajesh Kulkarni',
       nextFollowUpDate: '',
       attachments: 'Lead_Conversion_Docket.pdf'
     });
 
-    addNotification('Lead Converted! 🎉', `Lead "${lead.leadTitle}" linked to customer ${matchedCustomer.name} (${customerId}).`, 'success');
+    addNotification('Lead Converted! 🎉', `Lead "${lead.leadTitle}" converted to customer ${matchedCustomer.name}.`, 'success');
     return matchedCustomer;
   };
 
@@ -684,7 +567,7 @@ export const ERPDataProvider = ({ children }) => {
       followUpDate: followUpData.followUpDate || new Date().toISOString().split('T')[0],
       followUpTime: followUpData.followUpTime || '10:00',
       followUpType: followUpData.followUpType || 'Call',
-      assignedEmployee: followUpData.assignedEmployee || '',
+      assignedEmployee: followUpData.assignedEmployee || 'Er. Rajesh Kulkarni',
       reminderNotes: followUpData.reminderNotes || '',
       status: followUpData.status || 'Pending',
       createdDate: new Date().toISOString().split('T')[0]
@@ -742,38 +625,17 @@ export const ERPDataProvider = ({ children }) => {
   };
 
   const addCustomerActivity = (activityData) => {
-    const actDate = activityData.activityDate || activityData.dateTime?.split('T')[0] || activityData.dateTime?.split(' ')[0] || new Date().toISOString().split('T')[0];
-    const actTime = activityData.activityTime || (activityData.dateTime?.includes('T') ? activityData.dateTime.split('T')[1].slice(0, 5) : (activityData.dateTime?.split(' ')[1]?.slice(0, 5) || '10:30'));
-    const combinedDateTime = `${actDate} ${actTime}`;
-    const nowIso = new Date().toISOString();
-
     const newActivity = {
-      id: activityData.id || `ACT-${Date.now()}`,
+      id: `ACT-${Date.now()}`,
       customerId: activityData.customerId || '',
       customerName: activityData.customerName || '',
-      projectId: activityData.projectId || '',
-      projectName: activityData.projectName || '',
-      activityDate: actDate,
-      activityTime: actTime,
-      dateTime: combinedDateTime,
+      dateTime: activityData.dateTime || new Date().toISOString().replace('T', ' ').substring(0, 16),
       activityType: activityData.activityType || 'Meeting',
-      conductedBy: activityData.conductedBy || activityData.employeeName || '',
-      employeeName: activityData.conductedBy || activityData.employeeName || '',
-      contactPerson: activityData.contactPerson || '',
-      contactNumber: activityData.contactNumber || '',
-      subject: activityData.subject || '',
       discussionDetails: activityData.discussionDetails || '',
-      customerResponse: activityData.customerResponse || '',
-      nextAction: activityData.nextAction || '',
+      employeeName: activityData.employeeName || 'Er. Rajesh Kulkarni',
       nextFollowUpDate: activityData.nextFollowUpDate || '',
-      attachments: activityData.attachments || activityData.attachment || '',
-      attachment: activityData.attachments || activityData.attachment || '',
-      status: activityData.status || 'Completed',
-      remarks: activityData.remarks || '',
-      createdBy: activityData.createdBy || 'Admin',
-      createdDate: activityData.createdDate || nowIso,
-      updatedBy: activityData.updatedBy || 'Admin',
-      updatedDate: nowIso
+      attachments: activityData.attachments || '',
+      createdDate: new Date().toISOString().split('T')[0]
     };
     setCustomerActivities(prev => [newActivity, ...prev]);
 
@@ -783,63 +645,18 @@ export const ERPDataProvider = ({ children }) => {
         entityType: 'Customer',
         entityId: newActivity.customerId,
         customerName: newActivity.customerName,
-        contactNumber: newActivity.contactNumber || '',
+        contactNumber: '',
         followUpDate: newActivity.nextFollowUpDate,
         followUpTime: '11:00',
         followUpType: newActivity.activityType || 'Meeting',
-        assignedEmployee: newActivity.conductedBy || newActivity.employeeName || '',
-        reminderNotes: `Next action from interaction log: ${newActivity.subject ? newActivity.subject + ' - ' : ''}${newActivity.nextAction || newActivity.discussionDetails.substring(0, 60)}...`,
+        assignedEmployee: newActivity.employeeName,
+        reminderNotes: `Next scheduled interaction from history log: ${newActivity.discussionDetails.substring(0, 60)}...`,
         status: 'Pending'
       });
     }
 
-    addNotification('Activity Logged', `Customer interaction recorded for ${newActivity.customerName}.`, 'success');
+    addNotification('Activity Logged', `Customer history updated for ${newActivity.customerName}.`, 'success');
     return newActivity;
-  };
-
-  const updateCustomerActivity = (id, updatedFields) => {
-    const nowIso = new Date().toISOString();
-    let updatedItem = null;
-    setCustomerActivities(prev => prev.map(a => {
-      if (a.id === id) {
-        const actDate = updatedFields.activityDate || a.activityDate || updatedFields.dateTime?.split('T')[0] || a.dateTime?.split(' ')[0] || new Date().toISOString().split('T')[0];
-        const actTime = updatedFields.activityTime || a.activityTime || (updatedFields.dateTime?.includes('T') ? updatedFields.dateTime.split('T')[1].slice(0, 5) : (updatedFields.dateTime?.split(' ')[1]?.slice(0, 5) || '10:30'));
-        const combinedDateTime = `${actDate} ${actTime}`;
-        updatedItem = {
-          ...a,
-          ...updatedFields,
-          activityDate: actDate,
-          activityTime: actTime,
-          dateTime: combinedDateTime,
-          conductedBy: updatedFields.conductedBy || updatedFields.employeeName || a.conductedBy || a.employeeName || '',
-          employeeName: updatedFields.conductedBy || updatedFields.employeeName || a.conductedBy || a.employeeName || '',
-          attachments: updatedFields.attachments || updatedFields.attachment || a.attachments || a.attachment || '',
-          attachment: updatedFields.attachments || updatedFields.attachment || a.attachments || a.attachment || '',
-          updatedBy: updatedFields.updatedBy || 'Admin',
-          updatedDate: nowIso
-        };
-        return updatedItem;
-      }
-      return a;
-    }));
-
-    if (updatedFields.nextFollowUpDate && updatedFields.nextFollowUpDate !== '') {
-      addFollowUp({
-        entityType: 'Customer',
-        entityId: updatedItem?.customerId || '',
-        customerName: updatedItem?.customerName || '',
-        contactNumber: updatedItem?.contactNumber || '',
-        followUpDate: updatedFields.nextFollowUpDate,
-        followUpTime: '11:00',
-        followUpType: updatedItem?.activityType || 'Meeting',
-        assignedEmployee: updatedItem?.conductedBy || updatedItem?.employeeName || '',
-        reminderNotes: `Next action from updated interaction: ${updatedItem?.subject ? updatedItem.subject + ' - ' : ''}${updatedItem?.nextAction || ''}`,
-        status: 'Pending'
-      });
-    }
-
-    addNotification('Activity Updated', `Customer interaction log updated.`, 'info');
-    return updatedItem;
   };
 
   const deleteCustomerActivity = (id) => {
@@ -849,123 +666,45 @@ export const ERPDataProvider = ({ children }) => {
 
   // --- MODULE 2: ACCOUNT MANAGEMENT HELPER ACTIONS ---
   const addIncomeRecord = (incomeData, postToLedger = true) => {
-    const totalAmount = Number(incomeData.amount) || 0;
-    const receivedAmount = incomeData.receivedAmount !== undefined 
-      ? Number(incomeData.receivedAmount) || 0 
-      : totalAmount;
-    const pendingAmount = Math.max(0, totalAmount - receivedAmount);
-    
-    let computedStatus = incomeData.status || 'Paid';
-    if (incomeData.status !== 'Cancelled') {
-      if (pendingAmount === 0 && totalAmount > 0) computedStatus = 'Paid';
-      else if (receivedAmount > 0) computedStatus = 'Partial';
-      else computedStatus = 'Pending';
-    }
-
     const newIncome = {
-      id: incomeData.id || `VCH-INC-${Date.now().toString().slice(-6)}`,
-      voucherNumber: incomeData.voucherNumber || incomeData.id || `VCH-INC-${Date.now().toString().slice(-6)}`,
+      id: incomeData.id || `INC-${Date.now().toString().slice(-6)}`,
       date: incomeData.date || new Date().toISOString().split('T')[0],
       projectName: incomeData.projectName || 'General Civil Project',
       customerName: incomeData.customerName || '',
       category: incomeData.category || 'RA Bill Payment',
       description: incomeData.description || '',
-      amount: totalAmount,
-      receivedAmount,
-      paidAmount: receivedAmount,
-      pendingAmount,
+      amount: Number(incomeData.amount) || 0,
       paymentMode: incomeData.paymentMode || 'Bank Transfer',
       referenceNumber: incomeData.referenceNumber || '',
       receiptAttachment: incomeData.receiptAttachment || '',
-      status: computedStatus,
+      status: 'Active',
       createdDate: new Date().toISOString().split('T')[0]
     };
 
     setIncomeRecords(prev => [newIncome, ...prev]);
 
-    // Automatically post credit to Customer Ledger without duplicate
-    if (postToLedger && newIncome.customerName && newIncome.status !== 'Cancelled') {
-      setLedgerEntries(prev => {
-        const withoutOld = prev.filter(l => l.linkedId !== newIncome.id);
-        const ledgerCredit = {
-          id: `LDG-${Date.now().toString().slice(-6)}`,
-          accountName: newIncome.customerName,
-          accountType: 'Customer',
-          date: newIncome.date,
-          transactionType: 'Credit',
-          referenceNumber: newIncome.referenceNumber || newIncome.voucherNumber || newIncome.id,
-          description: `${newIncome.category} - ${newIncome.description || 'Customer Inflow'}`,
-          debitAmount: 0,
-          creditAmount: newIncome.receivedAmount || newIncome.amount,
-          linkedId: newIncome.id,
-          createdDate: new Date().toISOString().split('T')[0]
-        };
-        return [ledgerCredit, ...withoutOld];
-      });
+    // Automatically post credit to Customer Ledger ONLY IF not already posted by Payment Tracking
+    if (postToLedger && newIncome.customerName) {
+      addLedgerEntry({
+        accountName: newIncome.customerName,
+        accountType: 'Customer',
+        date: newIncome.date,
+        transactionType: 'Credit',
+        referenceNumber: newIncome.referenceNumber || newIncome.id,
+        description: `${newIncome.category} - ${newIncome.description || 'Customer Inflow'}`,
+        debitAmount: 0,
+        creditAmount: newIncome.amount,
+        linkedId: newIncome.id
+      }, false);
     }
 
-    addNotification('Income Recorded', `Received ₹${(newIncome.receivedAmount || newIncome.amount).toLocaleString('en-IN')} from ${newIncome.customerName || 'Client'}.`, 'success');
+    addNotification('Income Recorded', `Received ₹${newIncome.amount.toLocaleString('en-IN')} from ${newIncome.customerName || 'Client'}.`, 'success');
     return newIncome;
   };
 
   const updateIncomeRecord = (id, updatedFields) => {
-    setIncomeRecords(prev => prev.map(inc => {
-      if (inc.id === id) {
-        const totalAmount = updatedFields.amount !== undefined ? (Number(updatedFields.amount) || 0) : inc.amount;
-        const receivedAmount = updatedFields.receivedAmount !== undefined 
-          ? (Number(updatedFields.receivedAmount) || 0) 
-          : (updatedFields.paidAmount !== undefined ? (Number(updatedFields.paidAmount) || 0) : (inc.receivedAmount ?? totalAmount));
-        const pendingAmount = Math.max(0, totalAmount - receivedAmount);
-        
-        let computedStatus = updatedFields.status || inc.status || 'Paid';
-        if (computedStatus !== 'Cancelled') {
-          if (pendingAmount === 0 && totalAmount > 0) computedStatus = 'Paid';
-          else if (receivedAmount > 0) computedStatus = 'Partial';
-          else computedStatus = 'Pending';
-        }
-
-        const merged = {
-          ...inc,
-          ...updatedFields,
-          amount: totalAmount,
-          receivedAmount,
-          paidAmount: receivedAmount,
-          pendingAmount,
-          status: computedStatus,
-          updatedDate: new Date().toISOString().split('T')[0]
-        };
-
-        // Synchronize linked ledger entry
-        if (merged.customerName && merged.status !== 'Cancelled') {
-          setLedgerEntries(entries => entries.map(l => {
-            if (l.linkedId === id) {
-              return {
-                ...l,
-                accountName: merged.customerName,
-                date: merged.date,
-                creditAmount: merged.receivedAmount || merged.amount,
-                referenceNumber: merged.referenceNumber || merged.voucherNumber || merged.id,
-                description: `${merged.category} - ${merged.description || 'Customer Inflow'}`
-              };
-            }
-            return l;
-          }));
-        }
-
-        return merged;
-      }
-      return inc;
-    }));
-
+    setIncomeRecords(prev => prev.map(inc => inc.id === id ? { ...inc, ...updatedFields } : inc));
     addNotification('Income Updated', `Transaction ${id} modified.`, 'info');
-  };
-
-  const deleteIncomeRecord = (id) => {
-    setIncomeRecords(prev => prev.filter(inc => inc.id !== id));
-    // Remove linked ledger entries to prevent orphan duplicates
-    setLedgerEntries(prev => prev.filter(l => l.linkedId !== id && l.linkedId !== `REV-${id}`));
-
-    addNotification('Transaction Removed', `Income voucher ${id} deleted.`, 'warning');
   };
 
   const reverseIncomeRecord = (id, reason = 'Cancelled by Accountant') => {
@@ -988,7 +727,7 @@ export const ERPDataProvider = ({ children }) => {
         transactionType: 'Debit',
         referenceNumber: `REV-${record.id}`,
         description: `REVERSAL: Cancelled income receipt ${record.id} [${reason}]`,
-        debitAmount: record.receivedAmount || record.amount,
+        debitAmount: record.amount,
         creditAmount: 0,
         linkedId: `REV-${record.id}`
       }, false);
@@ -998,125 +737,48 @@ export const ERPDataProvider = ({ children }) => {
   };
 
   const addExpenseRecord = (expenseData, postToLedger = true) => {
-    const totalAmount = Number(expenseData.amount) || 0;
-    const paidAmount = expenseData.paidAmount !== undefined 
-      ? Number(expenseData.paidAmount) || 0 
-      : totalAmount;
-    const pendingAmount = Math.max(0, totalAmount - paidAmount);
-    
-    let computedStatus = expenseData.status || 'Paid';
-    if (expenseData.status !== 'Cancelled') {
-      if (pendingAmount === 0 && totalAmount > 0) computedStatus = 'Paid';
-      else if (paidAmount > 0) computedStatus = 'Partial';
-      else computedStatus = 'Pending';
-    }
-
     const newExpense = {
-      id: expenseData.id || `VCH-EXP-${Date.now().toString().slice(-6)}`,
-      voucherNumber: expenseData.voucherNumber || expenseData.id || `VCH-EXP-${Date.now().toString().slice(-6)}`,
+      id: expenseData.id || `EXP-${Date.now().toString().slice(-6)}`,
       date: expenseData.date || new Date().toISOString().split('T')[0],
       projectName: expenseData.projectName || 'General Civil Project',
       category: expenseData.category || 'Materials & Cement',
       vendorName: expenseData.vendorName || '',
       description: expenseData.description || '',
-      amount: totalAmount,
-      paidAmount,
-      pendingAmount,
+      amount: Number(expenseData.amount) || 0,
       paymentMode: expenseData.paymentMode || 'Bank Transfer',
-      referenceNumber: expenseData.referenceNumber || '',
       billAttachment: expenseData.billAttachment || '',
-      status: computedStatus,
+      status: 'Active',
       createdDate: new Date().toISOString().split('T')[0]
     };
 
     setExpenseRecords(prev => [newExpense, ...prev]);
 
-    // Automatically post debit to Vendor Ledger (settling payable) without duplicate
-    if (postToLedger && newExpense.vendorName && newExpense.status !== 'Cancelled') {
-      setLedgerEntries(prev => {
-        const withoutOld = prev.filter(l => l.linkedId !== newExpense.id);
-        const ledgerDebit = {
-          id: `LDG-${Date.now().toString().slice(-6)}`,
-          accountName: newExpense.vendorName,
-          accountType: 'Vendor',
-          date: newExpense.date,
-          transactionType: 'Debit',
-          referenceNumber: newExpense.referenceNumber || newExpense.voucherNumber || newExpense.id,
-          description: `${newExpense.category} - ${newExpense.description || 'Payment to Vendor'}`,
-          debitAmount: newExpense.paidAmount || newExpense.amount,
-          creditAmount: 0,
-          linkedId: newExpense.id,
-          createdDate: new Date().toISOString().split('T')[0]
-        };
-        return [ledgerDebit, ...withoutOld];
-      });
+    // Automatically post debit to Vendor Ledger (settling payable) ONLY IF not already handled by Vendor Payment
+    if (postToLedger && newExpense.vendorName) {
+      addLedgerEntry({
+        accountName: newExpense.vendorName,
+        accountType: 'Vendor',
+        date: newExpense.date,
+        transactionType: 'Debit',
+        referenceNumber: newExpense.id,
+        description: `${newExpense.category} - ${newExpense.description || 'Payment to Vendor'}`,
+        debitAmount: newExpense.amount,
+        creditAmount: 0,
+        linkedId: newExpense.id
+      }, false);
     }
 
-    addNotification('Expense Recorded', `Disbursed ₹${(newExpense.paidAmount || newExpense.amount).toLocaleString('en-IN')} to ${newExpense.vendorName || 'Vendor'}.`, 'info');
+    addNotification('Expense Recorded', `Disbursed ₹${newExpense.amount.toLocaleString('en-IN')} to ${newExpense.vendorName || 'Vendor'}.`, 'info');
     return newExpense;
   };
 
   const updateExpenseRecord = (id, updatedFields) => {
-    setExpenseRecords(prev => prev.map(exp => {
-      if (exp.id === id) {
-        const totalAmount = updatedFields.amount !== undefined ? (Number(updatedFields.amount) || 0) : exp.amount;
-        const paidAmount = updatedFields.paidAmount !== undefined 
-          ? (Number(updatedFields.paidAmount) || 0) 
-          : (exp.paidAmount ?? totalAmount);
-        const pendingAmount = Math.max(0, totalAmount - paidAmount);
-        
-        let computedStatus = updatedFields.status || exp.status || 'Paid';
-        if (computedStatus !== 'Cancelled') {
-          if (pendingAmount === 0 && totalAmount > 0) computedStatus = 'Paid';
-          else if (paidAmount > 0) computedStatus = 'Partial';
-          else computedStatus = 'Pending';
-        }
-
-        const merged = {
-          ...exp,
-          ...updatedFields,
-          amount: totalAmount,
-          paidAmount,
-          pendingAmount,
-          status: computedStatus,
-          updatedDate: new Date().toISOString().split('T')[0]
-        };
-
-        // Synchronize linked ledger entry
-        if (merged.vendorName && merged.status !== 'Cancelled') {
-          setLedgerEntries(entries => entries.map(l => {
-            if (l.linkedId === id) {
-              return {
-                ...l,
-                accountName: merged.vendorName,
-                date: merged.date,
-                debitAmount: merged.paidAmount || merged.amount,
-                referenceNumber: merged.referenceNumber || merged.voucherNumber || merged.id,
-                description: `${merged.category} - ${merged.description || 'Payment to Vendor'}`
-              };
-            }
-            return l;
-          }));
-        }
-
-        return merged;
-      }
-      return exp;
-    }));
-
+    setExpenseRecords(prev => prev.map(exp => exp.id === id ? { ...exp, ...updatedFields } : exp));
     addNotification('Expense Updated', `Transaction ${id} modified.`, 'info');
   };
 
-  const deleteExpenseRecord = (id) => {
-    setExpenseRecords(prev => prev.filter(exp => exp.id !== id));
-    // Remove linked ledger entries to prevent orphan duplicates
-    setLedgerEntries(prev => prev.filter(l => l.linkedId !== id && l.linkedId !== `REV-${id}`));
-
-    addNotification('Transaction Removed', `Expense voucher ${id} deleted.`, 'warning');
-  };
-
   const reverseExpenseRecord = (id, reason = 'Cancelled by Accountant') => {
-    const record = expenseRecords.find(e => e.id === id);
+    const record = expenseRecords.find(e => e.id === e.id);
     if (!record) return;
 
     setExpenseRecords(prev => prev.map(exp => exp.id === id ? {
@@ -1136,7 +798,7 @@ export const ERPDataProvider = ({ children }) => {
         referenceNumber: `REV-${record.id}`,
         description: `REVERSAL: Cancelled expense voucher ${record.id} [${reason}]`,
         debitAmount: 0,
-        creditAmount: record.paidAmount || record.amount,
+        creditAmount: record.amount,
         linkedId: `REV-${record.id}`
       }, false);
     }
@@ -1337,42 +999,6 @@ export const ERPDataProvider = ({ children }) => {
 
     setLedgerEntries(prev => [offsettingEntry, ...prev]);
     addNotification('Ledger Reversal Posted', `Reversal entry posted for ${entry.accountName} (${reason}).`, 'warning');
-  };
-
-  // --- NFD Operations (Module 2 Subsection v) ---
-  const addNfdRecord = (nfdData) => {
-    const newNfd = {
-      id: nfdData.id || `NFD-${Date.now().toString().slice(-6)}`,
-      nfdNumber: nfdData.nfdNumber || `NFD/KLP/${Date.now().toString().slice(-4)}`,
-      bankName: nfdData.bankName || '',
-      branchName: nfdData.branchName || '',
-      accountHolder: nfdData.accountHolder || 'SANMATI CONSTRUCTIONS',
-      projectName: nfdData.projectName || '',
-      depositAmount: Number(nfdData.depositAmount) || 0,
-      interestRate: Number(nfdData.interestRate) || 0,
-      depositDate: nfdData.depositDate || new Date().toISOString().split('T')[0],
-      maturityDate: nfdData.maturityDate || '',
-      maturityAmount: Number(nfdData.maturityAmount) || Number(nfdData.depositAmount) || 0,
-      purpose: nfdData.purpose || 'Bank Guarantee Margin',
-      lienTo: nfdData.lienTo || '',
-      status: nfdData.status || 'Active', // Active, Matured, Liquidated, Pledged
-      attachment: nfdData.attachment || '',
-      remarks: nfdData.remarks || '',
-      createdDate: new Date().toISOString().split('T')[0]
-    };
-    setNfdRecords(prev => [newNfd, ...prev]);
-    addNotification('NFD Record Added', `NFD ${newNfd.nfdNumber} for ₹${Number(newNfd.depositAmount).toLocaleString('en-IN')} added successfully.`, 'success');
-    return newNfd;
-  };
-
-  const updateNfdRecord = (id, updatedFields) => {
-    setNfdRecords(prev => prev.map(item => item.id === id ? { ...item, ...updatedFields, updatedDate: new Date().toISOString().split('T')[0] } : item));
-    addNotification('NFD Record Updated', `NFD record updated successfully.`, 'info');
-  };
-
-  const deleteNfdRecord = (id) => {
-    setNfdRecords(prev => prev.filter(item => item.id !== id));
-    addNotification('NFD Record Removed', `NFD record has been deleted.`, 'warning');
   };
 
   // --- MODULE 3: VENDOR MANAGEMENT OPERATIONS ---
@@ -1711,20 +1337,17 @@ export const ERPDataProvider = ({ children }) => {
         completeFollowUp,
         deleteFollowUp,
         addCustomerActivity,
-        updateCustomerActivity,
         deleteCustomerActivity,
         // Account Management
         incomeRecords,
         setIncomeRecords,
         addIncomeRecord,
         updateIncomeRecord,
-        deleteIncomeRecord,
         reverseIncomeRecord,
         expenseRecords,
         setExpenseRecords,
         addExpenseRecord,
         updateExpenseRecord,
-        deleteExpenseRecord,
         reverseExpenseRecord,
         paymentTracking,
         setPaymentTracking,
@@ -1734,12 +1357,6 @@ export const ERPDataProvider = ({ children }) => {
         setLedgerEntries,
         addLedgerEntry,
         reverseLedgerEntry,
-        // NFD (Module 2 Subsection v)
-        nfdRecords,
-        setNfdRecords,
-        addNfdRecord,
-        updateNfdRecord,
-        deleteNfdRecord,
         // Vendor Management
         vendorContacts,
         setVendorContacts,
