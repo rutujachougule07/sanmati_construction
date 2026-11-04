@@ -756,7 +756,7 @@ export const HRMSModule = () => {
             
             <button
               onClick={() => setIsOnboardModalOpen(true)}
-              className="erp-btn-primary text-sm font-bold px-4 py-2"
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Plus className="w-4 h-4" />
               <span>Onboard New Employee</span>
@@ -842,7 +842,7 @@ export const HRMSModule = () => {
                       onClick={() => setSelectedDate(todayIso)}
                       className={`px-2.5 py-1.5 border rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
                         selectedDate === todayIso
-                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-300 font-bold'
                           : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                       }`}
                       title="Jump to Today (आज)"
@@ -878,7 +878,7 @@ export const HRMSModule = () => {
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Save attendance for selected date"
                 >
                   <Save className="w-3.5 h-3.5" />
@@ -1097,10 +1097,10 @@ export const HRMSModule = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsPayrollApproved(!isPayrollApproved)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs ${
                     isPayrollApproved 
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                      : 'erp-btn-primary'
+                      : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -1237,7 +1237,7 @@ export const HRMSModule = () => {
 
                       <button
                         onClick={() => generatePayslipPDF(emp, selectedMonth)}
-                        className="erp-btn-primary text-xs flex items-center gap-1.5 py-1.5 px-3"
+                        className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download PDF</span>
@@ -1786,7 +1786,7 @@ export const HRMSModule = () => {
                   generatePayslipPDF(viewPayslipEmployee, selectedMonth);
                   setViewPayslipEmployee(null);
                 }}
-                className="erp-btn-primary text-xs flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download Official PDF</span>
@@ -1993,7 +1993,7 @@ export const HRMSModule = () => {
               </button>
               <button
                 type="submit"
-                className="erp-btn-primary text-xs"
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
               >
                 Save Employee Record
               </button>
