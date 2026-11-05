@@ -143,17 +143,17 @@ export const DataTable = ({
             <button
               onClick={handleExportExcel}
               title="Export to Excel"
-              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs cursor-pointer"
+              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 border border-emerald-300 rounded-lg text-[11px] flex items-center gap-1.5 transition-all font-bold shadow-2xs cursor-pointer active:scale-95"
             >
-              <Download className="w-3 h-3" />
+              <Download className="w-3 h-3 text-emerald-600 stroke-[2.5]" />
               <span className="hidden sm:inline">Excel</span>
             </button>
             <button
               onClick={handleExportPDF}
               title="Export to PDF"
-              className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200/80 rounded-lg text-[11px] flex items-center gap-1 transition-colors font-semibold shadow-2xs cursor-pointer"
+              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 border border-red-300 rounded-lg text-[11px] flex items-center gap-1.5 transition-all font-bold shadow-2xs cursor-pointer active:scale-95"
             >
-              <Download className="w-3 h-3" />
+              <Download className="w-3 h-3 text-red-600 stroke-[2.5]" />
               <span className="hidden sm:inline">PDF</span>
             </button>
           </div>

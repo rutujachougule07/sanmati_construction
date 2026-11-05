@@ -6,8 +6,8 @@
   --color-app-base: #f8fafc;
   --color-app-card: #ffffff;
   --color-app-border: #e2e8f0;
-  --color-brand-red: #dc2626;
-  --color-brand-red-dark: #b91c1c;
+  --color-brand-red: #002855;
+  --color-brand-red-dark: #002046;
   --color-text-main: #0f172a;
   --color-text-muted: #64748b;
 }
@@ -144,14 +144,14 @@ table tbody td svg {
 
 .erp-input:focus {
   outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+  border-color: #002046;
+  box-shadow: 0 0 0 2px rgba(0, 32, 70, 0.15);
 }
 
-/* Action Buttons: Brand Red matching Sidebar Accent */
+/* Action Buttons: Midnight Royal Navy matching Sidebar */
 .erp-btn-primary {
-  background-color: #dc2626;
-  color: #ffffff;
+  background-color: #002046;
+  color: #ffffff !important;
   font-weight: 700;
   padding: 0.65rem 1.35rem;
   border-radius: 0.75rem;
@@ -161,12 +161,13 @@ table tbody td svg {
   gap: 0.5rem;
   font-size: 0.875rem;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 32, 70, 0.25);
+  cursor: pointer;
 }
 
 .erp-btn-primary:hover {
-  background-color: #b91c1c;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+  background-color: #001736;
+  box-shadow: 0 2px 6px rgba(0, 32, 70, 0.35);
 }
 
 .erp-btn-secondary {
@@ -240,50 +241,325 @@ main [class*="border-[#"],
   border-color: #e2e8f0 !important;
 }
 
-/* Typography contrast for white theme */
-main .text-white:not(
-  .erp-btn-primary *,
-  .erp-btn-copper *,
-  .bg-gold-400 *,
-  .bg-emerald-500 *,
-  .bg-emerald-600 *,
-  .bg-rose-500 *,
-  .bg-rose-600 *,
-  .bg-red-500 *,
-  .bg-red-600 *,
-  .bg-red-700 *,
-  [class*="bg-[#0b192c]"] *,
-  [class*="bg-[#071326]"] *
-),
-.modal .text-white:not(
-  .erp-btn-primary *,
-  .erp-btn-copper *,
-  .bg-gold-400 *,
-  .bg-emerald-500 *,
-  .bg-emerald-600 *,
-  .bg-red-500 *,
-  .bg-red-600 *,
-  .bg-red-700 *,
-  [class*="bg-[#0b192c]"] *,
-  [class*="bg-[#071326]"] *
-) {
+/* =========================================================
+   BUTTON & INTERACTIVE ELEMENTS - HIGH CONTRAST & VISIBILITY
+   ========================================================= */
+
+/* Dark solid action buttons MUST have pure crisp white text and white icons */
+button.text-white,
+button.text-white *,
+button.bg-\[\#002046\],
+button.bg-\[\#002046\] *,
+button.bg-\[\#002855\],
+button.bg-\[\#002855\] *,
+button.bg-\[\#001736\],
+button.bg-\[\#001736\] *,
+button.bg-\[\#dc2626\],
+button.bg-\[\#dc2626\] *,
+button.bg-\[\#b91c1c\],
+button.bg-\[\#b91c1c\] *,
+button.bg-slate-900,
+button.bg-slate-900 *,
+button.bg-slate-800,
+button.bg-slate-800 *,
+button.bg-blue-600,
+button.bg-blue-600 *,
+button.bg-blue-700,
+button.bg-blue-700 *,
+button.bg-blue-800,
+button.bg-blue-800 *,
+button.bg-emerald-600,
+button.bg-emerald-600 *,
+button.bg-emerald-700,
+button.bg-emerald-700 *,
+button.bg-emerald-800,
+button.bg-emerald-800 *,
+button.bg-green-600,
+button.bg-green-600 *,
+button.bg-green-700,
+button.bg-green-700 *,
+button.bg-green-800,
+button.bg-green-800 *,
+button.bg-rose-600,
+button.bg-rose-600 *,
+button.bg-rose-700,
+button.bg-rose-700 *,
+button.bg-rose-800,
+button.bg-rose-800 *,
+button.bg-red-600,
+button.bg-red-600 *,
+button.bg-red-700,
+button.bg-red-700 *,
+button.bg-red-800,
+button.bg-red-800 *,
+a.text-white,
+a.text-white *,
+a.bg-\[\#002046\],
+a.bg-\[\#002046\] *,
+a.bg-blue-600,
+a.bg-blue-600 *,
+.erp-btn-primary,
+.erp-btn-primary *,
+.erp-btn-copper,
+.erp-btn-copper *,
+span.text-white,
+div.text-white {
+  color: #ffffff !important;
+}
+
+/* Ensure SVG icons inside dark solid buttons are also pure white */
+button.text-white svg,
+button.bg-\[\#002046\] svg,
+button.bg-\[\#002855\] svg,
+button.bg-\[\#dc2626\] svg,
+button.bg-blue-600 svg,
+button.bg-blue-700 svg,
+button.bg-slate-900 svg,
+button.bg-slate-800 svg,
+button.bg-emerald-600 svg,
+button.bg-emerald-700 svg,
+button.bg-green-600 svg,
+button.bg-green-700 svg,
+button.bg-rose-600 svg,
+button.bg-rose-700 svg,
+button.bg-red-600 svg,
+button.bg-red-700 svg,
+a.text-white svg,
+a.bg-\[\#002046\] svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+/* Hover-only white text on dark hover states */
+button.hover\:text-white:hover,
+button.hover\:text-white:hover *,
+button.hover\:bg-\[\#002046\]:hover,
+button.hover\:bg-\[\#002046\]:hover *,
+button.hover\:bg-rose-600:hover,
+button.hover\:bg-rose-600:hover *,
+button.hover\:bg-amber-600:hover,
+button.hover\:bg-amber-600:hover * {
+  color: #ffffff !important;
+}
+button.hover\:text-white:hover svg,
+button.hover\:bg-\[\#002046\]:hover svg,
+button.hover\:bg-rose-600:hover svg,
+button.hover\:bg-amber-600:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* =========================================================
+   TABLE ACTION BUTTONS (VIEW / EDIT / DELETE) - HIGH VISIBILITY
+   ========================================================= */
+
+/* Default state for action buttons inside table rows */
+table td button:not(.bg-\[\#002046\]):not(.bg-emerald-600):not(.bg-rose-600):not(.bg-red-600):not(.text-white) {
+  color: #475569 !important;
+}
+table td button:not(.bg-\[\#002046\]):not(.bg-emerald-600):not(.bg-rose-600):not(.bg-red-600):not(.text-white) svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* Specific colored action icon buttons in tables */
+table td button.text-blue-600,
+table td button.text-blue-600 svg,
+table td button .text-blue-600 {
+  color: #2563eb !important;
+  stroke: #2563eb !important;
+}
+
+table td button.text-amber-600,
+table td button.text-amber-600 svg,
+table td button .text-amber-600 {
+  color: #d97706 !important;
+  stroke: #d97706 !important;
+}
+
+table td button.text-rose-600,
+table td button.text-rose-600 svg,
+table td button.text-rose-500,
+table td button.text-rose-500 svg,
+table td button.text-red-600,
+table td button.text-red-600 svg,
+table td button .text-rose-600,
+table td button .text-rose-500 {
+  color: #e11d48 !important;
+  stroke: #e11d48 !important;
+}
+
+/* On hover, table action buttons turn white with their hover background */
+table td button:hover,
+table td button:hover * {
+  color: #ffffff !important;
+}
+table td button:hover svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* =========================================================
+   SOFT / PASTEL BUTTONS - CRYSTAL CLEAR READABILITY
+   ========================================================= */
+
+/* Pastel Green / Emerald Buttons (e.g. Mark All Present, Excel export) */
+button.bg-emerald-50,
+button.bg-emerald-100,
+button.bg-green-50,
+button.bg-green-100 {
+  color: #047857 !important;
+  border-color: #6ee7b7 !important;
+}
+button.bg-emerald-50 *,
+button.bg-emerald-100 *,
+button.bg-green-50 *,
+button.bg-green-100 * {
+  color: #047857 !important;
+}
+button.bg-emerald-50 svg,
+button.bg-emerald-100 svg,
+button.bg-green-50 svg,
+button.bg-green-100 svg {
+  color: #059669 !important;
+  stroke: #059669 !important;
+}
+button.bg-emerald-50:hover,
+button.bg-emerald-100:hover,
+button.bg-green-50:hover,
+button.bg-green-100:hover {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border-color: #34d399 !important;
+}
+
+/* Pastel Red / Rose Buttons (e.g. Mark All Absent, PDF export) */
+button.bg-rose-50,
+button.bg-rose-100,
+button.bg-red-50,
+button.bg-red-100 {
+  color: #be123c !important;
+  border-color: #fda4af !important;
+}
+button.bg-rose-50 *,
+button.bg-rose-100 *,
+button.bg-red-50 *,
+button.bg-red-100 * {
+  color: #be123c !important;
+}
+button.bg-rose-50 svg,
+button.bg-rose-100 svg,
+button.bg-red-50 svg,
+button.bg-red-100 svg {
+  color: #e11d48 !important;
+  stroke: #e11d48 !important;
+}
+button.bg-rose-50:hover,
+button.bg-rose-100:hover,
+button.bg-red-50:hover,
+button.bg-red-100:hover {
+  background-color: #ffe4e6 !important;
+  color: #9f1239 !important;
+  border-color: #fb7185 !important;
+}
+
+/* Pastel Blue Buttons */
+button.bg-blue-50,
+button.bg-blue-100 {
+  color: #1d4ed8 !important;
+  border-color: #93c5fd !important;
+}
+button.bg-blue-50 *,
+button.bg-blue-100 * {
+  color: #1d4ed8 !important;
+}
+button.bg-blue-50 svg,
+button.bg-blue-100 svg {
+  color: #2563eb !important;
+  stroke: #2563eb !important;
+}
+
+/* Pastel Amber / Warning Buttons */
+button[class*="bg-amber-50"],
+button[class*="bg-amber-100"],
+button[class*="bg-yellow-50"],
+button[class*="bg-yellow-100"] {
+  color: #b45309 !important;
+  border-color: #fcd34d !important;
+}
+button[class*="bg-amber-50"] *,
+button[class*="bg-amber-100"] *,
+button[class*="bg-yellow-50"] *,
+button[class*="bg-yellow-100"] * {
+  color: #b45309 !important;
+}
+button[class*="bg-amber-50"] svg,
+button[class*="bg-amber-100"] svg,
+button[class*="bg-yellow-50"] svg,
+button[class*="bg-yellow-100"] svg {
+  color: #d97706 !important;
+  stroke: #d97706 !important;
+}
+
+/* Ensure pill badges with dark backgrounds have visible white text */
+[class*="bg-[#002046]"].text-white,
+[class*="bg-[#002046]"] .text-white,
+[class*="bg-[#002855]"].text-white,
+[class*="bg-[#002855]"] .text-white,
+[class*="bg-[#881337]"].text-white,
+[class*="bg-[#881337]"] .text-white {
+  color: #ffffff !important;
+}
+
+/* Typography contrast for converted white cards only (never affect buttons, badges, or dark headers) */
+main .bg-white h1.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+main .bg-white h2.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+main .bg-white h3.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+main .bg-white h4.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+main .bg-white h5.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+main .bg-white p.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+.modal .bg-white h1.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+.modal .bg-white h2.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+.modal .bg-white h3.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+.modal .bg-white h4.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *),
+.modal .bg-white p.text-white:not([class*="bg-[#"] *):not([class*="bg-slate-900"] *):not([class*="bg-slate-800"] *) {
   color: #0f172a !important;
 }
 
 /* Ensure dark navy headers in modals/cards keep crisp white and light text */
+[class*="bg-[#0b192c]"],
 [class*="bg-[#0b192c]"] h1,
 [class*="bg-[#0b192c]"] h2,
 [class*="bg-[#0b192c]"] h3,
 [class*="bg-[#0b192c]"] h4,
 [class*="bg-[#0b192c]"] .text-white,
-[class*="bg-[#071326]"] .text-white {
+[class*="bg-[#071326]"] .text-white,
+[class*="bg-[#002046]"],
+[class*="bg-[#002046]"] h1,
+[class*="bg-[#002046]"] h2,
+[class*="bg-[#002046]"] h3,
+[class*="bg-[#002046]"] h4,
+[class*="bg-[#002046]"] .text-white,
+[class*="bg-[#002855]"] .text-white,
+[class*="bg-[#001736]"] .text-white {
   color: #ffffff !important;
 }
 
 [class*="bg-[#0b192c]"] .text-slate-100,
 [class*="bg-[#0b192c]"] .text-slate-200,
-[class*="bg-[#0b192c]"] .text-slate-300 {
+[class*="bg-[#0b192c]"] .text-slate-300,
+[class*="bg-[#002046]"] .text-slate-100,
+[class*="bg-[#002046]"] .text-slate-200,
+[class*="bg-[#002046]"] .text-slate-300,
+[class*="bg-[#002855]"] .text-slate-100,
+[class*="bg-[#002855]"] .text-slate-200,
+[class*="bg-[#002855]"] .text-slate-300 {
   color: #e2e8f0 !important;
+}
+
+[class*="bg-[#0b192c]"] .text-slate-400,
+[class*="bg-[#002046]"] .text-slate-400 {
+  color: #94a3b8 !important;
 }
 
 /* Ensure all table headings across all modules stay crisp dark slate and compact */
@@ -301,18 +577,18 @@ main thead th div,
   letter-spacing: 0.03em !important;
 }
 
-main .text-slate-200,
-.modal .text-slate-200 {
+main .text-slate-200:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *),
+.modal .text-slate-200:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *) {
   color: #1e293b !important;
 }
 
-main .text-slate-300,
-.modal .text-slate-300 {
+main .text-slate-300:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *),
+.modal .text-slate-300:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *) {
   color: #334155 !important;
 }
 
-main .text-slate-400,
-.modal .text-slate-400 {
+main .text-slate-400:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *),
+.modal .text-slate-400:not(button, button *, a, a *, [class*="bg-[#"] *, [class*="bg-slate-900"] *, [class*="bg-slate-800"] *) {
   color: #64748b !important;
 }
 

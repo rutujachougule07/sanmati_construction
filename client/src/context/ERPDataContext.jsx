@@ -14,7 +14,9 @@ import {
   INITIAL_TENDERS,
   INITIAL_QUOTATIONS,
   INITIAL_EXPENSES,
-  INITIAL_NOTIFICATIONS
+  INITIAL_NOTIFICATIONS,
+  INITIAL_LEADS,
+  INITIAL_HERO_BANNERS
 } from '../services/mockData';
 import { calculateHaversineDistance, calculateBOQItem, calculateRABill } from '../utils/formatters';
 
@@ -44,6 +46,14 @@ export const ERPDataProvider = ({ children }) => {
             parsed = parsed.filter(emp => !DUMMY_IDS.includes(emp.id) && emp.name !== 'Sanmati Patil' && emp.name !== 'Er. Rajesh Kulkarni' && emp.name !== 'Er. Amit Deshmukh' && emp.name !== 'CA Sneha Shinde');
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
+          if (key === 'leads' && Array.isArray(parsed) && parsed.length === 0) {
+            parsed = INITIAL_LEADS;
+            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
+          }
+          if (key === 'heroBanners' && (!parsed || (Array.isArray(parsed) && parsed.length === 0))) {
+            parsed = INITIAL_HERO_BANNERS;
+            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
+          }
           return parsed;
         } catch (e) { /* ignore */ }
       }
@@ -71,7 +81,8 @@ export const ERPDataProvider = ({ children }) => {
   const [notifications, setNotifications] = usePersistedState('notifications', INITIAL_NOTIFICATIONS);
 
   // CRM Dedicated States
-  const [leads, setLeads] = usePersistedState('leads', []);
+  const [leads, setLeads] = usePersistedState('leads', INITIAL_LEADS);
+  const [heroBanners, setHeroBanners] = usePersistedState('heroBanners', INITIAL_HERO_BANNERS);
   const [followUps, setFollowUps] = usePersistedState('followUps', []);
   const [customerActivities, setCustomerActivities] = usePersistedState('customerActivities', []);
 
@@ -464,10 +475,17 @@ export const ERPDataProvider = ({ children }) => {
       followUpDate: leadData.followUpDate || new Date().toISOString().split('T')[0],
       leadDescription: leadData.leadDescription || '',
       status: leadData.status || 'New',
-      createdDate: new Date().toISOString().split('T')[0]
+      createdDate: leadData.createdDate || new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) + ' ' + new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     };
     setLeads(prev => [newLead, ...prev]);
-    addNotification('Lead Created', `New lead "${newLead.leadTitle}" added for ${newLead.customerName}.`, 'success');
+    addNotification('Inquiry Received', `New customer inquiry recorded for "${newLead.customerName}".`, 'success');
 
     // Auto-create initial follow-up if follow-up date specified
     if (newLead.followUpDate) {
@@ -496,6 +514,30 @@ export const ERPDataProvider = ({ children }) => {
     const lead = leads.find(l => l.id === id);
     setLeads(prev => prev.filter(l => l.id !== id));
     addNotification('Lead Deleted', `Lead "${lead?.leadTitle || id}" removed.`, 'warning');
+  };
+
+  const addHeroBanner = (bannerData) => {
+    const newBanner = {
+      id: `BAN-${Date.now()}`,
+      title: bannerData.title || 'New Project Showcase',
+      category: bannerData.category || 'Commercial',
+      location: bannerData.location || 'Kolhapur',
+      status: bannerData.status || 'Active',
+      order: heroBanners.length + 1
+    };
+    setHeroBanners(prev => [...prev, newBanner]);
+    addNotification('Banner Added', `Hero banner "${newBanner.title}" created.`, 'success');
+    return newBanner;
+  };
+
+  const updateHeroBanner = (id, updatedFields) => {
+    setHeroBanners(prev => prev.map(b => b.id === id ? { ...b, ...updatedFields } : b));
+    addNotification('Banner Updated', 'Hero banner settings updated.', 'info');
+  };
+
+  const deleteHeroBanner = (id) => {
+    setHeroBanners(prev => prev.filter(b => b.id !== id));
+    addNotification('Banner Removed', 'Hero banner removed from slider.', 'warning');
   };
 
   const convertLeadToCustomer = (leadId) => {
@@ -1320,6 +1362,11 @@ export const ERPDataProvider = ({ children }) => {
         // CRM
         leads,
         setLeads,
+        heroBanners,
+        setHeroBanners,
+        addHeroBanner,
+        updateHeroBanner,
+        deleteHeroBanner,
         followUps,
         setFollowUps,
         customerActivities,

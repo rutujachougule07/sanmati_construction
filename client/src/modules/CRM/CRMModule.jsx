@@ -360,23 +360,23 @@ export const CRMModule = () => {
           <button
             onClick={() => setSelectedCustomerDossier(row)}
             title="View Complete Customer Dossier"
-            className="p-1.5 bg-slate-100 hover:bg-red-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-[#002046] text-blue-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-blue-600 group-hover/btn:text-white" />
           </button>
           <button
             onClick={() => handleOpenEditCustomer(row)}
             title="Edit Customer"
-            className="p-1.5 bg-slate-100 hover:bg-amber-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-amber-600 text-amber-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Edit3 className="w-3.5 h-3.5" />
+            <Edit3 className="w-3.5 h-3.5 text-amber-600 group-hover/btn:text-white" />
           </button>
           <button
             onClick={() => setCustomerToDelete(row)}
             title="Delete Customer"
-            className="p-1.5 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5 text-rose-600 group-hover/btn:text-white" />
           </button>
         </div>
       )
@@ -604,23 +604,23 @@ export const CRMModule = () => {
           <button
             onClick={() => setSelectedLeadDetails(row)}
             title="View Lead Details"
-            className="p-1.5 bg-slate-100 hover:bg-red-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-[#002046] text-blue-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-blue-600 group-hover/btn:text-white" />
           </button>
           <button
             onClick={() => handleOpenEditLead(row)}
             title="Edit Lead"
-            className="p-1.5 bg-slate-100 hover:bg-amber-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-amber-600 text-amber-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Edit3 className="w-3.5 h-3.5" />
+            <Edit3 className="w-3.5 h-3.5 text-amber-600 group-hover/btn:text-white" />
           </button>
           <button
             onClick={() => setLeadToDelete(row)}
             title="Delete Lead"
-            className="p-1.5 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5 text-rose-600 group-hover/btn:text-white" />
           </button>
         </div>
       )
@@ -761,7 +761,7 @@ export const CRMModule = () => {
               </button>
               <button
                 onClick={handleOpenAddCustomer}
-                className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Customer</span>
@@ -845,7 +845,7 @@ export const CRMModule = () => {
 
             <button
               onClick={handleOpenAddLead}
-              className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
+              className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Lead</span>
@@ -890,7 +890,7 @@ export const CRMModule = () => {
                   onClick={() => setLeadStatusFilter(status)}
                   className={`px-3 py-1 rounded-lg font-semibold text-xs transition-colors cursor-pointer ${
                     leadStatusFilter === status 
-                      ? 'bg-red-600 text-white shadow-2xs' 
+                      ? 'bg-[#002046] text-white shadow-2xs' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -945,7 +945,7 @@ export const CRMModule = () => {
 
             <button
               onClick={() => handleOpenAddFollowUp()}
-              className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
+              className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Schedule Follow-up</span>
@@ -973,15 +973,15 @@ export const CRMModule = () => {
               onClick={() => setFollowUpFilterTab('Upcoming')}
               className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                 followUpFilterTab === 'Upcoming' 
-                  ? 'bg-red-50/80 border-red-300 ring-2 ring-red-200' 
+                  ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-200' 
                   : 'bg-white border-slate-200/90 hover:bg-slate-50'
               }`}
             >
-              <span className="text-[11px] font-bold text-red-700 flex items-center gap-1">
+              <span className="text-[11px] font-bold text-blue-700 flex items-center gap-1">
                 <CalendarDays className="w-3.5 h-3.5" />
                 <span>Upcoming</span>
               </span>
-              <div className="text-lg font-bold text-red-800 mt-1">{upcomingFollowUpsCount}</div>
+              <div className="text-lg font-bold text-blue-900 mt-1">{upcomingFollowUpsCount}</div>
             </button>
 
             <button
@@ -1128,7 +1128,7 @@ export const CRMModule = () => {
               </p>
               <button
                 onClick={() => handleOpenAddFollowUp()}
-                className="px-3.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors shadow-2xs inline-flex items-center gap-1"
+                className="px-3.5 py-1.5 bg-[#002046] text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors shadow-2xs inline-flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Schedule a Follow-up</span>
@@ -1156,7 +1156,7 @@ export const CRMModule = () => {
 
             <button
               onClick={() => handleOpenAddActivity()}
-              className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
+              className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Log New Activity</span>
@@ -1309,7 +1309,7 @@ export const CRMModule = () => {
               </p>
               <button
                 onClick={() => handleOpenAddActivity()}
-                className="px-3.5 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors shadow-2xs inline-flex items-center gap-1"
+                className="px-3.5 py-1.5 bg-[#002046] text-white rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors shadow-2xs inline-flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Log First Activity</span>
@@ -1474,7 +1474,7 @@ export const CRMModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
             >
               {editingCustomer ? 'Update Customer' : 'Save Customer'}
             </button>
@@ -1812,7 +1812,7 @@ export const CRMModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
             >
               {editingLead ? 'Update Lead' : 'Save Lead'}
             </button>
@@ -2083,7 +2083,7 @@ export const CRMModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
             >
               Set Reminder
             </button>
@@ -2348,7 +2348,7 @@ export const CRMModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg text-xs transition-colors shadow-2xs"
             >
               Save Activity Log
             </button>

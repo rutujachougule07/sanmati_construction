@@ -94,19 +94,19 @@ export const RolesModule = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white font-heading">Role-Based Access Control (RBAC)</h2>
-          <p className="text-xs text-slate-400">Manage 8 operational construction roles, permissions matrix, and authorized user accounts.</p>
+          <h2 className="text-2xl font-bold text-slate-900 font-heading">Role-Based Access Control (RBAC)</h2>
+          <p className="text-xs text-slate-500">Manage 8 operational construction roles, permissions matrix, and authorized user accounts.</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'users' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'users' ? 'bg-[#002046] text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           >
             Authorized Users ({allUsers.length})
           </button>
           <button
             onClick={() => setActiveTab('matrix')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'matrix' ? 'bg-gold-400 text-black' : 'bg-[#181d26] text-slate-300'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${activeTab === 'matrix' ? 'bg-[#002046] text-white font-bold shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
           >
             Access Permissions Matrix
           </button>

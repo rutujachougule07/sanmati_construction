@@ -772,3 +772,85 @@ export const INITIAL_NOTIFICATIONS = [
   { id: "NOT-3", title: "New Material Request", message: "400 Bags Cement requested by Amit Deshmukh for D.Y. Patil Wing.", time: "3 hours ago", type: "info", read: true },
   { id: "NOT-4", title: "GPS Check-In Verified", message: "Site Engineer Amit Deshmukh checked in within geofence radius.", time: "Today 08:58 AM", type: "info", read: true }
 ];
+
+export const INITIAL_LEADS = [
+  {
+    id: "LEAD-001",
+    customerName: "Cherrylee Samson",
+    leadTitle: "Technical Inquiry for Sangli Office",
+    mobileNumber: "+91 98221 44521",
+    email: "cherrylee@sanglicorp.com",
+    enquiryType: "Commercial Complex",
+    projectName: "Sangli Regional Corporate Office",
+    projectLocation: "Sangli",
+    estimatedBudget: 8500000,
+    leadSource: "Website Contact Form",
+    assignedEmployee: "Er. Rajesh Kulkarni",
+    followUpDate: "2026-11-08",
+    leadDescription: "Technical Inquiry for structural foundation & civil contracting for 4-storey commercial office in Sangli.",
+    status: "New",
+    isUnread: true,
+    createdDate: "Oct 20, 2026 06:13 AM"
+  },
+  {
+    id: "LEAD-002",
+    customerName: "rishabh",
+    leadTitle: "Query regarding Sangli Office",
+    mobileNumber: "+91 94230 11982",
+    email: "rishabh.patil@gmail.com",
+    enquiryType: "Commercial Complex",
+    projectName: "Sangli High-Street Retail Hub",
+    projectLocation: "Sangli",
+    estimatedBudget: 12000000,
+    leadSource: "Website Contact Form",
+    assignedEmployee: "Er. Amit Deshmukh",
+    followUpDate: "2026-11-06",
+    leadDescription: "Query regarding civil construction BOQ estimation, RCC slab casting schedules, and material procurement.",
+    status: "In Progress",
+    isUnread: false,
+    createdDate: "Oct 3, 2026 04:28 PM"
+  },
+  {
+    id: "LEAD-003",
+    customerName: "Er. Suhas Patil",
+    leadTitle: "Tender Quotation for KMC Drainage Works",
+    mobileNumber: "+91 98234 88712",
+    email: "suhas.patil@infrastructure.org",
+    enquiryType: "Infrastructure / PWD",
+    projectName: "KMC Underground Drainage Extension",
+    projectLocation: "Kolhapur",
+    estimatedBudget: 4500000,
+    leadSource: "Tender Portal",
+    assignedEmployee: "Er. Rajesh Kulkarni",
+    followUpDate: "2026-11-10",
+    leadDescription: "Inquiry for joint venture subcontracting for 3.2km storm drainage line in Shahupuri, Kolhapur.",
+    status: "New",
+    isUnread: true,
+    createdDate: "Nov 2, 2026 11:15 AM"
+  },
+  {
+    id: "LEAD-004",
+    customerName: "Dr. Arvind Kulkarni",
+    leadTitle: "Bungalow Structural Renovation at Tarabai Park",
+    mobileNumber: "+91 97654 33210",
+    email: "dr.arvind@kulkarnihospital.com",
+    enquiryType: "Residential Luxury",
+    projectName: "Kulkarni Heritage Bungalow",
+    projectLocation: "Tarabai Park, Kolhapur",
+    estimatedBudget: 3500000,
+    leadSource: "Direct Referral",
+    assignedEmployee: "Er. Amit Deshmukh",
+    followUpDate: "2026-10-25",
+    leadDescription: "Structural retrofitting, waterproofing, and elevation renovation with premium Italian marble and copper cladding.",
+    status: "Converted",
+    isUnread: false,
+    createdDate: "Sep 28, 2026 02:45 PM"
+  }
+];
+
+export const INITIAL_HERO_BANNERS = [
+  { id: "BAN-1", title: "Royal Palace Commercial Complex", category: "Commercial", location: "Kawala Naka, Kolhapur", status: "Active", order: 1 },
+  { id: "BAN-2", title: "D.Y. Patil Medical Research Wing", category: "Institutional", location: "Kasaba Bawada, Kolhapur", status: "Active", order: 2 },
+  { id: "BAN-3", title: "MIDC Shiroli Heavy Logistics Hub", category: "Industrial", location: "MIDC Shiroli, Kolhapur", status: "Active", order: 3 },
+  { id: "BAN-4", title: "Sangli Mega Commercial Residency", category: "Residential", location: "Sangli High-Street", status: "Active", order: 4 }
+];

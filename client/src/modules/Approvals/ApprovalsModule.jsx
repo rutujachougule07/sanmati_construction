@@ -49,7 +49,7 @@ export const ApprovalsModule = () => {
       header: 'Request Description & Title',
       render: (row) => (
         <div>
-          <span className="font-bold text-white block">{row.title}</span>
+          <span className="font-bold text-slate-900 block">{row.title}</span>
           <span className="text-[11px] text-slate-400">Initiator: {row.requester}</span>
         </div>
       )
@@ -68,7 +68,7 @@ export const ApprovalsModule = () => {
       render: (row) => (
         <button
           onClick={() => { setSelectedApproval(row); setDecisionComments(''); }}
-          className="px-2.5 py-1 bg-[#222a36] hover:bg-gold-400 hover:text-black rounded text-[11px] font-semibold transition-colors"
+          className="px-3 py-1 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold transition-colors shadow-2xs cursor-pointer"
         >
           Review & Authorize
         </button>
@@ -80,8 +80,8 @@ export const ApprovalsModule = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white font-heading">Multi-Tier Approval Management</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="text-2xl font-bold text-slate-900 font-heading">Multi-Tier Approval Management</h2>
+          <p className="text-xs text-slate-500">
             Authorization gateway for Quotations, Tenders, POs, Site Material Requests, RA Bills, and Leave.
           </p>
         </div>
@@ -92,8 +92,8 @@ export const ApprovalsModule = () => {
             <button
               key={cat}
               onClick={() => setFilterType(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-                filterType === cat ? 'bg-gold-400 text-black' : 'bg-[#181d25] text-slate-300 hover:text-white'
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                filterType === cat ? 'bg-[#002046] text-white shadow-xs font-bold' : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
               }`}
             >
               {cat === 'ALL' ? 'All Approvals' : cat}
@@ -120,37 +120,37 @@ export const ApprovalsModule = () => {
           maxWidth="max-w-2xl"
         >
           <div className="space-y-4 text-xs">
-            <div className="bg-[#14181f] p-4 rounded-xl border border-[#262e3c] space-y-2">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Submitted By:</span>
-                <span className="text-white font-bold">{selectedApproval.requester}</span>
+                <span className="text-slate-500">Submitted By:</span>
+                <span className="text-slate-900 font-bold">{selectedApproval.requester}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Financial Value:</span>
-                <span className="text-emerald-400 font-bold font-mono text-sm">
+                <span className="text-slate-500">Financial Value:</span>
+                <span className="text-emerald-700 font-bold font-mono text-sm">
                   {selectedApproval.amount > 0 ? formatCurrency(selectedApproval.amount) : 'Non-financial'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-400">Initial Comments:</span>
-                <span className="text-slate-200">{selectedApproval.comments || '—'}</span>
+                <span className="text-slate-500">Initial Comments:</span>
+                <span className="text-slate-800 font-medium">{selectedApproval.comments || '—'}</span>
               </div>
             </div>
 
             {/* Complete Audit History Timeline */}
             <div>
-              <h5 className="font-bold text-white mb-2 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-gold-400" />
+              <h5 className="font-bold text-slate-900 mb-2 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#002046]" />
                 <span>Workflow Audit Trail</span>
               </h5>
-              <div className="space-y-2 bg-[#12151b] p-3 rounded-xl border border-[#232a35]">
+              <div className="space-y-2 bg-slate-50/80 p-3 rounded-xl border border-slate-200">
                 {selectedApproval.history?.map((h, idx) => (
                   <div key={idx} className="flex items-start gap-2 text-xs">
-                    <span className="w-2 h-2 rounded-full bg-gold-400 mt-1.5 flex-shrink-0"></span>
+                    <span className="w-2 h-2 rounded-full bg-[#002046] mt-1.5 flex-shrink-0"></span>
                     <div className="flex-1">
-                      <p className="font-semibold text-white">{h.step}</p>
-                      <p className="text-[11px] text-slate-400">{h.user} • {h.date}</p>
-                      {h.comments && <p className="text-[11px] text-slate-300 italic">"{h.comments}"</p>}
+                      <p className="font-semibold text-slate-900">{h.step}</p>
+                      <p className="text-[11px] text-slate-500">{h.user} • {h.date}</p>
+                      {h.comments && <p className="text-[11px] text-slate-600 italic">"{h.comments}"</p>}
                     </div>
                   </div>
                 ))}
@@ -159,7 +159,7 @@ export const ApprovalsModule = () => {
 
             {/* Decision Input */}
             <div>
-              <label className="block text-slate-300 font-medium mb-1">
+              <label className="block text-slate-700 font-bold mb-1">
                 Approver Remarks / Technical Verification Notes:
               </label>
               <textarea
@@ -172,11 +172,11 @@ export const ApprovalsModule = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-3 border-t border-[#262e3c]">
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
               <button
                 type="button"
                 onClick={() => handleDecision('Rejected')}
-                className="px-4 py-2 rounded-lg bg-rose-950/70 hover:bg-rose-900 text-rose-400 border border-rose-800 font-bold flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <XCircle className="w-4 h-4" />
                 <span>Reject Request</span>
@@ -184,7 +184,7 @@ export const ApprovalsModule = () => {
               <button
                 type="button"
                 onClick={() => handleDecision('Approved')}
-                className="px-4 py-2 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 font-bold flex items-center gap-1.5 transition-colors"
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>Authorize & Approve</span>

@@ -527,7 +527,7 @@ export const VendorsModule = () => {
       header: 'Category',
       minWidth: '170px',
       render: (r) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-[#002046] border border-blue-200">
           {r.category}
         </span>
       )
@@ -590,7 +590,7 @@ export const VendorsModule = () => {
         <div className="flex items-center justify-center gap-1.5">
           <button
             onClick={() => setSelectedVendorDossier(r)}
-            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#002046] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
             title="View Vendor Dossier"
           >
             <Eye className="w-4 h-4" />
@@ -683,7 +683,7 @@ export const VendorsModule = () => {
         <div className="flex items-center justify-center gap-1.5">
           <button
             onClick={() => setSelectedContactDossier(r)}
-            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#002046] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
             title="View Contact Details"
           >
             <Eye className="w-4 h-4" />
@@ -790,7 +790,7 @@ export const VendorsModule = () => {
         <div className="flex items-center justify-center gap-1.5">
           <button
             onClick={() => setSelectedPurchaseDossier(r)}
-            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-[#002046] hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
             title="View Bill Details"
           >
             <Eye className="w-4 h-4" />
@@ -957,7 +957,7 @@ export const VendorsModule = () => {
               </button>
               <button
                 onClick={handleOpenAddVendor}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-red-500/15"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-red-500/15"
               >
                 <Plus className="w-4 h-4" /> Add Vendor
               </button>
@@ -1065,9 +1065,9 @@ export const VendorsModule = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleOpenAddContact}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-emerald-500/20"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-[#002046]/25 active:scale-95"
               >
-                <Plus className="w-4 h-4" /> Add Vendor Contact
+                <Plus className="w-4 h-4 text-white" /> Add Vendor Contact
               </button>
             </div>
           </div>
@@ -1131,9 +1131,9 @@ export const VendorsModule = () => {
               </button>
               <button
                 onClick={handleOpenAddPurchase}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-purple-500/20"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-[#002046]/25 active:scale-95"
               >
-                <Plus className="w-4 h-4" /> Add Purchase Order
+                <Plus className="w-4 h-4 text-white" /> Add Purchase Order
               </button>
             </div>
           </div>
@@ -1217,9 +1217,9 @@ export const VendorsModule = () => {
                 onClick={() => {
                   exportToExcel(filteredPayments, 'Sanmati_Vendor_Payments');
                 }}
-                className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-[#002046]/25 active:scale-95"
               >
-                <Download className="w-4 h-4 text-emerald-600" /> Export Payables
+                <Download className="w-4 h-4 text-white" /> Export Payables
               </button>
             </div>
           </div>
@@ -1480,7 +1480,7 @@ export const VendorsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               {editingVendor ? "Update Vendor" : "Register Vendor"}
             </button>
@@ -1498,11 +1498,11 @@ export const VendorsModule = () => {
       >
         {selectedVendorDossier && (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-[#103a6c] to-[#dc2626] rounded-2xl text-white flex items-center justify-between">
+            <div className="p-4 bg-gradient-to-r from-[#002046] to-[#002855] rounded-2xl text-white flex items-center justify-between shadow-xs">
               <div>
-                <span className="text-[11px] font-mono text-red-200 block">{selectedVendorDossier.id}</span>
-                <h3 className="text-lg font-black">{selectedVendorDossier.name}</h3>
-                <span className="text-xs text-red-100">{selectedVendorDossier.category}</span>
+                <span className="text-[11px] font-mono text-blue-200 block">{selectedVendorDossier.id}</span>
+                <h3 className="text-lg font-black text-white" style={{ color: '#ffffff' }}>{selectedVendorDossier.name}</h3>
+                <span className="text-xs text-blue-100">{selectedVendorDossier.category}</span>
               </div>
               <div className="text-right">
                 <StatusBadge status={selectedVendorDossier.status || 'Active'} />
@@ -1672,7 +1672,7 @@ export const VendorsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               {editingContact ? "Update Contact" : "Add Contact"}
             </button>
@@ -1875,7 +1875,7 @@ export const VendorsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               {editingPurchase ? "Update Purchase Bill" : "Log Bill & Post to Ledger"}
             </button>
@@ -1988,7 +1988,7 @@ export const VendorsModule = () => {
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer shadow-sm"
+                className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold cursor-pointer shadow-sm"
               >
                 Confirm Disbursement & Post Debit
               </button>
@@ -2025,7 +2025,7 @@ export const VendorsModule = () => {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold text-slate-800">{formatCurrency(inst.amount)}</span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-[#002046] border border-blue-200">
                           {inst.mode}
                         </span>
                       </div>
@@ -2132,9 +2132,9 @@ export const VendorsModule = () => {
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
-                <Printer className="w-4 h-4" /> Print Voucher
+                <Printer className="w-4 h-4 text-white" /> Print Voucher
               </button>
             </div>
           </div>

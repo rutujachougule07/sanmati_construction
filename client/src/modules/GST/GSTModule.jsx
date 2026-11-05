@@ -49,7 +49,7 @@ export const GSTModule = () => {
       render: (row) => (
         <button
           onClick={() => handleDownloadInvoicePDF(row)}
-          className="px-2.5 py-1 bg-[#222a36] hover:bg-gold-400 hover:text-black rounded text-[11px] font-semibold transition-colors flex items-center gap-1 mx-auto"
+          className="px-3 py-1 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 mx-auto shadow-2xs cursor-pointer"
         >
           <Download className="w-3 h-3" />
           <span>GST PDF</span>

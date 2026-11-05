@@ -756,7 +756,7 @@ export const HRMSModule = () => {
             
             <button
               onClick={() => setIsOnboardModalOpen(true)}
-              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Plus className="w-4 h-4" />
               <span>Onboard New Employee</span>
@@ -858,27 +858,27 @@ export const HRMSModule = () => {
                 <button
                   type="button"
                   onClick={handleMarkAllPresent}
-                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
                   title="Mark all staff Present for this date"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
                   <span>Mark All Present</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleMarkAllAbsent}
-                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-300 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
                   title="Mark all staff Absent for this date"
                 >
-                  <UserX className="w-3.5 h-3.5 text-rose-600" />
+                  <UserX className="w-3.5 h-3.5 text-rose-600 stroke-[2.5]" />
                   <span>Mark All Absent</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  className="px-3 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Save attendance for selected date"
                 >
                   <Save className="w-3.5 h-3.5" />
@@ -1100,7 +1100,7 @@ export const HRMSModule = () => {
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs ${
                     isPayrollApproved 
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                      : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+                      : 'bg-[#002046] hover:bg-[#001736] text-white shadow-xs'
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -1237,7 +1237,7 @@ export const HRMSModule = () => {
 
                       <button
                         onClick={() => generatePayslipPDF(emp, selectedMonth)}
-                        className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download PDF</span>
@@ -1268,43 +1268,43 @@ export const HRMSModule = () => {
               className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200/90 transform transition-all text-slate-900"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Dark Navy Header (Matching Image 2) */}
-              <div className="bg-[#0b192c] px-6 py-4 flex items-center justify-between text-white shadow-xs">
+              {/* Dark Navy Header (Matching Sidebar & Navbar) */}
+              <div className="bg-[#002046] px-6 py-4 flex items-center justify-between text-white shadow-xs">
                 <div className="flex items-center gap-3">
                   <div 
-                    className="w-10 h-10 rounded-full bg-[#003865] border border-blue-400/40 text-amber-300 font-black text-base flex items-center justify-center shadow-inner flex-shrink-0"
+                    className="w-10 h-10 rounded-full bg-[#001736] border border-blue-400/40 text-amber-300 font-black text-base flex items-center justify-center shadow-inner flex-shrink-0"
                     style={{ color: '#fde047' }}
                   >
                     {individualEmployee.name ? individualEmployee.name.trim()[0].toUpperCase() : 'S'}
                   </div>
                   <div>
                     <h3 
-                      className="font-extrabold text-base leading-snug tracking-tight text-white !text-white"
+                      className="font-extrabold text-base leading-snug tracking-tight text-white"
                       style={{ color: '#ffffff' }}
                     >
                       {individualEmployee.name}
                     </h3>
                     <div className="flex flex-wrap items-center gap-2 text-xs mt-0.5">
                       <span 
-                        className="inline-flex items-center gap-1 font-medium text-slate-200 !text-slate-200"
-                        style={{ color: '#e2e8f0' }}
+                        className="inline-flex items-center gap-1 font-semibold text-slate-100"
+                        style={{ color: '#f1f5f9' }}
                       >
                         <span className="text-sm">✂️</span>
-                        <span>{individualEmployee.department || 'Grafting & Propagation'}</span>
+                        <span>{individualEmployee.department || 'Site Execution'}</span>
                       </span>
-                      <span className="font-bold text-slate-400" style={{ color: '#94a3b8' }}>•</span>
+                      <span className="font-bold text-slate-300" style={{ color: '#cbd5e1' }}>•</span>
                       <span 
-                        className="font-medium text-slate-200 !text-slate-200"
-                        style={{ color: '#e2e8f0' }}
+                        className="font-semibold text-slate-100"
+                        style={{ color: '#f1f5f9' }}
                       >
-                        {individualEmployee.designation || 'General Worker'}
+                        {individualEmployee.designation || 'Site Engineer'}
                       </span>
-                      <span className="font-bold text-slate-400" style={{ color: '#94a3b8' }}>•</span>
+                      <span className="font-bold text-slate-300" style={{ color: '#cbd5e1' }}>•</span>
                       <span 
-                        className="inline-flex items-center gap-1 font-semibold text-emerald-400 !text-emerald-400"
-                        style={{ color: '#34d399' }}
+                        className="inline-flex items-center gap-1 font-bold text-emerald-300"
+                        style={{ color: '#6ee7b7' }}
                       >
-                        <Phone className="w-3.5 h-3.5 text-emerald-400" style={{ color: '#34d399' }} />
+                        <Phone className="w-3.5 h-3.5 text-emerald-300" style={{ color: '#6ee7b7' }} />
                         <span>{individualEmployee.phone || '+91 98220 00000'}</span>
                       </span>
                     </div>
@@ -1314,11 +1314,11 @@ export const HRMSModule = () => {
                 <button
                   type="button"
                   onClick={() => setIndividualModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white !text-white flex items-center justify-center transition-colors cursor-pointer border border-slate-700/60 shadow-xs"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 shadow-xs"
                   style={{ color: '#ffffff' }}
                   title="Close (बंद करा)"
                 >
-                  <X className="w-4 h-4 text-white !text-white" style={{ color: '#ffffff' }} />
+                  <X className="w-4 h-4 text-white" style={{ color: '#ffffff' }} />
                 </button>
               </div>
 
@@ -1786,7 +1786,7 @@ export const HRMSModule = () => {
                   generatePayslipPDF(viewPayslipEmployee, selectedMonth);
                   setViewPayslipEmployee(null);
                 }}
-                className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download Official PDF</span>
@@ -1993,7 +1993,7 @@ export const HRMSModule = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
               >
                 Save Employee Record
               </button>

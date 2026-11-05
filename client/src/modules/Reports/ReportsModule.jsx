@@ -32,19 +32,19 @@ const Toast = ({ toast }) => {
 
 const StepBadge = ({ n, label }) => (
   <div className="flex items-center gap-2 mb-3">
-    <span className="w-7 h-7 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
-    <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</span>
+    <span className="w-7 h-7 rounded-full bg-[#002046] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
+    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{label}</span>
   </div>
 );
 
 const SummaryCard = ({ label, value, icon: Icon, color }) => (
   <div className={`rounded-xl p-4 border ${color} flex items-start gap-3`}>
-    <div className="p-2 rounded-lg bg-white/60">
+    <div className="p-2 rounded-lg bg-white/80 shadow-2xs">
       <Icon size={18} className="text-current" />
     </div>
     <div>
-      <p className="text-xs font-medium opacity-70">{label}</p>
-      <p className="text-lg font-bold">{value}</p>
+      <p className="text-xs font-semibold opacity-75">{label}</p>
+      <p className="text-lg font-extrabold">{value}</p>
     </div>
   </div>
 );
@@ -78,19 +78,19 @@ const ExportBar = ({ onPDF, onExcel, label = '' }) => (
   <div className="flex flex-wrap items-center gap-2 mt-3">
     {label && <span className="text-xs text-slate-500 mr-1">{label}</span>}
     <button onClick={onPDF}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-medium rounded-lg transition-colors">
-      <FileText size={13} /> PDF
+      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#002046] hover:bg-[#001736] text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+      <FileText size={13} className="text-white" /> PDF
     </button>
     <button onClick={onExcel}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors">
-      <FileSpreadsheet size={13} /> Excel
+      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+      <FileSpreadsheet size={13} className="text-white" /> Excel
     </button>
   </div>
 );
 
 const SectionHeader = ({ badge, title, subtitle }) => (
   <div className="mb-4">
-    <span className="inline-block text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-3 py-1 mb-2">{badge}</span>
+    <span className="inline-block text-xs font-bold text-[#004bb5] bg-[#e8f1fc] border border-[#cce0fc] rounded-full px-3 py-1 mb-2">{badge}</span>
     <h2 className="text-xl font-bold text-slate-800">{title}</h2>
     {subtitle && <p className="text-slate-500 text-sm mt-0.5">{subtitle}</p>}
   </div>
@@ -288,7 +288,7 @@ export const ReportsModule = () => {
 
   const exportCards = [
     {
-      icon: IndianRupee, color: 'border-red-100 bg-red-50',
+      icon: IndianRupee, color: 'border-blue-200 bg-blue-50/70 text-[#002046]',
       title: 'RA Billing & Revenue Statement',
       desc: 'सर्व RA Bills, Net Payable, Payment Status सहित',
       onPDF: () => { try { generatePDFReport({ title: 'RA Billing & Revenue Statement', headers: ['Bill No', 'Project', 'Date', 'Amount', 'Status'], rows: raBills.map(b => [b.billNumber || b.id, b.projectId, formatDate(b.date), formatCurrency(b.netPayable), b.paymentStatus || '—']), fileName: 'RA_Billing_Statement.pdf' }); showToast('PDF डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } },
@@ -340,14 +340,14 @@ export const ReportsModule = () => {
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Report Template</label>
             <select value={reportType} onChange={e => setReportType(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none">
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none">
               {Object.entries(reportDefs).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Project</label>
             <select value={selectedProjectId} onChange={e => setSelectedProjectId(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none">
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none">
               <option value="ALL">All Projects</option>
               {projects.map(p => <option key={p.id} value={p.id}>{p.id} — {p.projectName}</option>)}
             </select>
@@ -355,19 +355,19 @@ export const ReportsModule = () => {
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Financial Year</label>
             <select value={selectedFY} onChange={e => setSelectedFY(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none">
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none">
               {['FY2024-25', 'FY2025-26', 'FY2026-27', 'FY2027-28'].map(fy => <option key={fy}>{fy}</option>)}
             </select>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <button onClick={() => setPreviewMode(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors">
-            <Eye size={16} /> Report Preview करा
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#002046] hover:bg-[#001736] text-white text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer">
+            <Eye size={16} className="text-white" /> Report Preview करा
           </button>
           {previewMode && (
             <button onClick={() => setPreviewMode(false)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-600 text-sm rounded-xl transition-colors">
+              className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-xl transition-colors cursor-pointer">
               <X size={15} /> Preview बंद करा
             </button>
           )}
@@ -383,10 +383,10 @@ export const ReportsModule = () => {
           </span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SummaryCard label="Total Records" value={currentSummary.count} icon={BarChart3} color="border-red-200 bg-red-50 text-red-700" />
-          <SummaryCard label="Total Amount" value={formatCurrency(currentSummary.total)} icon={IndianRupee} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
-          <SummaryCard label="Report Type" value={currentDef.label.split(' ').slice(0, 2).join(' ')} icon={FileText} color="border-amber-200 bg-amber-50 text-amber-700" />
-          <SummaryCard label="Financial Year" value={selectedFY} icon={Calendar} color="border-purple-200 bg-purple-50 text-purple-700" />
+          <SummaryCard label="Total Records" value={currentSummary.count} icon={BarChart3} color="border-blue-200 bg-blue-50/70 text-[#002046]" />
+          <SummaryCard label="Total Amount" value={formatCurrency(currentSummary.total)} icon={IndianRupee} color="border-emerald-200 bg-emerald-50 text-emerald-800" />
+          <SummaryCard label="Report Type" value={currentDef.label.split(' ').slice(0, 2).join(' ')} icon={FileText} color="border-amber-200 bg-amber-50 text-amber-800" />
+          <SummaryCard label="Financial Year" value={selectedFY} icon={Calendar} color="border-purple-200 bg-purple-50 text-purple-800" />
         </div>
       </div>
 
@@ -450,7 +450,7 @@ export const ReportsModule = () => {
             <span className="text-xs text-slate-500 self-center">Quick:</span>
             {[['today', 'Today'], ['week', 'This Week'], ['month', 'This Month'], ['fy', 'Full FY']].map(([k, l]) => (
               <button key={k} onClick={() => setQuickRange(k)}
-                className="px-3 py-1.5 text-xs font-medium border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                className="px-3 py-1.5 text-xs font-semibold border border-blue-200 bg-[#e8f1fc] text-[#004bb5] rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
                 {l}
               </button>
             ))}
@@ -463,7 +463,7 @@ export const ReportsModule = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <SummaryCard label="Total Income (RA Bills)" value={formatCurrency(totalIncome)} icon={TrendingUp} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
             <SummaryCard label="Total Expense" value={formatCurrency(totalExpense)} icon={DollarSign} color="border-rose-200 bg-rose-50 text-rose-700" />
-            <SummaryCard label={`Net Cash Flow ${netCashFlow >= 0 ? '▲' : '▼'}`} value={formatCurrency(Math.abs(netCashFlow))} icon={BarChart3} color={netCashFlow >= 0 ? 'border-red-200 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-700'} />
+            <SummaryCard label={`Net Cash Flow ${netCashFlow >= 0 ? '▲' : '▼'}`} value={formatCurrency(Math.abs(netCashFlow))} icon={BarChart3} color={netCashFlow >= 0 ? 'border-blue-200 bg-blue-50/70 text-[#002046]' : 'border-amber-200 bg-amber-50 text-amber-700'} />
           </div>
         </div>
 
@@ -538,10 +538,10 @@ export const ReportsModule = () => {
             const pct = billingPct(p);
             return (
               <button key={p.id} onClick={() => setSelectedProjId(isSelected ? null : p.id)}
-                className={`text-left rounded-xl border-2 p-4 transition-all ${isSelected ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-300' : 'border-slate-200 hover:border-red-300 bg-white hover:shadow-sm'}`}>
+                className={`text-left rounded-xl border-2 p-4 transition-all ${isSelected ? 'border-[#002046] bg-blue-50/40 shadow-md ring-2 ring-blue-300' : 'border-slate-200 hover:border-blue-300 bg-white hover:shadow-sm'}`}>
                 <div className="flex items-start justify-between mb-2">
-                  <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">{p.id}</span>
-                  {isSelected && <CheckCircle2 size={18} className="text-red-600" />}
+                  <span className="text-xs font-bold text-[#002046] bg-blue-100 px-2 py-0.5 rounded-full">{p.id}</span>
+                  {isSelected && <CheckCircle2 size={18} className="text-[#002046]" />}
                 </div>
                 <h3 className="font-bold text-slate-800 text-sm mb-1 leading-tight">{p.projectName}</h3>
                 <p className="text-xs text-slate-500 mb-3">{p.location || p.siteAddress || '—'}</p>
@@ -549,11 +549,11 @@ export const ReportsModule = () => {
                   <div><span className="text-slate-400">Contract:</span> <span className="font-semibold text-slate-700">{formatCurrency(p.contractValue)}</span></div>
                   <div><span className="text-slate-400">Billed:</span> <span className="font-semibold text-emerald-600">{formatCurrency(p.billedAmount)}</span></div>
                   <div><span className="text-slate-400">Actual Cost:</span> <span className="font-semibold text-rose-600">{formatCurrency(p.actualExpenditure)}</span></div>
-                  <div><span className="text-slate-400">Net Profit:</span> <span className="font-semibold text-red-600">{formatCurrency(p.actualProfit)}</span></div>
+                  <div><span className="text-slate-400">Net Profit:</span> <span className="font-semibold text-[#002046]">{formatCurrency(p.actualProfit)}</span></div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-red-500 rounded-full" style={{ width: `${Math.min(pct, 100)}%` }} />
+                    <div className="h-full bg-[#002046] rounded-full" style={{ width: `${Math.min(pct, 100)}%` }} />
                   </div>
                   <span className="text-xs font-bold text-slate-600">{pct}%</span>
                 </div>
@@ -563,7 +563,7 @@ export const ReportsModule = () => {
           })}
         </div>
         {!selectedProjId && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium text-center">
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-[#002046] font-medium text-center">
             👆 वरीलपैकी एक Project Card वर Click करा — पूर्ण Financial Details खाली दिसतील.
           </div>
         )}
@@ -573,7 +573,7 @@ export const ReportsModule = () => {
       {selProject && (
         <>
           {/* Info bar */}
-          <div className="bg-white rounded-2xl border border-red-200 p-5 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <StepBadge n="2" label="Project Financial Overview" />
@@ -582,13 +582,13 @@ export const ReportsModule = () => {
                 <p className="text-xs text-slate-400 mt-1">Client: {getClientName(selProject.id)}</p>
               </div>
               <button onClick={() => handleDossierDownload(selProject)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors">
-                <Download size={16} /> Executive Dossier PDF डाऊनलोड
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#002046] hover:bg-[#001736] text-white text-sm font-bold rounded-xl transition-colors shadow-2xs cursor-pointer">
+                <Download size={16} className="text-white" /> Executive Dossier PDF डाऊनलोड
               </button>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-              <SummaryCard label="Project Budget" value={formatCurrency(selProject.projectBudget || selProject.contractValue)} icon={DollarSign} color="border-red-200 bg-red-50 text-red-700" />
+              <SummaryCard label="Project Budget" value={formatCurrency(selProject.projectBudget || selProject.contractValue)} icon={DollarSign} color="border-blue-200 bg-blue-50/70 text-[#002046]" />
               <SummaryCard label="Actual Expenditure" value={formatCurrency(selProject.actualExpenditure)} icon={TrendingUp} color="border-rose-200 bg-rose-50 text-rose-700" />
               <SummaryCard label="Remaining Budget" value={formatCurrency((selProject.projectBudget || selProject.contractValue || 0) - (selProject.actualExpenditure || 0))} icon={BarChart3} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
               <SummaryCard label="Total Billed (RA)" value={formatCurrency(selProject.billedAmount)} icon={FileText} color="border-amber-200 bg-amber-50 text-amber-700" />
@@ -676,10 +676,10 @@ export const ReportsModule = () => {
       </div>
 
       {/* Project Executive Dossiers */}
-      <div className="bg-white rounded-2xl border border-red-200 p-5 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <div className="flex items-start gap-3 mb-4">
-          <div className="p-2.5 bg-red-50 rounded-xl">
-            <Layers size={20} className="text-red-600" />
+          <div className="p-2.5 bg-blue-50 text-[#002046] rounded-xl">
+            <Layers size={20} className="text-[#002046]" />
           </div>
           <div>
             <h3 className="font-bold text-slate-800">Project Executive Dossiers</h3>
@@ -689,12 +689,12 @@ export const ReportsModule = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {projects.map(p => (
             <div key={p.id} className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">{p.id}</span>
+              <span className="text-xs font-bold text-[#002046] bg-blue-100 px-2 py-0.5 rounded-full">{p.id}</span>
               <p className="font-semibold text-slate-800 text-sm mt-2 mb-1">{p.projectName}</p>
               <p className="text-xs text-slate-500 mb-3">{p.location || p.siteAddress || '—'}</p>
               <button onClick={() => handleDossierDownload(p)}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold rounded-lg transition-colors">
-                <Download size={13} /> Dossier PDF डाऊनलोड
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[#002046] hover:bg-[#001736] text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <Download size={13} className="text-white" /> Dossier PDF डाऊनलोड
               </button>
             </div>
           ))}

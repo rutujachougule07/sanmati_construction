@@ -408,17 +408,17 @@ export const AccountsModule = () => {
           <button
             onClick={() => setSelectedTxnDossier(row)}
             title="View Voucher Details"
-            className="p-1.5 bg-slate-100 hover:bg-red-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-[#002046] text-blue-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-blue-600 group-hover/btn:text-white" />
           </button>
           {row.status !== 'Cancelled' && (
             <button
               onClick={() => setTxnToReverse({ id: row.id, type: row.recordType.toLowerCase(), reason: '' })}
               title="Reverse / Cancel Voucher (Audit Preserved)"
-              className="p-1.5 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+              className="p-1.5 bg-slate-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
             >
-              <ArrowRightLeft className="w-3.5 h-3.5" />
+              <ArrowRightLeft className="w-3.5 h-3.5 text-rose-600 group-hover/btn:text-white" />
             </button>
           )}
         </div>
@@ -603,16 +603,16 @@ export const AccountsModule = () => {
           <button
             onClick={() => setSelectedPaymentHistory(row)}
             title="View Partial Payment History"
-            className="p-1.5 bg-slate-100 hover:bg-red-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-[#002046] text-blue-600 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <History className="w-3.5 h-3.5" />
+            <History className="w-3.5 h-3.5 text-blue-600 group-hover/btn:text-white" />
           </button>
           <button
             onClick={() => setSelectedReceiptPrint(row)}
             title="Generate Receipt Voucher"
-            className="p-1.5 bg-slate-100 hover:bg-slate-700 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-slate-700 text-slate-700 hover:text-white rounded-lg transition-colors shadow-2xs cursor-pointer group/btn"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-3.5 h-3.5 text-slate-700 group-hover/btn:text-white" />
           </button>
         </div>
       )
@@ -1054,7 +1054,7 @@ export const AccountsModule = () => {
 
             <button
               onClick={handleOpenNewInvoice}
-              className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
+              className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Issue New Tax Invoice</span>
@@ -1103,7 +1103,7 @@ export const AccountsModule = () => {
                   onClick={() => setPaymentStatusFilter(status)}
                   className={`px-3 py-1 rounded-lg font-semibold text-xs transition-colors cursor-pointer ${
                     paymentStatusFilter === status 
-                      ? 'bg-red-600 text-white shadow-2xs' 
+                      ? 'bg-[#002046] text-white shadow-2xs' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
@@ -1166,7 +1166,7 @@ export const AccountsModule = () => {
               </button>
               <button
                 onClick={handleOpenAddManualLedger}
-                className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Ledger Entry</span>
@@ -1284,9 +1284,9 @@ export const AccountsModule = () => {
                     orientation: "portrait"
                   });
                 }}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-slate-200 transition-colors shadow-2xs"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm shadow-[#002046]/25 cursor-pointer active:scale-95"
               >
-                <FileText className="w-3.5 h-3.5 text-slate-500" />
+                <FileText className="w-4 h-4 text-white" />
                 <span>Export Executive PDF</span>
               </button>
             </div>
@@ -1850,7 +1850,7 @@ export const AccountsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg transition-colors shadow-2xs"
             >
               Generate Invoice & Post
             </button>
@@ -2075,7 +2075,7 @@ export const AccountsModule = () => {
                 onClick={() => {
                   window.print();
                 }}
-                className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-2xs flex items-center gap-1.5"
+                className="px-4 py-1.5 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg transition-colors shadow-2xs flex items-center gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Print Voucher</span>
@@ -2187,7 +2187,7 @@ export const AccountsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-2xs"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg transition-colors shadow-2xs"
             >
               Post to Ledger
             </button>

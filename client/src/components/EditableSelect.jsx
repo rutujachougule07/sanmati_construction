@@ -176,7 +176,7 @@ export const EditableSelect = ({
                   if (searchTerm) setNewOption(searchTerm);
                   setTimeout(() => inputRef.current?.focus(), 60);
                 }}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50/80 rounded-lg transition-colors cursor-pointer group"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 text-xs font-bold text-[#002046] hover:text-[#001736] hover:bg-[#e8f1fc] rounded-lg transition-colors cursor-pointer group"
               >
                 <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span>+ Custom Option</span>
@@ -210,7 +210,7 @@ export const EditableSelect = ({
                   onClick={handleAdd}
                   disabled={!newOption.trim()}
                   title="Add option"
-                  className="w-7 h-7 flex items-center justify-center bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-lg transition-colors cursor-pointer flex-shrink-0 shadow-xs"
+                  className="w-7 h-7 flex items-center justify-center bg-[#002046] hover:bg-[#001736] disabled:opacity-40 text-white rounded-lg transition-colors cursor-pointer flex-shrink-0 shadow-xs"
                 >
                   <Plus className="w-4 h-4" />
                 </button>

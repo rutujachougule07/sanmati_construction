@@ -28,19 +28,19 @@ const Toast = ({ toast }) => {
 
 const StepBadge = ({ n, label }) => (
   <div className="flex items-center gap-2 mb-3">
-    <span className="w-7 h-7 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
-    <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</span>
+    <span className="w-7 h-7 rounded-full bg-[#002046] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-2xs">{n}</span>
+    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{label}</span>
   </div>
 );
 
 const SummaryCard = ({ label, value, icon: Icon, color }) => (
   <div className={`rounded-xl p-4 border ${color} flex items-start gap-3`}>
-    <div className="p-2 rounded-lg bg-white/60">
+    <div className="p-2 rounded-lg bg-white/80 shadow-2xs">
       <Icon size={18} className="text-current" />
     </div>
     <div>
-      <p className="text-xs font-medium opacity-70">{label}</p>
-      <p className="text-lg font-bold">{value}</p>
+      <p className="text-xs font-semibold opacity-75">{label}</p>
+      <p className="text-lg font-extrabold">{value}</p>
     </div>
   </div>
 );
@@ -109,7 +109,7 @@ const VERIFICATION_DATA = [
 const VOUCHER_TYPES = [
   { key: 'Sales Voucher', icon: IndianRupee, color: 'border-emerald-200 bg-emerald-50 text-emerald-700', desc: 'RA Bills & Client Invoices' },
   { key: 'Purchase Voucher', icon: Building, color: 'border-amber-200 bg-amber-50 text-amber-700', desc: 'Material Purchase Bills' },
-  { key: 'Payment Voucher', icon: ArrowRightLeft, color: 'border-red-100 bg-red-50/60 text-red-600', desc: 'Vendor & Supplier Payments' },
+  { key: 'Payment Voucher', icon: ArrowRightLeft, color: 'border-blue-200 bg-blue-50/70 text-[#002046]', desc: 'Vendor & Supplier Payments' },
   { key: 'Receipt Voucher', icon: CheckCircle2, color: 'border-blue-200 bg-blue-50 text-blue-700', desc: 'Client Payment Receipts' },
   { key: 'Journal Voucher', icon: FileText, color: 'border-purple-200 bg-purple-50 text-purple-700', desc: 'Adjustments & Provisions' },
   { key: 'Contra Voucher', icon: RefreshCw, color: 'border-slate-200 bg-slate-50 text-slate-700', desc: 'Cash ↔ Bank Transfers' },
@@ -201,22 +201,22 @@ export const TallyModule = () => {
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tally Host</label>
             <input type="text" defaultValue={TALLY_COMPANY.host}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none" />
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Port</label>
             <input type="text" defaultValue={TALLY_COMPANY.port}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none" />
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Tally Version</label>
             <input type="text" defaultValue={TALLY_COMPANY.version}
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none" />
+              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#002046] focus:outline-none" />
           </div>
         </div>
         <div className="mt-4">
           <button onClick={handleTestConnection} disabled={isTesting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors disabled:opacity-60">
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs text-sm font-semibold rounded-xl transition-colors disabled:opacity-60">
             {isTesting ? <RefreshCw size={16} className="animate-spin" /> : <Link2 size={16} />}
             {isTesting ? 'Testing Connection...' : 'Test Connection'}
           </button>
@@ -233,7 +233,7 @@ export const TallyModule = () => {
           </span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SummaryCard label="Company Name" value={TALLY_COMPANY.name} icon={Building} color="border-red-100 bg-red-50/60 text-red-600" />
+          <SummaryCard label="Company Name" value={TALLY_COMPANY.name} icon={Building} color="border-blue-200 bg-blue-50/70 text-[#002046]" />
           <SummaryCard label="Financial Year" value={TALLY_COMPANY.fy} icon={Clock} color="border-amber-200 bg-amber-50 text-amber-700" />
           <SummaryCard label="Total Ledgers" value={`${LEDGERS.length} Ledgers`} icon={Database} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
         </div>
@@ -281,13 +281,13 @@ export const TallyModule = () => {
         <div className="flex items-center justify-between mb-4">
           <StepBadge n="1" label="Sync Overview" />
           <button onClick={handleSyncAllLedgers} disabled={isSyncing}
-            className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors disabled:opacity-60">
+            className="flex items-center gap-2 px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs text-sm font-semibold rounded-xl transition-colors disabled:opacity-60">
             {isSyncing ? <RefreshCw size={15} className="animate-spin" /> : <RefreshCw size={15} />}
             Sync All Accounts
           </button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <SummaryCard label="Total Ledgers" value={LEDGERS.length} icon={Database} color="border-red-100 bg-red-50/60 text-red-600" />
+          <SummaryCard label="Total Ledgers" value={LEDGERS.length} icon={Database} color="border-blue-200 bg-blue-50/70 text-[#002046]" />
           <SummaryCard label="Synced" value={LEDGERS.filter(l => l.synced).length} icon={CheckCircle2} color="border-emerald-200 bg-emerald-50 text-emerald-700" />
           <SummaryCard label="Pending" value={LEDGERS.filter(l => !l.synced).length} icon={Clock} color="border-amber-200 bg-amber-50 text-amber-700" />
           <SummaryCard label="Total Balance" value={formatCurrency(LEDGERS.reduce((s, l) => s + l.balance, 0))} icon={IndianRupee} color="border-blue-200 bg-blue-50 text-blue-700" />
@@ -320,7 +320,7 @@ export const TallyModule = () => {
                     <td className="px-4 py-3">
                       {!isSynced ? (
                         <button onClick={() => handleSyncLedger(l.id)} disabled={isSyncing}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50">
+                          className="flex items-center gap-1 px-3 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs text-xs font-semibold rounded-lg transition-colors disabled:opacity-50">
                           <RefreshCw size={12} /> Sync Now
                         </button>
                       ) : (
@@ -360,22 +360,31 @@ export const TallyModule = () => {
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
         <StepBadge n="1" label="Voucher Type निवडा" />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {VOUCHER_TYPES.map(vt => (
-            <button key={vt.key} onClick={() => setSelectedVoucherType(selectedVoucherType === vt.key ? null : vt.key)}
-              className={`text-left p-3 rounded-xl border-2 transition-all ${selectedVoucherType === vt.key
-                ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-200'
-                : 'border-slate-200 hover:border-red-200 bg-white hover:bg-red-50/30'}`}>
-              <div className={`inline-flex p-2 rounded-lg mb-2 ${vt.color}`}>
-                <vt.icon size={15} />
-              </div>
-              <p className="text-xs font-bold text-slate-800">{vt.key}</p>
-              <p className="text-[11px] text-slate-500 mt-0.5">{vt.desc}</p>
-            </button>
-          ))}
+          {VOUCHER_TYPES.map(vt => {
+            const isSelected = selectedVoucherType === vt.key;
+            return (
+              <button
+                key={vt.key}
+                type="button"
+                onClick={() => setSelectedVoucherType(isSelected ? null : vt.key)}
+                className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'border-[#004bb5] bg-[#e8f1fc] shadow-md ring-2 ring-blue-300'
+                    : 'border-[#cce0fc] bg-[#f8fafd] hover:bg-[#e8f1fc] hover:border-[#004bb5]'
+                }`}
+              >
+                <div className="inline-flex p-2 rounded-xl mb-2 bg-[#dbeafe] text-[#004bb5] border border-[#bfdbfe]">
+                  <vt.icon size={16} />
+                </div>
+                <p className="text-xs font-bold text-[#002046]">{vt.key}</p>
+                <p className="text-[11px] text-[#475569] mt-0.5">{vt.desc}</p>
+              </button>
+            );
+          })}
         </div>
         {!selectedVoucherType && (
-          <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 font-medium">
-            👆 वरीलपैकी एक Voucher Type निवडा — त्यानुसार Transactions खाली दिसतील.
+          <p className="mt-3 text-xs text-[#004bb5] bg-[#e8f1fc] border border-[#cce0fc] rounded-xl p-3 font-semibold flex items-center gap-2">
+            <span>👆</span> वरीलपैकी एक Voucher Type निवडा — त्यानुसार Transactions खाली दिसतील.
           </p>
         )}
       </div>
@@ -410,7 +419,7 @@ export const TallyModule = () => {
                         <div className="flex items-center gap-2">
                           {!isTransferred && (
                             <button onClick={() => handleSyncVoucher(v.id)} disabled={isSyncing}
-                              className="flex items-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50">
+                              className="flex items-center gap-1 px-2.5 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs text-xs font-semibold rounded-lg transition-colors disabled:opacity-50">
                               <Zap size={11} /> Transfer
                             </button>
                           )}
@@ -469,7 +478,7 @@ export const TallyModule = () => {
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <StepBadge n="1" label="Data Verification Summary" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <SummaryCard label="Total Checks" value={VERIFICATION_DATA.length} icon={BarChart3} color="border-red-100 bg-red-50/60 text-red-600" />
+            <SummaryCard label="Total Checks" value={VERIFICATION_DATA.length} icon={BarChart3} color="border-blue-200 bg-blue-50/70 text-[#002046]" />
             <SummaryCard label="Verified" value={verified.length} icon={CheckCircle2} color="border-emerald-100 bg-emerald-50/60 text-emerald-700" />
             <SummaryCard label="Mismatches" value={mismatches.length} icon={AlertTriangle} color="border-amber-100 bg-amber-50/60 text-amber-700" />
             <SummaryCard label="Total Diff" value={formatCurrency(VERIFICATION_DATA.reduce((s, v) => s + v.diff, 0))} icon={IndianRupee} color="border-rose-100 bg-rose-50/60 text-rose-600" />
@@ -575,7 +584,7 @@ export const TallyModule = () => {
             </pre>
             <div className="flex justify-end">
               <button onClick={() => downloadTallyXML(xmlPreview.content, xmlPreview.fileName)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold rounded-xl transition-colors">
+                className="flex items-center gap-2 px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs text-sm font-semibold rounded-xl transition-colors">
                 <Download size={14} /> Save XML File
               </button>
             </div>
