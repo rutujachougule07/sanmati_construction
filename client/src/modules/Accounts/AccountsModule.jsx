@@ -264,12 +264,15 @@ export const AccountsModule = () => {
     setEditingTransaction(null);
     setIncomeValidationErrors({});
     const newVoucher = generateIncomeVoucherNo();
+    const defaultClient = clients[0];
+    const initialCustomer = defaultClient?.name || '';
+    const initialProject = defaultClient?.assignedProject || projects[0]?.name || '';
     setIncomeForm({
       id: '',
       voucherNumber: newVoucher,
       date: new Date().toISOString().split('T')[0],
-      projectName: projects[0]?.name || '',
-      customerName: clients[0]?.name || '',
+      projectName: initialProject,
+      customerName: initialCustomer,
       category: 'RA Bill Payment',
       description: '',
       amount: '',
@@ -459,6 +462,55 @@ export const AccountsModule = () => {
     setTxnToReverse(null);
     setReversalReason('');
   };
+
+  // Deduplicated unique projects for Inflow / Income modal
+  const uniqueIncomeProjects = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    // If customer is selected in income form, prioritize their assigned project
+    if (incomeForm.customerName) {
+      const activeClient = clients.find(c => c.name === incomeForm.customerName || c.companyName === incomeForm.customerName);
+      if (activeClient?.assignedProject) {
+        const key = activeClient.assignedProject.toLowerCase().trim();
+        seen.add(key);
+        list.push({
+          value: activeClient.assignedProject,
+          label: `${activeClient.assignedProject} (${activeClient.name})`
+        });
+      }
+    }
+
+    // Projects from Projects Master
+    projects.forEach(p => {
+      if (p.name) {
+        const key = p.name.toLowerCase().trim();
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            value: p.name,
+            label: p.location ? `${p.name} (${p.location})` : p.name
+          });
+        }
+      }
+    });
+
+    // Projects from other clients
+    clients.forEach(c => {
+      if (c.assignedProject) {
+        const key = c.assignedProject.toLowerCase().trim();
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            value: c.assignedProject,
+            label: `${c.assignedProject} (${c.name})`
+          });
+        }
+      }
+    });
+
+    return list;
+  }, [projects, clients, incomeForm.customerName]);
 
   // Combine Income & Expenses into unified transaction view
   const combinedTransactions = useMemo(() => {
@@ -2196,13 +2248,21 @@ export const AccountsModule = () => {
               <select
                 required
                 value={incomeForm.customerName}
-                onChange={(e) => setIncomeForm({ ...incomeForm, customerName: e.target.value })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const matched = clients.find(c => c.name === val || c.companyName === val);
+                  setIncomeForm(prev => ({
+                    ...prev,
+                    customerName: val,
+                    projectName: matched?.assignedProject || prev.projectName
+                  }));
+                }}
                 className={`erp-input font-medium ${incomeValidationErrors.customerName ? 'border-rose-500 ring-1 ring-rose-400' : ''}`}
               >
                 <option value="">-- Select Customer / Client --</option>
                 {clients.map(c => (
                   <option key={c.id} value={c.name}>
-                    {c.name} {c.company ? `(${c.company})` : ''}
+                    {c.name} {c.company ? `(${c.company})` : c.companyName ? `(${c.companyName})` : ''}
                   </option>
                 ))}
                 {incomeForm.customerName && !clients.some(c => c.name === incomeForm.customerName) && (
@@ -2215,23 +2275,24 @@ export const AccountsModule = () => {
             </div>
 
             <div>
-              <label className="block text-slate-700 font-semibold mb-1">Associated Construction Project *</label>
-              <select
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-slate-700 font-semibold">Associated Construction Project *</label>
+                <span className="text-[10px] text-slate-400">Select or type project</span>
+              </div>
+              <input
+                type="text"
                 required
+                list="income-projects-datalist"
                 value={incomeForm.projectName}
                 onChange={(e) => setIncomeForm({ ...incomeForm, projectName: e.target.value })}
+                placeholder="Type or select project name..."
                 className={`erp-input font-medium ${incomeValidationErrors.projectName ? 'border-rose-500 ring-1 ring-rose-400' : ''}`}
-              >
-                <option value="">-- Select Construction Project --</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.name}>
-                    {p.name} {p.location ? `(${p.location})` : ''}
-                  </option>
+              />
+              <datalist id="income-projects-datalist">
+                {uniqueIncomeProjects.map((p, idx) => (
+                  <option key={idx} value={p.value} />
                 ))}
-                {incomeForm.projectName && !projects.some(p => p.name === incomeForm.projectName) && (
-                  <option value={incomeForm.projectName}>{incomeForm.projectName}</option>
-                )}
-              </select>
+              </datalist>
               {incomeValidationErrors.projectName && (
                 <span className="text-[10px] text-rose-600 font-semibold mt-0.5 block">{incomeValidationErrors.projectName}</span>
               )}

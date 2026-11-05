@@ -59,6 +59,24 @@ export const DataTable = ({
     return sortedData.slice(start, start + pageSize);
   }, [sortedData, currentPage, pageSize]);
 
+  // Calculate dynamic minimum table width based on columns to guarantee zero overlap
+  const minTableWidth = useMemo(() => {
+    let sum = 0;
+    columns.forEach(col => {
+      if (col.minWidth) {
+        const px = parseInt(col.minWidth, 10);
+        sum += isNaN(px) ? 140 : px;
+      } else if (col.width && String(col.width).includes('px')) {
+        sum += parseInt(col.width, 10);
+      } else if (col.width && String(col.width).includes('%')) {
+        sum += Math.max(120, Math.round(parseFloat(col.width) * 11));
+      } else {
+        sum += 130;
+      }
+    });
+    return Math.max(sum, 960);
+  }, [columns]);
+
   const requestSort = (key) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -201,26 +219,28 @@ export const DataTable = ({
         className="overflow-x-auto w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        <table className="w-full text-left border-collapse table-fixed min-w-[760px]">
+        <table 
+          className="w-full text-left border-collapse table-auto"
+          style={{ minWidth: `${minTableWidth}px` }}
+        >
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200/90 text-slate-700">
               {columns.map((col) => {
                 const isSortable = col.sortable !== false && col.key && col.key !== 'actions' && col.key !== 'action';
-                const isSorted = sortConfig.key === col.key;
-                const colWidth = col.width || `${(100 / columns.length).toFixed(3)}%`;
+                const minW = col.minWidth || '110px';
                 return (
                   <th
                     key={col.key || col.header}
                     onClick={() => isSortable && requestSort(col.key)}
-                    className={`px-3 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none transition-colors border-b border-slate-200/90 ${
+                    className={`px-3.5 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none transition-colors border-b border-slate-200/90 ${
                       isSortable ? 'cursor-pointer hover:bg-slate-100' : ''
                     } ${
                       col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                     } ${col.headerClassName || ''}`}
                     style={{
                       textAlign: col.align || 'left',
-                      width: colWidth,
-                      ...(col.minWidth ? { minWidth: col.minWidth } : {})
+                      minWidth: minW,
+                      ...(col.width ? { width: col.width } : {})
                     }}
                   >
                     <div
@@ -231,12 +251,6 @@ export const DataTable = ({
                           ? 'mx-auto justify-center'
                           : 'mr-auto justify-start'
                       }`}
-                      style={{
-                        display: 'inline-flex',
-                        ...(col.align === 'right' ? { marginLeft: 'auto', textAlign: 'right' } : {}),
-                        ...(col.align === 'center' ? { margin: '0 auto', textAlign: 'center' } : {}),
-                        ...(col.align === 'left' || !col.align ? { marginRight: 'auto', textAlign: 'left' } : {})
-                      }}
                     >
                       <span className="text-slate-600 font-bold tracking-wider uppercase whitespace-nowrap text-[10px]">
                         {col.header}
@@ -255,17 +269,17 @@ export const DataTable = ({
                   className="hover:bg-slate-50/80 transition-colors"
                 >
                   {columns.map((col) => {
-                    const colWidth = col.width || `${(100 / columns.length).toFixed(3)}%`;
+                    const minW = col.minWidth || '110px';
                     return (
                       <td
                         key={col.key || col.header}
-                        className={`px-3 py-2 text-[11px] text-slate-700 align-middle ${
+                        className={`px-3.5 py-2.5 text-[11px] text-slate-700 align-middle ${
                           col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
                         } ${col.cellClassName || ''}`}
                         style={{ 
                           textAlign: col.align || 'left',
-                          width: colWidth,
-                          ...(col.minWidth ? { minWidth: col.minWidth } : {})
+                          minWidth: minW,
+                          ...(col.width ? { width: col.width } : {})
                         }}
                       >
                         {col.render ? col.render(row) : (row[col.key] ?? '—')}

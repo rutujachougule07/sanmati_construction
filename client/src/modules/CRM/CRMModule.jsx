@@ -1,11 +1,12 @@
 // MODULE 1: CRM MANAGEMENT - Complete Working Implementation
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Plus, Users, Phone, Mail, MapPin, Building, Calendar, CheckCircle2, Clock, 
   Briefcase, History, AlertCircle, ArrowRight, UserCheck, Trash2, Edit3, 
   Eye, FileText, Check, X, AlertTriangle, ArrowUpRight, Search, Filter, 
-  Download, Send, Paperclip, ChevronRight, RefreshCw, CalendarDays, User
+  Download, Send, Paperclip, ChevronRight, RefreshCw, CalendarDays, User,
+  HardHat, Hammer, DollarSign, Layers, Wrench
 } from 'lucide-react';
 import { useERPData } from '../../context/ERPDataContext';
 import { DataTable } from '../../components/DataTable';
@@ -14,6 +15,21 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { exportToExcel, generatePDFReport } from '../../services/exportService';
 import { EditableSelect } from '../../components/EditableSelect';
+
+export const CONSTRUCTION_WORK_TYPES = [
+  'Residential Bungalow Construction',
+  'Commercial Building Construction',
+  'Villa / Row House Development',
+  'Industrial Shed & Warehouse',
+  'Apartment / Flat Renovation',
+  'Interior Design & Execution',
+  'RCC Structural Work',
+  'Road & Infrastructure Work',
+  'Plastering & Painting Work',
+  'Fabrication & Structural Steel',
+  'Plumbing & Electrical Works',
+  'Other / Custom Work'
+];
 
 const CUSTOMER_CATEGORIES = [
   'Individual',
@@ -145,6 +161,9 @@ export const CRMModule = () => {
   const [customerCategoriesList, setCustomerCategoriesList] = useState(() => 
     loadCustomOptions('sanmati_crm_customer_categories', CUSTOMER_CATEGORIES)
   );
+  const [workTypesList, setWorkTypesList] = useState(() => 
+    loadCustomOptions('sanmati_crm_work_types', CONSTRUCTION_WORK_TYPES)
+  );
   const [customerTypesList, setCustomerTypesList] = useState(() => 
     loadCustomOptions('sanmati_crm_customer_types', CUSTOMER_TYPES)
   );
@@ -210,6 +229,7 @@ export const CRMModule = () => {
   }, [leads, updateLead]);
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeTab = searchParams.get('tab') || 'customers';
 
   // Navigation tab switcher helper
@@ -263,7 +283,7 @@ export const CRMModule = () => {
     id: '',
     name: '',
     companyName: '',
-    category: 'Company',
+    category: 'Individual',
     designation: '',
     phone: '',
     alternatePhone: '',
@@ -274,9 +294,14 @@ export const CRMModule = () => {
     pincode: '',
     gstin: '',
     pan: '',
-    customerType: 'Company',
+    customerType: 'Individual',
     leadSource: '',
     assignedProject: '',
+    workType: 'Residential Bungalow Construction',
+    customWorkType: '',
+    workDescription: '',
+    contractValue: '',
+    assignedEngineer: '',
     status: 'Active'
   });
 
@@ -288,9 +313,6 @@ export const CRMModule = () => {
     // 1. Basic Details
     if (!customerForm.name?.trim()) {
       errors.name = 'Customer / Contact Name is required';
-    }
-    if (!customerForm.category) {
-      errors.category = 'Customer Category is required';
     }
 
     // 2. Contact Details
@@ -308,23 +330,16 @@ export const CRMModule = () => {
       }
     }
 
-    // 3. Address Details
-    if (!customerForm.address?.trim()) {
-      errors.address = 'Registered Address is required';
+    // 3. Work Details Validation
+    if (!customerForm.workType?.trim()) {
+      errors.workType = 'Construction Work Type is required';
     }
-    if (!customerForm.city?.trim()) {
-      errors.city = 'City is required';
-    }
-    if (!customerForm.state?.trim()) {
-      errors.state = 'State is required';
-    }
-    if (!customerForm.pincode?.trim()) {
-      errors.pincode = 'PIN Code is required';
-    } else if (!/^[1-9][0-9]{5}$/.test(customerForm.pincode.trim())) {
+
+    // 4. Optional Validations
+    if (customerForm.pincode?.trim() && !/^[1-9][0-9]{5}$/.test(customerForm.pincode.trim())) {
       errors.pincode = 'PIN Code must be a valid 6-digit number (e.g. 416001)';
     }
 
-    // 4. Business & Tax Details
     if (customerForm.gstin?.trim()) {
       const gstinClean = customerForm.gstin.trim().toUpperCase();
       const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -339,10 +354,6 @@ export const CRMModule = () => {
       if (!panRegex.test(panClean)) {
         errors.pan = 'Invalid PAN format (e.g. AAYCS9281Q)';
       }
-    }
-
-    if (!customerForm.customerType) {
-      errors.customerType = 'Customer Type is required';
     }
 
     return errors;
@@ -503,7 +514,7 @@ export const CRMModule = () => {
       id: nextId,
       name: '',
       companyName: '',
-      category: 'Company',
+      category: 'Individual',
       designation: '',
       phone: '',
       alternatePhone: '',
@@ -514,9 +525,14 @@ export const CRMModule = () => {
       pincode: '',
       gstin: '',
       pan: '',
-      customerType: 'Company',
+      customerType: 'Individual',
       leadSource: '',
       assignedProject: '',
+      workType: 'Residential Bungalow Construction',
+      customWorkType: '',
+      workDescription: '',
+      contractValue: '',
+      assignedEngineer: combinedEmployeeList[0] || '',
       status: 'Active'
     });
     setIsCustomerModalOpen(true);
@@ -529,7 +545,7 @@ export const CRMModule = () => {
       id: customer.id || '',
       name: customer.name || '',
       companyName: customer.companyName || customer.name || '',
-      category: customer.category || 'Company',
+      category: customer.category || 'Individual',
       designation: customer.designation || '',
       phone: customer.phone || '',
       alternatePhone: customer.alternatePhone || '',
@@ -540,9 +556,14 @@ export const CRMModule = () => {
       pincode: customer.pincode || '',
       gstin: customer.gstin || '',
       pan: customer.pan || '',
-      customerType: customer.customerType || 'Company',
+      customerType: customer.customerType || 'Individual',
       leadSource: customer.leadSource || '',
       assignedProject: customer.assignedProject || '',
+      workType: customer.workType || 'Residential Bungalow Construction',
+      customWorkType: customer.customWorkType || '',
+      workDescription: customer.workDescription || '',
+      contractValue: customer.contractValue || '',
+      assignedEngineer: customer.assignedEngineer || '',
       status: customer.status || 'Active'
     });
     setIsCustomerModalOpen(true);
@@ -559,6 +580,7 @@ export const CRMModule = () => {
 
     const sanitizedData = {
       ...customerForm,
+      contractValue: Number(customerForm.contractValue) || 0,
       gstin: customerForm.gstin?.trim().toUpperCase() || '',
       pan: customerForm.pan?.trim().toUpperCase() || '',
       pincode: customerForm.pincode?.trim() || ''
@@ -590,14 +612,16 @@ export const CRMModule = () => {
     generatePDFReport({
       title: "SANMATI CONSTRUCTIONS - REGISTERED CUSTOMERS DIRECTORY",
       subtitle: `Official Customer Directory | Kolhapur, Maharashtra | Total: ${filteredCustomers.length} Records`,
-      headers: ["Customer ID", "Customer / Company", "Type", "Mobile", "GSTIN", "Assigned Project", "Status"],
+      headers: ["Customer ID", "Customer Name", "Mobile", "City", "Project Name", "Work Type", "Assigned Engineer", "Contract Value", "Status"],
       rows: filteredCustomers.map(c => [
         c.id,
         c.name,
-        c.customerType || 'Company',
         c.phone || '—',
-        c.gstin || '—',
+        c.city || '—',
         c.assignedProject || '—',
+        c.workType === 'Other / Custom Work' ? (c.customWorkType || 'Custom Work') : (c.workType || '—'),
+        c.assignedEngineer || '—',
+        c.contractValue ? formatCurrency(c.contractValue) : '—',
         c.status || 'Active'
       ]),
       fileName: "Sanmati_Customer_Directory",
@@ -607,134 +631,87 @@ export const CRMModule = () => {
 
   const customerColumns = [
     { 
-      key: 'id', 
-      header: 'Customer ID', 
-      minWidth: '120px', 
-      nowrap: true, 
-      render: (row) => <span className="font-bold text-red-600 font-mono whitespace-nowrap">{row.id}</span> 
-    },
-    {
-      key: 'name',
-      header: 'Customer & Company',
-      minWidth: '220px',
+      key: 'name', 
+      header: 'Customer Name', 
+      minWidth: '200px', 
       render: (row) => (
         <div>
-          <span className="font-bold text-slate-900 block leading-snug">{row.name}</span>
-          <span className="text-[11px] text-slate-500 font-medium">{row.companyName || row.name}</span>
-        </div>
-      )
-    },
-    {
-      key: 'customerType',
-      header: 'Type',
-      minWidth: '120px',
-      nowrap: true,
-      render: (row) => (
-        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${
-          row.customerType === 'Individual' 
-            ? 'bg-purple-50 text-purple-700 border-purple-200' 
-            : 'bg-indigo-50 text-indigo-700 border-indigo-200'
-        }`}>
-          {row.customerType || 'Company'}
-        </span>
-      )
-    },
-    {
-      key: 'phone',
-      header: 'Mobile / Email',
-      minWidth: '180px',
-      nowrap: true,
-      render: (row) => (
-        <div className="text-xs whitespace-nowrap">
-          <p className="text-slate-800 font-medium flex items-center gap-1">
-            <Phone className="w-3 h-3 text-slate-400" />
-            <span>{row.phone || '—'}</span>
-          </p>
-          <p className="text-slate-500 text-[11px] flex items-center gap-1">
-            <Mail className="w-3 h-3 text-slate-400" />
-            <span>{row.email || '—'}</span>
-          </p>
-        </div>
-      )
-    },
-    {
-      key: 'location',
-      header: 'City & State',
-      minWidth: '140px',
-      nowrap: true,
-      render: (row) => (
-        <span className="text-slate-700 text-xs whitespace-nowrap">
-          {row.city || 'Kolhapur'}, {row.state || 'MH'}
-        </span>
-      )
-    },
-    { 
-      key: 'gstin', 
-      header: 'GSTIN', 
-      minWidth: '150px', 
-      nowrap: true, 
-      render: (row) => <span className="font-mono text-[11px] text-slate-600 whitespace-nowrap">{row.gstin || '—'}</span> 
-    },
-    {
-      key: 'assignedProject',
-      header: 'Assigned Project',
-      minWidth: '180px',
-      render: (row) => (
-        <div className="truncate max-w-[170px]" title={row.assignedProject || 'Not Assigned'}>
-          {row.assignedProject ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-800 text-[11px] font-semibold border border-red-200/80">
-              <Building className="w-3 h-3 flex-shrink-0" />
-              <span className="truncate">{row.assignedProject}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-900 leading-snug">{row.name}</span>
+            <span className="font-mono text-[10px] text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded font-bold">
+              {row.id}
             </span>
-          ) : (
-            <span className="text-slate-400 text-xs italic">Unassigned</span>
+          </div>
+          {row.companyName && row.companyName !== row.name && (
+            <span className="text-[11px] text-slate-500 font-medium block mt-0.5">{row.companyName}</span>
           )}
         </div>
       )
     },
     {
-      key: 'status',
-      header: 'Status',
-      align: 'center',
-      minWidth: '110px',
+      key: 'phone',
+      header: 'Contact No',
+      minWidth: '150px',
       nowrap: true,
       render: (row) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border whitespace-nowrap ${
-          row.status === 'Active' 
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-            : 'bg-rose-50 text-rose-700 border-rose-200'
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${row.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-          {row.status || 'Active'}
-        </span>
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+          <Phone className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+          <span>{row.phone || '—'}</span>
+        </div>
       )
+    },
+    {
+      key: 'workType',
+      header: 'Work / Project',
+      minWidth: '220px',
+      render: (row) => {
+        const displayWork = row.workType === 'Other / Custom Work' 
+          ? (row.customWorkType || 'Custom Work') 
+          : (row.workType || 'Construction Work');
+        return (
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              <Hammer className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+              <span className="truncate max-w-[190px]" title={displayWork}>{displayWork}</span>
+            </div>
+            {row.assignedProject && (
+              <div className="flex items-center gap-1 text-[11px] text-slate-600">
+                <Building className="w-3 h-3 text-red-500 flex-shrink-0" />
+                <span className="font-medium text-slate-800 truncate max-w-[170px]" title={row.assignedProject}>
+                  {row.assignedProject}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      }
     },
     {
       key: 'actions',
       header: 'Actions',
       align: 'center',
-      minWidth: '170px',
+      minWidth: '130px',
       nowrap: true,
       render: (row) => (
         <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
           <button
             onClick={() => setSelectedCustomerDossier(row)}
-            title="View Complete Customer Dossier"
-            className="p-1.5 bg-slate-100 hover:bg-red-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            title="View Details"
+            className="p-1.5 bg-red-50 hover:bg-red-600 hover:text-white rounded-lg text-red-600 transition-colors shadow-2xs cursor-pointer border border-red-200 hover:border-transparent"
           >
             <Eye className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => handleOpenEditCustomer(row)}
             title="Edit Customer"
-            className="p-1.5 bg-slate-100 hover:bg-amber-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-amber-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer border border-slate-200 hover:border-transparent"
           >
             <Edit3 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setCustomerToDelete(row)}
             title="Delete Customer"
-            className="p-1.5 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer"
+            className="p-1.5 bg-slate-100 hover:bg-rose-600 hover:text-white rounded-lg text-slate-600 transition-colors shadow-2xs cursor-pointer border border-slate-200 hover:border-transparent"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -1279,6 +1256,19 @@ export const CRMModule = () => {
     setIsActivityModalOpen(false);
   };
 
+  // Derived modal titles
+  const customerModalTitle = editingCustomer
+    ? ("Edit Customer: " + (editingCustomer.name || customerForm.name || editingCustomer.id))
+    : "Register Customer & Work Scope";
+
+  const customerModalSubtitle = editingCustomer
+    ? ("Customer ID: " + editingCustomer.id + " • Manage client credentials, project allocation, and work scope.")
+    : "Manage client credentials, construction project allocation, and work scope details.";
+
+  const leadModalTitle = editingLead
+    ? ("Edit Lead: " + (editingLead.customerName || editingLead.leadTitle || editingLead.id))
+    : "Register New Construction Lead";
+
   // =============================================================
   // RENDER UI
   // =============================================================
@@ -1367,7 +1357,7 @@ export const CRMModule = () => {
           <DataTable
             columns={customerColumns}
             data={filteredCustomers}
-            searchKey="name"
+            searchKey={['name', 'companyName', 'phone', 'assignedProject', 'workType', 'gstin']}
             searchPlaceholder="Search customers by name, company, email, phone or GSTIN..."
             title="Customer Directory"
             exportFileName="Sanmati_Customers"
@@ -1948,24 +1938,24 @@ export const CRMModule = () => {
       <Modal
         isOpen={isCustomerModalOpen}
         onClose={() => setIsCustomerModalOpen(false)}
-        title={editingCustomer ? `Edit Customer: ${editingCustomer.id}` : "Register New Customer"}
-        subtitle="Manage client credentials, contact directory, and project allocations."
+        title={customerModalTitle}
+        subtitle={customerModalSubtitle}
         maxWidth="max-w-3xl"
       >
         <form onSubmit={handleSubmitCustomer} className="space-y-4 text-xs">
-          {/* 1. CUSTOMER BASIC DETAILS */}
-          <div className="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center gap-1.5 pb-1 border-b border-slate-200/60">
+          {/* 1. CUSTOMER & CONTACT DETAILS */}
+          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/90 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
               <span className="w-2 h-2 rounded-full bg-red-600"></span>
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-heading">
-                1. Customer Basic Details
+                1. Customer & Contact Details
               </h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
-                  Customer ID <span className="text-[10px] text-slate-400 font-normal">(Auto-generated)</span>
+                  Customer ID <span className="text-[10px] text-slate-400 font-normal">(Auto)</span>
                 </label>
                 <input
                   type="text"
@@ -1989,68 +1979,13 @@ export const CRMModule = () => {
                     if (customerValidationErrors.name) setCustomerValidationErrors(prev => ({ ...prev, name: '' }));
                   }}
                   className={`erp-input ${customerValidationErrors.name ? 'border-red-400 focus:border-red-500' : ''}`}
-                  placeholder="e.g. Adv. Rahul Shinde"
+                  placeholder="e.g. Rutu Patil"
                 />
                 {customerValidationErrors.name && (
                   <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.name}</p>
                 )}
               </div>
 
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Company / Developer Name</label>
-                <input
-                  type="text"
-                  value={customerForm.companyName}
-                  onChange={(e) => setCustomerForm({ ...customerForm, companyName: e.target.value })}
-                  className="erp-input"
-                  placeholder="e.g. Mahalaxmi Housing Society"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  Customer Category <span className="text-red-500">*</span>
-                </label>
-                <EditableSelect
-                  value={customerForm.category}
-                  onChange={(val) => {
-                    setCustomerForm({ ...customerForm, category: val });
-                    if (customerValidationErrors.category) setCustomerValidationErrors(prev => ({ ...prev, category: '' }));
-                  }}
-                  options={customerCategoriesList}
-                  onAddOption={(newOpt) => handleAddOption('sanmati_crm_customer_categories', setCustomerCategoriesList, customerCategoriesList, newOpt)}
-                  onRemoveOption={(opt) => handleRemoveOption('sanmati_crm_customer_categories', setCustomerCategoriesList, customerCategoriesList, opt)}
-                  placeholder="Select Category..."
-                  error={customerValidationErrors.category}
-                />
-                {customerValidationErrors.category && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.category}</p>
-                )}
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-slate-700 font-semibold mb-1">Contact Person Designation</label>
-                <input
-                  type="text"
-                  value={customerForm.designation}
-                  onChange={(e) => setCustomerForm({ ...customerForm, designation: e.target.value })}
-                  className="erp-input"
-                  placeholder="e.g. Managing Director / Partner / Site Head"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 2. CONTACT DETAILS */}
-          <div className="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center gap-1.5 pb-1 border-b border-slate-200/60">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-heading">
-                2. Contact Details
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
                   Mobile Number <span className="text-red-500">*</span>
@@ -2072,7 +2007,7 @@ export const CRMModule = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Alternate Mobile Number</label>
+                <label className="block text-slate-700 font-semibold mb-1">Alternate Phone</label>
                 <input
                   type="tel"
                   value={customerForm.alternatePhone}
@@ -2083,9 +2018,6 @@ export const CRMModule = () => {
                   className={`erp-input ${customerValidationErrors.alternatePhone ? 'border-red-400 focus:border-red-500' : ''}`}
                   placeholder="e.g. 9422033445"
                 />
-                {customerValidationErrors.alternatePhone && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.alternatePhone}</p>
-                )}
               </div>
 
               <div>
@@ -2095,119 +2027,229 @@ export const CRMModule = () => {
                   value={customerForm.email}
                   onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
                   className="erp-input"
-                  placeholder="e.g. rahul.shinde@example.com"
+                  placeholder="e.g. rutu@gmail.com"
                 />
               </div>
-            </div>
-          </div>
 
-          {/* 3. ADDRESS DETAILS */}
-          <div className="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center gap-1.5 pb-1 border-b border-slate-200/60">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-heading">
-                3. Address Details
-              </h4>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Registered Address <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                rows={2}
-                required
-                value={customerForm.address}
-                onChange={(e) => {
-                  setCustomerForm({ ...customerForm, address: e.target.value });
-                  if (customerValidationErrors.address) setCustomerValidationErrors(prev => ({ ...prev, address: '' }));
-                }}
-                className={`erp-input ${customerValidationErrors.address ? 'border-red-400 focus:border-red-500' : ''}`}
-                placeholder="Enter complete office or residential street address"
-              />
-              {customerValidationErrors.address && (
-                <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.address}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-slate-700 font-semibold mb-1">
-                  City <span className="text-red-500">*</span>
+                  City / Location <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={customerForm.city}
-                  onChange={(e) => {
-                    setCustomerForm({ ...customerForm, city: e.target.value });
-                    if (customerValidationErrors.city) setCustomerValidationErrors(prev => ({ ...prev, city: '' }));
-                  }}
-                  className={`erp-input ${customerValidationErrors.city ? 'border-red-400 focus:border-red-500' : ''}`}
-                  placeholder="Kolhapur"
+                  onChange={(e) => setCustomerForm({ ...customerForm, city: e.target.value })}
+                  className="erp-input"
+                  placeholder="e.g. Kolhapur"
                 />
-                {customerValidationErrors.city && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.city}</p>
-                )}
               </div>
 
-              <div>
+              <div className="sm:col-span-2 md:col-span-3">
                 <label className="block text-slate-700 font-semibold mb-1">
-                  State <span className="text-red-500">*</span>
+                  Site / Registered Address
                 </label>
                 <input
                   type="text"
-                  required
-                  value={customerForm.state}
-                  onChange={(e) => {
-                    setCustomerForm({ ...customerForm, state: e.target.value });
-                    if (customerValidationErrors.state) setCustomerValidationErrors(prev => ({ ...prev, state: '' }));
-                  }}
-                  className={`erp-input ${customerValidationErrors.state ? 'border-red-400 focus:border-red-500' : ''}`}
-                  placeholder="Maharashtra"
+                  value={customerForm.address}
+                  onChange={(e) => setCustomerForm({ ...customerForm, address: e.target.value })}
+                  className="erp-input"
+                  placeholder="e.g. Plot No. 12, Tarabai Park, Kolhapur"
                 />
-                {customerValidationErrors.state && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.state}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  PIN Code <span className="text-red-500">*</span> <span className="text-[10px] text-slate-400 font-normal">(6 Digits)</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={6}
-                  value={customerForm.pincode}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                    setCustomerForm({ ...customerForm, pincode: val });
-                    if (customerValidationErrors.pincode) setCustomerValidationErrors(prev => ({ ...prev, pincode: '' }));
-                  }}
-                  className={`erp-input font-mono ${customerValidationErrors.pincode ? 'border-red-400 focus:border-red-500' : ''}`}
-                  placeholder="416001"
-                />
-                {customerValidationErrors.pincode && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.pincode}</p>
-                )}
               </div>
             </div>
           </div>
 
-          {/* 4. BUSINESS & TAX DETAILS */}
-          <div className="bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center gap-1.5 pb-1 border-b border-slate-200/60">
-              <span className="w-2 h-2 rounded-full bg-red-600"></span>
+          {/* 2. CONSTRUCTION WORK & PROJECT DETAILS */}
+          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/90 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-600"></span>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-heading">
+                  2. Construction Work & Project Details
+                </h4>
+              </div>
+              <span className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Project Scope
+              </span>
+            </div>
+
+            {/* Project / Site Name */}
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Project / Site Name
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  list="customer-projects-datalist"
+                  value={customerForm.assignedProject}
+                  onChange={(e) => setCustomerForm({ ...customerForm, assignedProject: e.target.value })}
+                  className="erp-input font-medium bg-white"
+                  placeholder="e.g. Home, Rutu Residency, Safa Bakery, or Site Name"
+                />
+                <datalist id="customer-projects-datalist">
+                  {projects.map(p => (
+                    <option key={p.id} value={p.name}>
+                      {p.name} {p.location ? `(${p.location})` : ''}
+                    </option>
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
+            {/* Construction Work Type - Dual Option (Dropdown + Direct Type) */}
+            <div className="space-y-1.5 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <label className="block text-slate-800 font-bold text-xs">
+                  Construction Work Type <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[10px] text-slate-500 font-medium">
+                  Select from list or type custom work directly
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 1. Dropdown Option */}
+                <div>
+                  <span className="text-[10px] font-semibold text-slate-500 block mb-1">
+                    Select from Dropdown:
+                  </span>
+                  <select
+                    value={workTypesList.includes(customerForm.workType) ? customerForm.workType : ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val) {
+                        setCustomerForm({ ...customerForm, workType: val });
+                        if (customerValidationErrors.workType) {
+                          setCustomerValidationErrors(prev => ({ ...prev, workType: '' }));
+                        }
+                      }
+                    }}
+                    className="erp-input font-medium bg-slate-50 text-xs"
+                  >
+                    <option value="">-- Choose Standard Work Type --</option>
+                    {workTypesList.map((wt, idx) => (
+                      <option key={idx} value={wt}>{wt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. Direct Type Option */}
+                <div>
+                  <span className="text-[10px] font-semibold text-slate-500 block mb-1">
+                    Or Type Work Name Directly:
+                  </span>
+                  <input
+                    type="text"
+                    value={customerForm.workType}
+                    onChange={(e) => {
+                      setCustomerForm({ ...customerForm, workType: e.target.value });
+                      if (customerValidationErrors.workType) {
+                        setCustomerValidationErrors(prev => ({ ...prev, workType: '' }));
+                      }
+                    }}
+                    placeholder="e.g. Bakery Renovation, Swimming Pool, Warehouse Shed..."
+                    className={`erp-input font-medium bg-white text-xs ${customerValidationErrors.workType ? 'border-rose-500 ring-1 ring-rose-400' : ''}`}
+                  />
+                </div>
+              </div>
+
+              {customerValidationErrors.workType && (
+                <span className="text-[10px] text-rose-600 font-semibold mt-0.5 block">{customerValidationErrors.workType}</span>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">
+                Scope of Work / Requirements
+              </label>
+              <textarea
+                rows={2}
+                value={customerForm.workDescription}
+                onChange={(e) => setCustomerForm({ ...customerForm, workDescription: e.target.value })}
+                className="erp-input bg-white"
+                placeholder="e.g. G+1 2400 sq.ft residential bungalow, RCC frame structure, brickwork, vitrified tiles, waterproofing, modular kitchen..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Estimated Contract Value / Budget
+                </label>
+                <div className="flex rounded-lg border border-slate-300 focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500 overflow-hidden bg-white shadow-2xs">
+                  <span className="inline-flex items-center px-3 bg-slate-100 text-slate-600 font-bold text-xs border-r border-slate-300 select-none">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={customerForm.contractValue}
+                    onChange={(e) => setCustomerForm({ ...customerForm, contractValue: e.target.value })}
+                    className="w-full px-3 py-2 text-xs font-mono font-bold text-slate-800 outline-none placeholder-slate-400 bg-white"
+                    placeholder="e.g. 3500000"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Assigned Site Engineer / Supervisor
+                </label>
+                <select
+                  value={customerForm.assignedEngineer}
+                  onChange={(e) => setCustomerForm({ ...customerForm, assignedEngineer: e.target.value })}
+                  className="erp-input font-medium bg-white"
+                >
+                  <option value="">-- Select Site Engineer / Supervisor --</option>
+                  {employeeList.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                  {customerForm.assignedEngineer && !employeeList.includes(customerForm.assignedEngineer) && (
+                    <option value={customerForm.assignedEngineer}>{customerForm.assignedEngineer}</option>
+                  )}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. BUSINESS, TAX & ACCOUNT DETAILS */}
+          <div className="bg-slate-50/70 p-4 rounded-xl border border-slate-200/90 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+              <span className="w-2 h-2 rounded-full bg-slate-500"></span>
               <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-heading">
-                4. Business & Tax Details
+                3. Business, Tax & Account Details
               </h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div>
+                <label className="block text-slate-700 font-semibold mb-1">Customer Category</label>
+                <EditableSelect
+                  value={customerForm.category}
+                  onChange={(val) => setCustomerForm({ ...customerForm, category: val })}
+                  options={customerCategoriesList}
+                  onAddOption={(newOpt) => handleAddOption('sanmati_crm_customer_categories', setCustomerCategoriesList, customerCategoriesList, newOpt)}
+                  onRemoveOption={(opt) => handleRemoveOption('sanmati_crm_customer_categories', setCustomerCategoriesList, customerCategoriesList, opt)}
+                  placeholder="Select category..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Company / Developer</label>
+                <input
+                  type="text"
+                  value={customerForm.companyName}
+                  onChange={(e) => setCustomerForm({ ...customerForm, companyName: e.target.value })}
+                  className="erp-input bg-white"
+                  placeholder="e.g. Mahalaxmi Housing"
+                />
+              </div>
+
+              <div>
                 <label className="block text-slate-700 font-semibold mb-1">
-                  GSTIN <span className="text-[10px] text-slate-400 font-normal">(Optional, 15 chars)</span>
+                  GSTIN <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
@@ -2218,7 +2260,7 @@ export const CRMModule = () => {
                     setCustomerForm({ ...customerForm, gstin: val });
                     if (customerValidationErrors.gstin) setCustomerValidationErrors(prev => ({ ...prev, gstin: '' }));
                   }}
-                  className={`erp-input font-mono ${customerValidationErrors.gstin ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input font-mono bg-white ${customerValidationErrors.gstin ? 'border-red-400 focus:border-red-500' : ''}`}
                   placeholder="27AAYCS9281Q1ZU"
                 />
                 {customerValidationErrors.gstin && (
@@ -2227,57 +2269,15 @@ export const CRMModule = () => {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  PAN Number <span className="text-[10px] text-slate-400 font-normal">(Optional, 10 chars)</span>
-                </label>
-                <input
-                  type="text"
-                  maxLength={10}
-                  value={customerForm.pan}
-                  onChange={(e) => {
-                    const val = e.target.value.toUpperCase();
-                    setCustomerForm({ ...customerForm, pan: val });
-                    if (customerValidationErrors.pan) setCustomerValidationErrors(prev => ({ ...prev, pan: '' }));
-                  }}
-                  className={`erp-input font-mono ${customerValidationErrors.pan ? 'border-red-400 focus:border-red-500' : ''}`}
-                  placeholder="AAYCS9281Q"
-                />
-                {customerValidationErrors.pan && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.pan}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  Customer Type <span className="text-red-500">*</span>
-                </label>
-                <EditableSelect
-                  value={customerForm.customerType}
-                  onChange={(val) => {
-                    setCustomerForm({ ...customerForm, customerType: val });
-                    if (customerValidationErrors.customerType) setCustomerValidationErrors(prev => ({ ...prev, customerType: '' }));
-                  }}
-                  options={customerTypesList}
-                  onAddOption={(newOpt) => handleAddOption('sanmati_crm_customer_types', setCustomerTypesList, customerTypesList, newOpt)}
-                  onRemoveOption={(opt) => handleRemoveOption('sanmati_crm_customer_types', setCustomerTypesList, customerTypesList, opt)}
-                  placeholder="Select Customer Type..."
-                  error={customerValidationErrors.customerType}
-                />
-                {customerValidationErrors.customerType && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{customerValidationErrors.customerType}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Lead Source</label>
-                <EditableSelect
-                  value={customerForm.leadSource}
-                  onChange={(val) => setCustomerForm({ ...customerForm, leadSource: val })}
-                  options={leadSourcesList}
-                  onAddOption={(newOpt) => handleAddOption('sanmati_crm_lead_sources', setLeadSourcesList, leadSourcesList, newOpt)}
-                  onRemoveOption={(opt) => handleRemoveOption('sanmati_crm_lead_sources', setLeadSourcesList, leadSourcesList, opt)}
-                  placeholder="Select Lead Source..."
-                />
+                <label className="block text-slate-700 font-semibold mb-1">Account Status</label>
+                <select
+                  value={customerForm.status || 'Active'}
+                  onChange={(e) => setCustomerForm({ ...customerForm, status: e.target.value })}
+                  className="erp-input font-medium bg-white"
+                >
+                  <option value="Active">Active (Ongoing Site)</option>
+                  <option value="Inactive">Inactive (Dormant Account)</option>
+                </select>
               </div>
             </div>
           </div>
@@ -2292,9 +2292,10 @@ export const CRMModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs cursor-pointer"
+              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
             >
-              {editingCustomer ? 'Update Customer' : 'Save Customer'}
+              <Check className="w-3.5 h-3.5" />
+              <span>{editingCustomer ? 'Update Customer' : 'Save Customer & Work Details'}</span>
             </button>
           </div>
         </form>
@@ -2320,7 +2321,7 @@ export const CRMModule = () => {
                 </span>
                 <h3 className="text-base font-extrabold text-slate-900">{selectedCustomerDossier.companyName || selectedCustomerDossier.name}</h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  {selectedCustomerDossier.address}, {selectedCustomerDossier.city}, {selectedCustomerDossier.state}{selectedCustomerDossier.pincode ? ` - ${selectedCustomerDossier.pincode}` : ''}
+                  {[selectedCustomerDossier.address, selectedCustomerDossier.city, selectedCustomerDossier.state].filter(Boolean).join(', ')}{selectedCustomerDossier.pincode ? ` - ${selectedCustomerDossier.pincode}` : ''}
                 </p>
               </div>
 
@@ -2369,56 +2370,109 @@ export const CRMModule = () => {
             </div>
 
             {/* Linked Construction Project Card */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-white">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
-                Linked Construction Project
+            <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                Construction Project & Scope of Work Details
               </span>
-              {selectedCustomerDossier.assignedProject ? (
-                <div className="flex items-center justify-between p-3 rounded-lg bg-red-50/60 border border-red-200">
+              <div className="p-3.5 rounded-xl bg-red-50/60 border border-red-200 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <Building className="w-5 h-5 text-red-600" />
+                    <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+                      <Building className="w-4 h-4" />
+                    </div>
                     <div>
-                      <h4 className="text-xs font-bold text-slate-900">{selectedCustomerDossier.assignedProject}</h4>
-                      <p className="text-[11px] text-slate-500">Site location registered in Kolhapur cluster</p>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        {selectedCustomerDossier.assignedProject || 'Site / Project Unassigned'}
+                      </h4>
+                      <span className="text-[11px] text-blue-700 font-semibold bg-blue-100/70 px-2 py-0.5 rounded inline-block mt-0.5">
+                        {selectedCustomerDossier.workType === 'Other / Custom Work' ? (selectedCustomerDossier.customWorkType || 'Custom Work') : (selectedCustomerDossier.workType || 'Construction Work')}
+                      </span>
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-red-600 bg-white px-2.5 py-1 rounded-md border border-red-200">
-                    Active Site
-                  </span>
+                  {selectedCustomerDossier.assignedProject ? (
+                    <span className="text-xs font-bold text-red-600 bg-white px-2.5 py-1 rounded-md border border-red-200 self-start sm:self-auto">
+                      Active Site
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 self-start sm:self-auto">
+                      Pending Site Affiliation
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-slate-400 italic">No construction project currently linked to this client.</p>
-              )}
+
+                {selectedCustomerDossier.workDescription && (
+                  <div className="p-2.5 bg-white rounded-lg border border-red-100 text-slate-700 text-xs">
+                    <strong className="text-slate-900 block font-semibold mb-0.5">Scope of Work:</strong>
+                    {selectedCustomerDossier.workDescription}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-red-100/80 text-xs">
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Contract Value / Budget:</span>
+                    <strong className="text-emerald-700 font-mono text-sm">
+                      {selectedCustomerDossier.contractValue ? formatCurrency(selectedCustomerDossier.contractValue) : '—'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 text-[11px] block">Assigned Site Engineer:</span>
+                    <strong className="text-slate-800">
+                      {selectedCustomerDossier.assignedEngineer || 'Unassigned'}
+                    </strong>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Quick Actions Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-200">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => {
+                    const c = selectedCustomerDossier;
+                    setSelectedCustomerDossier(null);
+                    handleOpenEditCustomer(c);
+                  }}
+                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-xs font-semibold border border-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Edit Customer</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedCustomerDossier(null);
+                    navigate('/quotations');
+                  }}
+                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg text-xs font-semibold border border-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Create Quotation</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedCustomerDossier(null);
+                    navigate('/projects');
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <HardHat className="w-3.5 h-3.5" />
+                  <span>Go to Site Work</span>
+                </button>
                 <button
                   onClick={() => {
                     handleOpenAddFollowUp(selectedCustomerDossier.name, selectedCustomerDossier.phone);
                     setSelectedCustomerDossier(null);
                     setActiveTab('reminders');
                   }}
-                  className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-xs font-semibold border border-amber-200 transition-colors"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold border border-slate-200 transition-colors cursor-pointer"
                 >
                   + Schedule Follow-up
-                </button>
-                <button
-                  onClick={() => {
-                    handleOpenAddActivity(selectedCustomerDossier);
-                    setSelectedCustomerDossier(null);
-                    setActiveTab('history');
-                  }}
-                  className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-lg text-xs font-semibold border border-indigo-200 transition-colors"
-                >
-                  + Log Interaction
                 </button>
               </div>
 
               <button
                 onClick={() => setSelectedCustomerDossier(null)}
-                className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors"
+                className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition-colors cursor-pointer"
               >
                 Close
               </button>
@@ -2475,7 +2529,7 @@ export const CRMModule = () => {
       <Modal
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
-        title={editingLead ? `Edit Lead: ${editingLead.id}` : "Register New Construction Lead"}
+        title={leadModalTitle}
         subtitle="Record prospective inquiries, tender opportunities, civil requirements, and assignment details."
         maxWidth="max-w-3xl"
       >

@@ -17,6 +17,12 @@ import {
   INITIAL_NOTIFICATIONS
 } from '../services/mockData';
 import { calculateHaversineDistance, calculateBOQItem, calculateRABill } from '../utils/formatters';
+import { isFirebaseConfigured } from '../services/firebase';
+import { 
+  subscribeToModuleCollection, 
+  saveModuleRecord, 
+  removeModuleRecord 
+} from '../services/firebaseSync';
 
 const ERPDataContext = createContext(null);
 
@@ -42,23 +48,20 @@ export const ERPDataProvider = ({ children }) => {
         try {
           let parsed = JSON.parse(saved);
           if (key === 'projects' && Array.isArray(parsed)) {
-            const DUMMY_PRJ_IDS = ['PRJ-KLP-001', 'PRJ-KLP-002', 'PRJ-KLP-003'];
-            parsed = parsed.filter(p => !DUMMY_PRJ_IDS.includes(p.id) && !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
+            parsed = parsed.filter(p => !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'clients' && Array.isArray(parsed)) {
-            const DUMMY_CLI_IDS = ['CLI-001', 'CLI-002', 'CLI-003', 'CLI-004'];
-            parsed = parsed.filter(c => !DUMMY_CLI_IDS.includes(c.id) && !c.name?.includes('Kolhapur Municipal Corporation') && !c.name?.includes('D. Y. Patil') && !c.name?.includes('Chhatrapati Shahu') && !c.name?.includes('Tarabai Heights'));
+            parsed = parsed.filter(c => !c.name?.includes('Kolhapur Municipal Corporation') && !c.name?.includes('D. Y. Patil') && !c.name?.includes('Chhatrapati Shahu') && !c.name?.includes('Tarabai Heights'));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'vendors' && Array.isArray(parsed)) {
-            const DUMMY_VND_IDS = ['VND-001', 'VND-002', 'VND-003', 'VND-004'];
-            parsed = parsed.filter(v => !DUMMY_VND_IDS.includes(v.id) && !v.name?.includes('Rajaram Steel') && !v.name?.includes('Ultratech Cement') && !v.name?.includes('Kolhapur Earthmovers') && !v.name?.includes('Mahavir Hardware'));
+            parsed = parsed.filter(v => !v.name?.includes('Rajaram Steel') && !v.name?.includes('Ultratech Cement') && !v.name?.includes('Kolhapur Earthmovers') && !v.name?.includes('Mahavir Hardware'));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'hrmsEmployees' && Array.isArray(parsed)) {
-            const DUMMY_IDS = ['EMP-KLP-01', 'EMP-KLP-02', 'EMP-KLP-03', 'EMP-KLP-04'];
-            parsed = parsed.filter(emp => !DUMMY_IDS.includes(emp.id) && emp.name !== 'Sanmati Patil' && emp.name !== 'Er. Rajesh Kulkarni' && emp.name !== 'Er. Amit Deshmukh' && emp.name !== 'CA Sneha Shinde');
+            const DUMMY_NAMES = ['Sanmati Patil', 'Er. Rajesh Kulkarni', 'Er. Amit Deshmukh', 'CA Sneha Shinde'];
+            parsed = parsed.filter(emp => !DUMMY_NAMES.includes(emp.name));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'leads' && Array.isArray(parsed)) {
@@ -99,10 +102,10 @@ export const ERPDataProvider = ({ children }) => {
   const [expenses, setExpenses] = usePersistedState('expenses', INITIAL_EXPENSES);
   const [notifications, setNotifications] = usePersistedState('notifications', INITIAL_NOTIFICATIONS);
 
-  // Live project guarantee: ensure dummy projects (PRJ-KLP-001, 002, 003) are never shown
+  // Live project guarantee: ensure dummy projects are never shown
   useEffect(() => {
     setProjects(prev => {
-      const filtered = (prev || []).filter(p => p.id !== 'PRJ-KLP-001' && p.id !== 'PRJ-KLP-002' && p.id !== 'PRJ-KLP-003' && !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
+      const filtered = (prev || []).filter(p => !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
       if (filtered.length !== prev.length) {
         localStorage.setItem('sanmati_projects', JSON.stringify(filtered));
         return filtered;
@@ -127,6 +130,110 @@ export const ERPDataProvider = ({ children }) => {
   const [vendorContacts, setVendorContacts] = usePersistedState('vendorContacts', []);
   const [vendorPurchases, setVendorPurchases] = usePersistedState('vendorPurchases', []);
   const [vendorPayments, setVendorPayments] = usePersistedState('vendorPayments', []);
+
+  // Live Firebase Cloud Firestore Realtime Synchronizer
+  useEffect(() => {
+    if (!isFirebaseConfigured) return;
+
+    const unsubs = [
+      subscribeToModuleCollection('clients', (data) => {
+        if (data && data.length > 0) setClients(data);
+      }),
+      subscribeToModuleCollection('leads', (data) => {
+        if (data && data.length > 0) setLeads(data);
+      }),
+      subscribeToModuleCollection('followUps', (data) => {
+        if (data && data.length > 0) setFollowUps(data);
+      }),
+      subscribeToModuleCollection('customerActivities', (data) => {
+        if (data && data.length > 0) setCustomerActivities(data);
+      }),
+      subscribeToModuleCollection('incomeRecords', (data) => {
+        if (data && data.length > 0) setIncomeRecords(data);
+      }),
+      subscribeToModuleCollection('expenseRecords', (data) => {
+        if (data && data.length > 0) setExpenseRecords(data);
+      }),
+      subscribeToModuleCollection('paymentTracking', (data) => {
+        if (data && data.length > 0) setPaymentTracking(data);
+      }),
+      subscribeToModuleCollection('ledgerEntries', (data) => {
+        if (data && data.length > 0) setLedgerEntries(data);
+      }),
+      subscribeToModuleCollection('nfdRecords', (data) => {
+        if (data && data.length > 0) setNfdRecords(data);
+      }),
+      subscribeToModuleCollection('vendors', (data) => {
+        if (data && data.length > 0) setVendors(data);
+      }),
+      subscribeToModuleCollection('vendorContacts', (data) => {
+        if (data && data.length > 0) setVendorContacts(data);
+      }),
+      subscribeToModuleCollection('vendorPurchases', (data) => {
+        if (data && data.length > 0) setVendorPurchases(data);
+      }),
+      subscribeToModuleCollection('vendorPayments', (data) => {
+        if (data && data.length > 0) setVendorPayments(data);
+      }),
+      subscribeToModuleCollection('projects', (data) => {
+        if (data && data.length > 0) setProjects(data);
+      }),
+      subscribeToModuleCollection('hrmsEmployees', (data) => {
+        if (data && data.length > 0) setHrmsEmployees(data);
+      }),
+      subscribeToModuleCollection('boqItems', (data) => {
+        if (data && data.length > 0) setBoqItems(data);
+      }),
+      subscribeToModuleCollection('raBills', (data) => {
+        if (data && data.length > 0) setRaBills(data);
+      }),
+      subscribeToModuleCollection('gpsLogs', (data) => {
+        if (data && data.length > 0) setGpsLogs(data);
+      }),
+      subscribeToModuleCollection('approvals', (data) => {
+        if (data && data.length > 0) setApprovals(data);
+      })
+    ];
+
+    // Auto-sync any existing local records across collections directly to live Firebase
+    try {
+      const collectionsToSync = [
+        { key: 'sanmati_hrmsEmployees', col: 'hrmsEmployees' },
+        { key: 'sanmati_clients', col: 'clients' },
+        { key: 'sanmati_leads', col: 'leads' },
+        { key: 'sanmati_followUps', col: 'followUps' },
+        { key: 'sanmati_customerActivities', col: 'customerActivities' },
+        { key: 'sanmati_incomeRecords', col: 'incomeRecords' },
+        { key: 'sanmati_expenseRecords', col: 'expenseRecords' },
+        { key: 'sanmati_paymentTracking', col: 'paymentTracking' },
+        { key: 'sanmati_ledgerEntries', col: 'ledgerEntries' },
+        { key: 'sanmati_nfdRecords', col: 'nfdRecords' },
+        { key: 'sanmati_vendors', col: 'vendors' },
+        { key: 'sanmati_vendorContacts', col: 'vendorContacts' },
+        { key: 'sanmati_vendorPurchases', col: 'vendorPurchases' },
+        { key: 'sanmati_vendorPayments', col: 'vendorPayments' },
+        { key: 'sanmati_projects', col: 'projects' },
+      ];
+
+      collectionsToSync.forEach(({ key, col }) => {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            parsed.forEach(item => {
+              if (item && item.id) {
+                saveModuleRecord(col, item.id, item);
+              }
+            });
+          }
+        }
+      });
+    } catch (e) { /* ignore */ }
+
+    return () => {
+      unsubs.forEach(unsub => typeof unsub === 'function' && unsub());
+    };
+  }, []);
 
   // --- Notification Dispatcher ---
   const addNotification = (title, message, type = 'info') => {
@@ -176,6 +283,7 @@ export const ERPDataProvider = ({ children }) => {
     };
     newProject.estimatedProfit = Math.max(0, (newProject.contractValue || 0) - (newProject.projectBudget || 0));
     setProjects(prev => [newProject, ...prev]);
+    saveModuleRecord('projects', newProject.id, newProject);
     addNotification('Project Created', `Project ${newProject.name} created successfully.`, 'success');
     return newProject;
   };
@@ -190,35 +298,48 @@ export const ERPDataProvider = ({ children }) => {
       }
       return p;
     }));
+    saveModuleRecord('projects', projectId, updatedData);
   };
 
   const updateProjectActivity = (projectId, activityName, progress, status) => {
+    let updatedProj = null;
     setProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         const activities = p.activities.map(act => 
           act.name === activityName ? { ...act, progress: Number(progress), status } : act
         );
         const avgProgress = Math.round(activities.reduce((acc, curr) => acc + (curr.progress || 0), 0) / activities.length);
-        return {
+        updatedProj = {
           ...p,
           activities,
           completionPercentage: avgProgress
         };
+        return updatedProj;
       }
       return p;
     }));
+    if (updatedProj) {
+      saveModuleRecord('projects', projectId, updatedProj);
+    }
     addNotification('Activity Updated', `${activityName} updated to ${progress}% on project.`, 'info');
+  };
+
+  const deleteProject = (projectId) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    removeModuleRecord('projects', projectId);
+    addNotification('Project Deleted', `Project has been deleted.`, 'info');
   };
 
   // --- BOQ Operations ---
   const addBOQItem = (boqData) => {
     const amount = calculateBOQItem(boqData.quantity, boqData.rate);
     const newItem = {
-      id: `BOQ-${Date.now()}`,
+      id: boqData.id || `BOQ-${Date.now()}`,
       amount,
       ...boqData
     };
     setBoqItems(prev => [newItem, ...prev]);
+    saveModuleRecord('boqItems', newItem.id, newItem);
     addNotification('BOQ Item Added', `${newItem.description.substring(0, 30)}... added to BOQ.`, 'success');
     return newItem;
   };
@@ -235,7 +356,7 @@ export const ERPDataProvider = ({ children }) => {
     });
 
     const newBill = {
-      id: `RA-${Date.now()}`,
+      id: billData.id || `RA-${Date.now()}`,
       date: new Date().toISOString().split('T')[0],
       retentionAmount: calc.retentionAmount,
       taxableSubtotal: calc.taxableSubtotal,
@@ -250,6 +371,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setRaBills(prev => [newBill, ...prev]);
+    saveModuleRecord('raBills', newBill.id, newBill);
 
     // Also automatically create an Approval request for the bill
     const appRequest = {
@@ -378,6 +500,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setGpsLogs(prev => [newLog, ...prev]);
+    saveModuleRecord('gpsLogs', newLog.id, newLog);
     addNotification(
       isInside ? 'GPS Check-In Verified' : 'GPS Check-In Outside Geofence',
       `${userName} logged attendance for ${proj?.name || 'Project'}. Status: ${geofenceStatus}`,
@@ -388,9 +511,10 @@ export const ERPDataProvider = ({ children }) => {
 
   // --- Approvals Workflow (Draft -> Submitted -> Approved / Rejected) ---
   const updateApprovalStatus = (approvalId, newStatus, comments, approverName) => {
+    let updatedApproval = null;
     setApprovals(prev => prev.map(app => {
       if (app.id === approvalId) {
-        const updated = {
+        updatedApproval = {
           ...app,
           status: newStatus,
           history: [
@@ -401,13 +525,23 @@ export const ERPDataProvider = ({ children }) => {
 
         // If it was an RA Bill approval
         if (app.type === "RA bill" && newStatus === 'Approved') {
-          setRaBills(bills => bills.map(b => b.id === app.referenceId ? { ...b, status: 'Approved' } : b));
+          setRaBills(bills => bills.map(b => {
+            if (b.id === app.referenceId) {
+              const updatedB = { ...b, status: 'Approved' };
+              saveModuleRecord('raBills', b.id, updatedB);
+              return updatedB;
+            }
+            return b;
+          }));
         }
 
-        return updated;
+        return updatedApproval;
       }
       return app;
     }));
+    if (updatedApproval) {
+      saveModuleRecord('approvals', approvalId, updatedApproval);
+    }
     addNotification('Approval Updated', `Request marked as ${newStatus} by ${approverName}.`, newStatus === 'Approved' ? 'success' : 'warning');
   };
 
@@ -475,24 +609,32 @@ export const ERPDataProvider = ({ children }) => {
       customerType: customerData.customerType || 'Company',
       leadSource: customerData.leadSource || '',
       assignedProject: customerData.assignedProject || '',
+      workType: customerData.workType || 'Residential Bungalow Construction',
+      customWorkType: customerData.customWorkType || '',
+      workDescription: customerData.workDescription || '',
+      contractValue: Number(customerData.contractValue) || 0,
+      assignedEngineer: customerData.assignedEngineer || '',
       status: customerData.status || 'Active',
       totalBilled: Number(customerData.totalBilled) || 0,
       outstanding: Number(customerData.outstanding) || 0,
       createdDate: customerData.createdDate || new Date().toISOString().split('T')[0]
     };
     setClients(prev => [newCustomer, ...prev]);
+    saveModuleRecord('clients', newCustomer.phone || newCustomer.id, newCustomer);
     addNotification('Customer Added', `${newCustomer.name} has been successfully registered.`, 'success');
     return newCustomer;
   };
 
   const updateCustomer = (id, updatedFields) => {
     setClients(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+    saveModuleRecord('clients', id, updatedFields);
     addNotification('Customer Updated', `Customer ${id} profile has been updated.`, 'info');
   };
 
   const deleteCustomer = (id) => {
     const cust = clients.find(c => c.id === id);
     setClients(prev => prev.filter(c => c.id !== id));
+    removeModuleRecord('clients', id);
     addNotification('Customer Removed', `Customer ${cust?.name || id} deleted.`, 'warning');
   };
 
@@ -541,6 +683,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setLeads(prev => [newLead, ...prev]);
+    saveModuleRecord('leads', newLead.id, newLead);
     addNotification('Lead Created', `New lead "${newLead.leadTitle}" (${newLead.id}) registered for ${newLead.customerName}.`, 'success');
 
     // Auto-create initial follow-up if follow-up date specified
@@ -581,12 +724,14 @@ export const ERPDataProvider = ({ children }) => {
       }
       return l;
     }));
+    saveModuleRecord('leads', id, updatedFields);
     addNotification('Lead Updated', `Lead ${id} details updated.`, 'info');
   };
 
   const deleteLead = (id) => {
     const lead = leads.find(l => l.id === id);
     setLeads(prev => prev.filter(l => l.id !== id));
+    removeModuleRecord('leads', id);
     addNotification('Lead Deleted', `Lead "${lead?.leadTitle || id}" removed.`, 'warning');
   };
 
@@ -690,12 +835,14 @@ export const ERPDataProvider = ({ children }) => {
       createdDate: new Date().toISOString().split('T')[0]
     };
     setFollowUps(prev => [newFollowUp, ...prev]);
+    saveModuleRecord('followUps', newFollowUp.id, newFollowUp);
     addNotification('Follow-Up Scheduled', `Reminder set for ${newFollowUp.customerName} on ${newFollowUp.followUpDate} at ${newFollowUp.followUpTime}.`, 'info');
     return newFollowUp;
   };
 
   const updateFollowUp = (id, updatedFields) => {
     setFollowUps(prev => prev.map(f => f.id === id ? { ...f, ...updatedFields } : f));
+    saveModuleRecord('followUps', id, updatedFields);
     addNotification('Follow-Up Updated', `Follow-up ${id} modified.`, 'info');
   };
 
@@ -712,6 +859,7 @@ export const ERPDataProvider = ({ children }) => {
       }
       return f;
     }));
+    saveModuleRecord('followUps', id, { followUpDate: newDate, followUpTime: newTime, status: 'Pending' });
     addNotification('Follow-Up Rescheduled', `Rescheduled to ${newDate} ${newTime}.`, 'info');
   };
 
@@ -720,6 +868,7 @@ export const ERPDataProvider = ({ children }) => {
     if (!item) return;
 
     setFollowUps(prev => prev.map(f => f.id === id ? { ...f, status: 'Completed' } : f));
+    saveModuleRecord('followUps', id, { status: 'Completed' });
 
     // Automatically record activity in customer history
     addCustomerActivity({
@@ -738,6 +887,7 @@ export const ERPDataProvider = ({ children }) => {
 
   const deleteFollowUp = (id) => {
     setFollowUps(prev => prev.filter(f => f.id !== id));
+    removeModuleRecord('followUps', id);
     addNotification('Follow-Up Removed', `Reminder deleted.`, 'info');
   };
 
@@ -776,6 +926,7 @@ export const ERPDataProvider = ({ children }) => {
       updatedDate: nowIso
     };
     setCustomerActivities(prev => [newActivity, ...prev]);
+    saveModuleRecord('customerActivities', newActivity.id, newActivity);
 
     // If next follow-up date specified, automatically schedule follow-up
     if (newActivity.nextFollowUpDate) {
@@ -838,12 +989,16 @@ export const ERPDataProvider = ({ children }) => {
       });
     }
 
+    if (updatedItem) {
+      saveModuleRecord('customerActivities', id, updatedItem);
+    }
     addNotification('Activity Updated', `Customer interaction log updated.`, 'info');
     return updatedItem;
   };
 
   const deleteCustomerActivity = (id) => {
     setCustomerActivities(prev => prev.filter(a => a.id !== id));
+    removeModuleRecord('customerActivities', id);
     addNotification('Activity Removed', `History record deleted.`, 'info');
   };
 
@@ -882,6 +1037,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setIncomeRecords(prev => [newIncome, ...prev]);
+    saveModuleRecord('incomeRecords', newIncome.voucherNumber || newIncome.id, newIncome);
 
     // Automatically post credit to Customer Ledger without duplicate
     if (postToLedger && newIncome.customerName && newIncome.status !== 'Cancelled') {
@@ -958,13 +1114,14 @@ export const ERPDataProvider = ({ children }) => {
     }));
 
     addNotification('Income Updated', `Transaction ${id} modified.`, 'info');
+    saveModuleRecord('incomeRecords', id, updatedFields);
   };
 
   const deleteIncomeRecord = (id) => {
     setIncomeRecords(prev => prev.filter(inc => inc.id !== id));
     // Remove linked ledger entries to prevent orphan duplicates
     setLedgerEntries(prev => prev.filter(l => l.linkedId !== id && l.linkedId !== `REV-${id}`));
-
+    removeModuleRecord('incomeRecords', id);
     addNotification('Transaction Removed', `Income voucher ${id} deleted.`, 'warning');
   };
 
@@ -1030,6 +1187,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setExpenseRecords(prev => [newExpense, ...prev]);
+    saveModuleRecord('expenseRecords', newExpense.voucherNumber || newExpense.id, newExpense);
 
     // Automatically post debit to Vendor Ledger (settling payable) without duplicate
     if (postToLedger && newExpense.vendorName && newExpense.status !== 'Cancelled') {
@@ -1105,13 +1263,14 @@ export const ERPDataProvider = ({ children }) => {
     }));
 
     addNotification('Expense Updated', `Transaction ${id} modified.`, 'info');
+    saveModuleRecord('expenseRecords', id, updatedFields);
   };
 
   const deleteExpenseRecord = (id) => {
     setExpenseRecords(prev => prev.filter(exp => exp.id !== id));
     // Remove linked ledger entries to prevent orphan duplicates
     setLedgerEntries(prev => prev.filter(l => l.linkedId !== id && l.linkedId !== `REV-${id}`));
-
+    removeModuleRecord('expenseRecords', id);
     addNotification('Transaction Removed', `Expense voucher ${id} deleted.`, 'warning');
   };
 
@@ -1184,6 +1343,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setPaymentTracking(prev => [newPayment, ...prev]);
+    saveModuleRecord('paymentTracking', newPayment.id, newPayment);
 
     // Post Debit to Customer Ledger for the Invoice Amount (Billed)
     if (newPayment.customerName && newPayment.invoiceAmount > 0) {
@@ -1261,6 +1421,14 @@ export const ERPDataProvider = ({ children }) => {
       return p;
     }));
 
+    saveModuleRecord('paymentTracking', paymentId, {
+      paidAmount: newTotalPaid,
+      remainingAmount: newRemaining,
+      paymentDate: pDate,
+      paymentMode,
+      paymentStatus: newStatus
+    });
+
     // Post to Customer Ledger
     addLedgerEntry({
       accountName: payment.customerName,
@@ -1306,6 +1474,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setLedgerEntries(prev => [newEntry, ...prev]);
+    saveModuleRecord('ledgerEntries', newEntry.id, newEntry);
     if (notify) {
       addNotification('Ledger Posted', `Ledger entry recorded for ${newEntry.accountName}.`, 'info');
     }
@@ -1336,6 +1505,7 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setLedgerEntries(prev => [offsettingEntry, ...prev]);
+    saveModuleRecord('ledgerEntries', offsettingEntry.id, offsettingEntry);
     addNotification('Ledger Reversal Posted', `Reversal entry posted for ${entry.accountName} (${reason}).`, 'warning');
   };
 
@@ -1361,18 +1531,21 @@ export const ERPDataProvider = ({ children }) => {
       createdDate: new Date().toISOString().split('T')[0]
     };
     setNfdRecords(prev => [newNfd, ...prev]);
-    addNotification('NFD Record Added', `NFD ${newNfd.nfdNumber} for ₹${Number(newNfd.depositAmount).toLocaleString('en-IN')} added successfully.`, 'success');
+    saveModuleRecord('nfdRecords', newNfd.nfdNumber || newNfd.id, newNfd);
+    addNotification('NDT Record Added', `NDT ${newNfd.nfdNumber} for ₹${Number(newNfd.depositAmount).toLocaleString('en-IN')} added successfully.`, 'success');
     return newNfd;
   };
 
   const updateNfdRecord = (id, updatedFields) => {
     setNfdRecords(prev => prev.map(item => item.id === id ? { ...item, ...updatedFields, updatedDate: new Date().toISOString().split('T')[0] } : item));
-    addNotification('NFD Record Updated', `NFD record updated successfully.`, 'info');
+    saveModuleRecord('nfdRecords', id, updatedFields);
+    addNotification('NDT Record Updated', `NDT record updated successfully.`, 'info');
   };
 
   const deleteNfdRecord = (id) => {
     setNfdRecords(prev => prev.filter(item => item.id !== id));
-    addNotification('NFD Record Removed', `NFD record has been deleted.`, 'warning');
+    removeModuleRecord('nfdRecords', id);
+    addNotification('NDT Record Removed', `NDT record has been deleted.`, 'warning');
   };
 
   // --- MODULE 3: VENDOR MANAGEMENT OPERATIONS ---
@@ -1402,18 +1575,21 @@ export const ERPDataProvider = ({ children }) => {
       createdDate: new Date().toISOString().split('T')[0]
     };
     setVendors(prev => [newVendor, ...prev]);
+    saveModuleRecord('vendors', newVendor.gstin || newVendor.id, newVendor);
     addNotification('Vendor Registered', `Vendor "${newVendor.name}" registered successfully.`, 'success');
     return newVendor;
   };
 
   const updateVendor = (id, updatedFields) => {
     setVendors(prev => prev.map(v => v.id === id ? { ...v, ...updatedFields } : v));
+    saveModuleRecord('vendors', id, updatedFields);
     addNotification('Vendor Updated', `Vendor details for ${id} modified.`, 'info');
   };
 
   const deleteVendor = (id) => {
     const v = vendors.find(x => x.id === id);
     setVendors(prev => prev.filter(x => x.id !== id));
+    removeModuleRecord('vendors', id);
     addNotification('Vendor Removed', `Vendor ${v?.name || id} deleted.`, 'warning');
   };
 
@@ -1433,17 +1609,20 @@ export const ERPDataProvider = ({ children }) => {
       createdDate: new Date().toISOString().split('T')[0]
     };
     setVendorContacts(prev => [newContact, ...prev]);
+    saveModuleRecord('vendorContacts', newContact.id, newContact);
     addNotification('Vendor Contact Added', `Contact "${newContact.contactPerson}" added for ${newContact.vendorName}.`, 'success');
     return newContact;
   };
 
   const updateVendorContact = (id, updatedFields) => {
     setVendorContacts(prev => prev.map(c => c.id === id ? { ...c, ...updatedFields } : c));
+    saveModuleRecord('vendorContacts', id, updatedFields);
     addNotification('Contact Updated', `Contact record updated.`, 'info');
   };
 
   const deleteVendorContact = (id) => {
     setVendorContacts(prev => prev.filter(c => c.id !== id));
+    removeModuleRecord('vendorContacts', id);
     addNotification('Contact Removed', `Contact person deleted.`, 'info');
   };
 
@@ -1541,6 +1720,8 @@ export const ERPDataProvider = ({ children }) => {
     };
 
     setVendorPayments(prev => [newVndPayment, ...prev]);
+    saveModuleRecord('vendorPurchases', newPurchase.id, newPurchase);
+    saveModuleRecord('vendorPayments', newVndPayment.id, newVndPayment);
 
     // If initial payment made, post Debit to Vendor Ledger and Expense Record
     if (paidInitial > 0) {
@@ -1573,11 +1754,13 @@ export const ERPDataProvider = ({ children }) => {
 
   const updateVendorPurchase = (id, updatedFields) => {
     setVendorPurchases(prev => prev.map(p => p.id === id ? { ...p, ...updatedFields } : p));
+    saveModuleRecord('vendorPurchases', id, updatedFields);
     addNotification('Purchase Updated', `Purchase order ${id} updated.`, 'info');
   };
 
   const deleteVendorPurchase = (id) => {
     setVendorPurchases(prev => prev.filter(p => p.id !== id));
+    removeModuleRecord('vendorPurchases', id);
     addNotification('Purchase Removed', `Purchase record deleted.`, 'info');
   };
 
@@ -1617,6 +1800,12 @@ export const ERPDataProvider = ({ children }) => {
       }
       return p;
     }));
+
+    saveModuleRecord('vendorPayments', paymentId, {
+      paidAmount: newTotalPaid,
+      remainingAmount: newRemaining,
+      paymentStatus: newStatus
+    });
 
     // Update Purchase bill payment status
     if (payment.purchaseId) {
@@ -1760,6 +1949,7 @@ export const ERPDataProvider = ({ children }) => {
         // Projects & Operations
         addProject,
         updateProject,
+        deleteProject,
         updateProjectActivity,
         addBOQItem,
         createRABill,

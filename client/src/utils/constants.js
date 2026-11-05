@@ -125,6 +125,83 @@ export const MODULES_CONFIG = [
       { id: 'geo-geofence', name: 'iii. Geofence area configuration', path: '/geotracking?tab=geofence', icon: 'Shield', tab: 'geofence' },
       { id: 'geo-history', name: 'iv. Location history and reports', path: '/geotracking?tab=history', icon: 'History', tab: 'history' }
     ]
+  },
+  { 
+    id: 'projects', 
+    name: '8. Projects Management', 
+    path: '/projects', 
+    icon: 'Building2', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'inventory', 
+    name: '9. Inventory & Materials', 
+    path: '/inventory', 
+    icon: 'Package', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'tenders', 
+    name: '10. Tenders & Bidding', 
+    path: '/tenders', 
+    icon: 'FileSpreadsheet', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'quotations', 
+    name: '11. Quotations', 
+    path: '/quotations', 
+    icon: 'FileText', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'budgets', 
+    name: '12. Budgets & Costing', 
+    path: '/budgets', 
+    icon: 'PieChart', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'expenses', 
+    name: '13. Expenses Management', 
+    path: '/expenses', 
+    icon: 'Receipt', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'approvals', 
+    name: '14. Approvals', 
+    path: '/approvals', 
+    icon: 'CheckSquare', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'gst', 
+    name: '15. GST Compliance', 
+    path: '/gst', 
+    icon: 'FileCheck', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'mis', 
+    name: '16. MIS Reports', 
+    path: '/mis', 
+    icon: 'BarChart2', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'bi', 
+    name: '17. Business Intelligence', 
+    path: '/bi', 
+    icon: 'TrendingUp', 
+    roles: Object.values(USER_ROLES) 
+  },
+  { 
+    id: 'roles', 
+    name: '18. Roles & Permissions', 
+    path: '/roles', 
+    icon: 'Shield', 
+    roles: [USER_ROLES.SUPER_ADMIN] 
   }
 ];
 

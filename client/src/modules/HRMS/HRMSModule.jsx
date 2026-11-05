@@ -21,6 +21,7 @@ import { formatCurrency, formatNumber, formatDate, numberToWordsIndian } from '.
 import { generatePayslipPDF, exportToExcel } from '../../services/exportService';
 import { COMPANY_DETAILS } from '../../utils/constants';
 import { DatePicker } from '../../components/DatePicker';
+import { saveModuleRecord, removeModuleRecord } from '../../services/firebaseSync';
 
 export const HRMSModule = () => {
   const { hrmsEmployees, setHrmsEmployees, projects, gpsLogs } = useERPData();
@@ -518,6 +519,7 @@ export const HRMSModule = () => {
     };
 
     setHrmsEmployees([newEmp, ...hrmsEmployees]);
+    saveModuleRecord('hrmsEmployees', newEmp.id, newEmp);
     
     // Add to attendance register as well across dates
     setAttendanceByDate(prev => {
@@ -547,6 +549,7 @@ export const HRMSModule = () => {
   const handleDeleteEmployee = (empId) => {
     if (window.confirm('Are you sure you want to delete this employee record?')) {
       setHrmsEmployees(prev => prev.filter(e => e.id !== empId));
+      removeModuleRecord('hrmsEmployees', empId);
       setAttendanceByDate(prev => {
         const updated = {};
         Object.keys(prev).forEach(k => {

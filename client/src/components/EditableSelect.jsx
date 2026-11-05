@@ -165,7 +165,7 @@ export const EditableSelect = ({
             )}
           </div>
 
-          {/* Bottom Section: Clickable "+ Custom Option" button or Input Box */}
+          {/* Bottom Section: Clickable "+ Add Other / Custom Option" button or Input Box */}
           {!isAddingCustom ? (
             <div className="p-1 border-t border-slate-100 bg-slate-50/70">
               <button
@@ -179,7 +179,7 @@ export const EditableSelect = ({
                 className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50/80 rounded-lg transition-colors cursor-pointer group"
               >
                 <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span>+ Custom Option</span>
+                <span>+ Add Other / Custom</span>
               </button>
             </div>
           ) : (
@@ -200,19 +200,31 @@ export const EditableSelect = ({
                       setNewOption('');
                     }
                   }}
-                  placeholder="Enter custom name..."
-                  className="flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-red-500 text-slate-800"
+                  placeholder="Enter custom option..."
+                  className="flex-1 min-w-0 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 text-slate-800"
                   autoFocus
                 />
-                {/* Sign-only Add (+) Button */}
+                {/* Done (Check) Confirmation Button */}
                 <button
                   type="button"
                   onClick={handleAdd}
                   disabled={!newOption.trim()}
-                  title="Add option"
-                  className="w-7 h-7 flex items-center justify-center bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-lg transition-colors cursor-pointer flex-shrink-0 shadow-xs"
+                  title="Done / Confirm Add"
+                  className="w-7 h-7 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg transition-colors cursor-pointer flex-shrink-0 shadow-xs"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Check className="w-4 h-4" />
+                </button>
+                {/* Cancel Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingCustom(false);
+                    setNewOption('');
+                  }}
+                  title="Cancel"
+                  className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
