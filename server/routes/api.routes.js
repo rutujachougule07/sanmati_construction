@@ -51,11 +51,7 @@ router.get('/projects', async (req, res) => {
   // Return operational projects
   res.json({
     success: true,
-    data: [
-      { id: "PRJ-KLP-001", name: "Royal Palace Commercial Complex", location: "Kawala Naka, Kolhapur", status: "Active" },
-      { id: "PRJ-KLP-002", name: "D.Y. Patil Medical Research Wing Extension", location: "Kasaba Bawada, Kolhapur", status: "Active" },
-      { id: "PRJ-KLP-003", name: "MIDC Shiroli Heavy Warehouse & Logistics Hub", location: "MIDC Shiroli, Kolhapur", status: "Active" }
-    ]
+    data: []
   });
 });
 
