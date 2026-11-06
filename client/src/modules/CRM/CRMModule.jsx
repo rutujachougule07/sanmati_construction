@@ -638,7 +638,7 @@ export const CRMModule = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-900 leading-snug">{row.name}</span>
-            <span className="font-mono text-[10px] text-red-600 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded font-bold">
+            <span className="font-mono text-[10px] text-[#004bb5] bg-[#e8f1fc] border border-[#cce0fc] px-1.5 py-0.5 rounded font-bold">
               {row.id}
             </span>
           </div>
@@ -655,7 +655,7 @@ export const CRMModule = () => {
       nowrap: true,
       render: (row) => (
         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-          <Phone className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+          <Phone className="w-3.5 h-3.5 text-[#004bb5] flex-shrink-0" />
           <span>{row.phone || '—'}</span>
         </div>
       )
@@ -676,7 +676,7 @@ export const CRMModule = () => {
             </div>
             {row.assignedProject && (
               <div className="flex items-center gap-1 text-[11px] text-slate-600">
-                <Building className="w-3 h-3 text-red-500 flex-shrink-0" />
+                <Building className="w-3 h-3 text-slate-400 flex-shrink-0" />
                 <span className="font-medium text-slate-800 truncate max-w-[170px]" title={row.assignedProject}>
                   {row.assignedProject}
                 </span>
@@ -1281,7 +1281,7 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 1. CRM Management • Subsection (i)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1313,7 +1313,7 @@ export const CRMModule = () => {
             <div 
               onClick={() => setCustomerStatusFilter('All')}
               className={`p-4 bg-white border rounded-2xl shadow-sm cursor-pointer transition-all ${
-                customerStatusFilter === 'All' ? 'border-red-500 ring-2 ring-red-100' : 'border-slate-200/90 hover:border-slate-300'
+                customerStatusFilter === 'All' ? 'border-[#004bb5] ring-2 ring-blue-100' : 'border-slate-200/90 hover:border-slate-300'
               }`}
             >
               <span className="text-xs text-slate-500">Total Customers</span>
@@ -1335,14 +1335,14 @@ export const CRMModule = () => {
             <div 
               onClick={() => setCustomerStatusFilter('Inactive')}
               className={`p-4 bg-white border rounded-2xl shadow-sm cursor-pointer transition-all ${
-                customerStatusFilter === 'Inactive' ? 'border-rose-500 ring-2 ring-rose-100' : 'border-slate-200/90 hover:border-slate-300'
+                customerStatusFilter === 'Inactive' ? 'border-[#004bb5] ring-2 ring-blue-100' : 'border-slate-200/90 hover:border-slate-300'
               }`}
             >
               <span className="text-xs text-slate-500">Inactive Customers</span>
-              <div className="text-lg font-bold text-rose-600 mt-1">
+              <div className="text-lg font-bold text-slate-700 mt-1">
                 {clients.filter(c => c.status === 'Inactive').length}
               </div>
-              <span className="text-[11px] text-rose-500 font-medium">Dormant accounts</span>
+              <span className="text-[11px] text-slate-400 font-medium">Dormant accounts</span>
             </div>
             <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-sm">
               <span className="text-xs text-slate-500">Active Projects Linked</span>
@@ -1373,7 +1373,7 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 1. CRM Management • Subsection (ii)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1407,7 +1407,7 @@ export const CRMModule = () => {
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Conversion Rate</span>
-              <div className="text-lg font-bold text-red-600 mt-1">{leadConversionRate}</div>
+              <div className="text-lg font-bold text-[#004bb5] mt-1">{leadConversionRate}</div>
               <span className="text-[11px] text-red-500 font-medium">{convertedLeadsCount} converted to clients</span>
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
@@ -1449,7 +1449,7 @@ export const CRMModule = () => {
                     setLeadPriorityFilter('All');
                     setLeadDateFilter('');
                   }}
-                  className="text-xs font-semibold text-red-600 hover:text-red-700 underline cursor-pointer"
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 underline cursor-pointer"
                 >
                   Reset All Filters
                 </button>
@@ -1462,7 +1462,7 @@ export const CRMModule = () => {
                 <select
                   value={leadSourceFilter}
                   onChange={(e) => setLeadSourceFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#004bb5]"
                 >
                   <option value="All">All Sources</option>
                   {leadSourcesList.map(src => (
@@ -1476,7 +1476,7 @@ export const CRMModule = () => {
                 <select
                   value={leadProjectTypeFilter}
                   onChange={(e) => setLeadProjectTypeFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#004bb5]"
                 >
                   <option value="All">All Project Types</option>
                   {projectTypes.map(pt => (
@@ -1490,7 +1490,7 @@ export const CRMModule = () => {
                 <select
                   value={leadEmployeeFilter}
                   onChange={(e) => setLeadEmployeeFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#004bb5]"
                 >
                   <option value="All">All Employees</option>
                   {combinedEmployeeList.map(emp => (
@@ -1504,7 +1504,7 @@ export const CRMModule = () => {
                 <select
                   value={leadPriorityFilter}
                   onChange={(e) => setLeadPriorityFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#004bb5]"
                 >
                   <option value="All">All Priorities</option>
                   {leadPrioritiesList.map(p => (
@@ -1519,7 +1519,7 @@ export const CRMModule = () => {
                   type="date"
                   value={leadDateFilter}
                   onChange={(e) => setLeadDateFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#004bb5]"
                 />
               </div>
             </div>
@@ -1544,7 +1544,7 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 1. CRM Management • Subsection (iii)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1727,7 +1727,7 @@ export const CRMModule = () => {
             </div>
           ) : (
             <div className="p-12 text-center bg-white border border-slate-200/90 rounded-2xl">
-              <div className="w-9 h-9 rounded-full bg-red-50 text-red-600 border border-red-200/80 flex items-center justify-center mx-auto mb-2"><Clock className="w-5 h-5" /></div>
+              <div className="w-9 h-9 rounded-full bg-blue-50 text-[#004bb5] border border-blue-200/80 flex items-center justify-center mx-auto mb-2"><Clock className="w-5 h-5" /></div>
               <h4 className="text-xs font-bold text-slate-800">No Reminders Found</h4>
               <p className="text-xs text-slate-400 mt-1 mb-4">
                 {followUpFilterTab === 'Today' 
@@ -1755,14 +1755,14 @@ export const CRMModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 1. CRM Management • Subsection (iv)
               </div>
               <div className="flex items-center gap-2.5 mt-0.5">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                   Customer Interaction History & Activity Logs
                 </h2>
-                <span className="text-xs font-bold bg-red-50 text-red-600 px-2.5 py-0.5 rounded-full border border-red-200">
+                <span className="text-xs font-bold bg-[#e8f1fc] text-[#004bb5] px-2.5 py-0.5 rounded-full border border-[#cce0fc]">
                   {customerActivities.length} {customerActivities.length === 1 ? 'interaction' : 'interactions'}
                 </span>
               </div>
@@ -1814,7 +1814,7 @@ export const CRMModule = () => {
                               const found = clients.find(c => c.name === act.customerName);
                               if (found) setSelectedCustomerDossier(found);
                             }}
-                            className="text-sm font-bold text-slate-900 hover:text-red-600 cursor-pointer transition-colors"
+                            className="text-sm font-bold text-slate-900 hover:text-[#004bb5] cursor-pointer transition-colors"
                           >
                             {act.customerName}
                           </h4>
@@ -1874,7 +1874,7 @@ export const CRMModule = () => {
                             </span>
                           )}
                           {(act.attachments || act.attachment) && (
-                            <span className="text-red-600 font-medium flex items-center gap-1 font-mono">
+                            <span className="text-[#004bb5] font-medium flex items-center gap-1 font-mono">
                               <Paperclip className="w-3 h-3" />
                               {act.attachments || act.attachment}
                             </span>
@@ -1915,7 +1915,7 @@ export const CRMModule = () => {
             </div>
           ) : (
             <div className="p-12 text-center bg-white border border-slate-200/90 rounded-2xl">
-              <div className="w-9 h-9 rounded-full bg-red-50 text-red-600 border border-red-200/80 flex items-center justify-center mx-auto mb-2"><History className="w-5 h-5" /></div>
+              <div className="w-9 h-9 rounded-full bg-blue-50 text-[#004bb5] border border-blue-200/80 flex items-center justify-center mx-auto mb-2"><History className="w-5 h-5" /></div>
               <h4 className="text-xs font-bold text-slate-800">No Interaction History Recorded</h4>
               <p className="text-xs text-slate-400 mt-1 mb-4">
                 Record client meetings, technical consultations, calls, or site visits to build the chronological customer dossier.
@@ -1962,7 +1962,7 @@ export const CRMModule = () => {
                   disabled
                   readOnly
                   value={customerForm.id}
-                  className="erp-input bg-slate-100/90 text-red-600 font-mono font-bold cursor-not-allowed select-none"
+                  className="erp-input bg-slate-100/90 text-[#002046] font-mono font-bold cursor-not-allowed select-none"
                 />
               </div>
 
@@ -1978,7 +1978,7 @@ export const CRMModule = () => {
                     setCustomerForm({ ...customerForm, name: e.target.value });
                     if (customerValidationErrors.name) setCustomerValidationErrors(prev => ({ ...prev, name: '' }));
                   }}
-                  className={`erp-input ${customerValidationErrors.name ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${customerValidationErrors.name ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. Rutu Patil"
                 />
                 {customerValidationErrors.name && (
@@ -1998,7 +1998,7 @@ export const CRMModule = () => {
                     setCustomerForm({ ...customerForm, phone: e.target.value });
                     if (customerValidationErrors.phone) setCustomerValidationErrors(prev => ({ ...prev, phone: '' }));
                   }}
-                  className={`erp-input ${customerValidationErrors.phone ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${customerValidationErrors.phone ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. 9822011223"
                 />
                 {customerValidationErrors.phone && (
@@ -2015,7 +2015,7 @@ export const CRMModule = () => {
                     setCustomerForm({ ...customerForm, alternatePhone: e.target.value });
                     if (customerValidationErrors.alternatePhone) setCustomerValidationErrors(prev => ({ ...prev, alternatePhone: '' }));
                   }}
-                  className={`erp-input ${customerValidationErrors.alternatePhone ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${customerValidationErrors.alternatePhone ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. 9422033445"
                 />
               </div>
@@ -2069,7 +2069,7 @@ export const CRMModule = () => {
                   2. Construction Work & Project Details
                 </h4>
               </div>
-              <span className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-[#004bb5] bg-[#e8f1fc] border border-[#cce0fc] px-2 py-0.5 rounded-full uppercase tracking-wider">
                 Project Scope
               </span>
             </div>
@@ -2260,7 +2260,7 @@ export const CRMModule = () => {
                     setCustomerForm({ ...customerForm, gstin: val });
                     if (customerValidationErrors.gstin) setCustomerValidationErrors(prev => ({ ...prev, gstin: '' }));
                   }}
-                  className={`erp-input font-mono bg-white ${customerValidationErrors.gstin ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input font-mono bg-white ${customerValidationErrors.gstin ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="27AAYCS9281Q1ZU"
                 />
                 {customerValidationErrors.gstin && (
@@ -2569,7 +2569,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, leadTitle: e.target.value });
                     if (leadValidationErrors.leadTitle) setLeadValidationErrors(prev => ({ ...prev, leadTitle: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.leadTitle ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.leadTitle ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. Turnkey RCC Construction for Commercial Complex"
                 />
                 {leadValidationErrors.leadTitle && (
@@ -2603,7 +2603,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, customerName: e.target.value });
                     if (leadValidationErrors.customerName) setLeadValidationErrors(prev => ({ ...prev, customerName: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.customerName ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.customerName ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. Prashant Patil"
                 />
                 {leadValidationErrors.customerName && (
@@ -2636,7 +2636,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, mobileNumber: e.target.value });
                     if (leadValidationErrors.mobileNumber) setLeadValidationErrors(prev => ({ ...prev, mobileNumber: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.mobileNumber ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.mobileNumber ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. 9822011223"
                 />
                 {leadValidationErrors.mobileNumber && (
@@ -2653,7 +2653,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, alternateMobileNumber: e.target.value });
                     if (leadValidationErrors.alternateMobileNumber) setLeadValidationErrors(prev => ({ ...prev, alternateMobileNumber: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.alternateMobileNumber ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.alternateMobileNumber ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. 9422033445"
                 />
                 {leadValidationErrors.alternateMobileNumber && (
@@ -2670,7 +2670,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, email: e.target.value });
                     if (leadValidationErrors.email) setLeadValidationErrors(prev => ({ ...prev, email: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.email ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. prashant.patil@example.com"
                 />
                 {leadValidationErrors.email && (
@@ -2735,7 +2735,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, estimatedBudget: e.target.value });
                     if (leadValidationErrors.estimatedBudget) setLeadValidationErrors(prev => ({ ...prev, estimatedBudget: '' }));
                   }}
-                  className={`erp-input font-mono ${leadValidationErrors.estimatedBudget ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input font-mono ${leadValidationErrors.estimatedBudget ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. 45000000"
                 />
                 {leadValidationErrors.estimatedBudget && (
@@ -2757,7 +2757,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, projectLocation: e.target.value });
                     if (leadValidationErrors.projectLocation) setLeadValidationErrors(prev => ({ ...prev, projectLocation: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.projectLocation ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.projectLocation ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="e.g. Plot 42, Shiroli MIDC"
                 />
                 {leadValidationErrors.projectLocation && (
@@ -2777,7 +2777,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, city: e.target.value });
                     if (leadValidationErrors.city) setLeadValidationErrors(prev => ({ ...prev, city: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.city ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.city ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="Kolhapur"
                 />
                 {leadValidationErrors.city && (
@@ -2797,7 +2797,7 @@ export const CRMModule = () => {
                     setLeadForm({ ...leadForm, state: e.target.value });
                     if (leadValidationErrors.state) setLeadValidationErrors(prev => ({ ...prev, state: '' }));
                   }}
-                  className={`erp-input ${leadValidationErrors.state ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${leadValidationErrors.state ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                   placeholder="Maharashtra"
                 />
                 {leadValidationErrors.state && (
@@ -2819,7 +2819,7 @@ export const CRMModule = () => {
                   setLeadForm({ ...leadForm, pincode: val });
                   if (leadValidationErrors.pincode) setLeadValidationErrors(prev => ({ ...prev, pincode: '' }));
                 }}
-                className={`erp-input font-mono max-w-xs ${leadValidationErrors.pincode ? 'border-red-400 focus:border-red-500' : ''}`}
+                className={`erp-input font-mono max-w-xs ${leadValidationErrors.pincode ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                 placeholder="416001"
               />
               {leadValidationErrors.pincode && (
@@ -2839,7 +2839,7 @@ export const CRMModule = () => {
                   setLeadForm({ ...leadForm, leadDescription: e.target.value });
                   if (leadValidationErrors.leadDescription) setLeadValidationErrors(prev => ({ ...prev, leadDescription: '' }));
                 }}
-                className={`erp-input ${leadValidationErrors.leadDescription ? 'border-red-400 focus:border-red-500' : ''}`}
+                className={`erp-input ${leadValidationErrors.leadDescription ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                 placeholder="e.g. Turnkey civil execution including PEB structural fabrication, grade slab flooring, boundary wall, and storm drainage."
               />
               {leadValidationErrors.leadDescription && (
@@ -3665,7 +3665,7 @@ export const CRMModule = () => {
                   required
                   value={activityForm.customerName}
                   onChange={(e) => handleActivityCustomerChange(e.target.value)}
-                  className={`erp-input ${activityValidationErrors.customerName ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`erp-input ${activityValidationErrors.customerName ? 'border-red-400 focus:border-[#004bb5]' : ''}`}
                 >
                   <option value="">-- Select Customer from Records --</option>
                   {clients.map(c => (

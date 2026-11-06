@@ -63,7 +63,22 @@ export const ERPDataProvider = ({ children }) => {
           }
           if (key === 'hrmsEmployees' && Array.isArray(parsed)) {
             const DUMMY_NAMES = ['Sanmati Patil', 'Er. Rajesh Kulkarni', 'Er. Amit Deshmukh', 'CA Sneha Shinde'];
-            parsed = parsed.filter(emp => !DUMMY_NAMES.includes(emp.name));
+            parsed = parsed.filter(emp => !DUMMY_NAMES.includes(emp.name)).map(emp => {
+              const basic = Number(emp.basicSalary) || 0;
+              const overtime = Number(emp.overtime) || 0;
+              const pf = Number(emp.pfDeduction) || (basic ? Math.round(basic * 0.12) : 0);
+              const pt = Number(emp.professionalTax) || 200;
+              const net = basic + overtime - pf - pt;
+              const { hra, conveyance, specialAllowance, ...rest } = emp;
+              return {
+                ...rest,
+                basicSalary: basic,
+                overtime,
+                pfDeduction: pf,
+                professionalTax: pt,
+                netSalary: net
+              };
+            });
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'leads' && Array.isArray(parsed)) {

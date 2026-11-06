@@ -8,7 +8,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
-  Users, Calendar, CheckCircle2, DollarSign, Download, Plus, FileText, 
+  Users, Calendar, User, Edit2, Building, CheckCircle2, DollarSign, Download, Plus, FileText, 
   MapPin, Clock, ShieldCheck, Printer, Eye, Calculator, RefreshCw, 
   AlertCircle, Building2, Briefcase, Phone, Mail, Award, X, Trash2,
   ChevronLeft, ChevronRight, CalendarDays, Save, UserX, Check, UserCheck
@@ -22,6 +22,11 @@ import { generatePayslipPDF, exportToExcel } from '../../services/exportService'
 import { COMPANY_DETAILS } from '../../utils/constants';
 import { DatePicker } from '../../components/DatePicker';
 import { saveModuleRecord, removeModuleRecord } from '../../services/firebaseSync';
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 export const HRMSModule = () => {
   const { hrmsEmployees, setHrmsEmployees, projects, gpsLogs } = useERPData();
@@ -50,11 +55,74 @@ export const HRMSModule = () => {
   // Selected Employee & Modals
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
   const [viewPayslipEmployee, setViewPayslipEmployee] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState('November 2026');
   const [isPayrollApproved, setIsPayrollApproved] = useState(false);
   const [siteFilter, setSiteFilter] = useState('all');
   const [attendanceToast, setAttendanceToast] = useState(null);
+
+  const monthNames = MONTH_NAMES;
+
+  // Helper to extract YYYY-MM from date string or month name
+  const getMonthPrefix = (dateOrMonthStr) => {
+    if (!dateOrMonthStr) return '2026-11';
+    if (typeof dateOrMonthStr === 'string' && dateOrMonthStr.includes('-')) {
+      const parts = dateOrMonthStr.split('-');
+      if (parts.length >= 2) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}`;
+      }
+    }
+    if (typeof dateOrMonthStr === 'string') {
+      const parts = dateOrMonthStr.trim().split(/\s+/);
+      if (parts.length === 2) {
+        const mIdx = monthNames.indexOf(parts[0]);
+        if (mIdx !== -1) {
+          return `${parts[1]}-${String(mIdx + 1).padStart(2, '0')}`;
+        }
+      }
+    }
+    return '2026-11';
+  };
+
+  // Manual / Overridden Days Worked per employee for a month: { [`${monthPrefix}_${empId}`]: daysWorked }
+  const [manualDaysWorked, setManualDaysWorked] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sanmati_payroll_manual_days');
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sanmati_payroll_manual_days', JSON.stringify(manualDaysWorked));
+    }
+  }, [manualDaysWorked]);
+
+  const updateEmployeeDaysWorked = (empId, days) => {
+    const monthKey = getMonthPrefix(selectedMonth);
+    const num = parseFloat(days);
+    const validDays = isNaN(num) || num < 0 ? 0 : Math.min(31, Number(num.toFixed(1)));
+    setManualDaysWorked(prev => ({
+      ...prev,
+      [`${monthKey}_${empId}`]: validDays
+    }));
+  };
+
+  const resetEmployeeDaysWorked = (empId) => {
+    const monthKey = getMonthPrefix(selectedMonth);
+    setManualDaysWorked(prev => {
+      const updated = { ...prev };
+      delete updated[`${monthKey}_${empId}`];
+      delete updated[empId];
+      return updated;
+    });
+  };
 
   // Date utilities
   const getTodayIso = () => {
@@ -144,9 +212,56 @@ export const HRMSModule = () => {
         ? 'Historical Entry' 
         : (idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (15m)'),
       overtimeHours: 0,
-      daysPresentMonth: 26
+      daysPresentMonth: 1
     }));
   }, [attendanceByDate, selectedDate, hrmsEmployees, todayIso]);
+
+  // Dynamic monthly attendance stats calculator for an employee
+  // Computes actual Present Days (Full Day = 1, Half Day = 0.5, Absent = 0) and OT Hours
+  const getEmployeeMonthlyStats = useMemo(() => {
+    return (empId, targetMonthPrefix) => {
+      const monthPrefix = targetMonthPrefix || (selectedDate ? selectedDate.slice(0, 7) : '2026-11');
+      let presentDays = 0;
+      let totalOtHours = 0;
+      let totalMarkedDays = 0;
+
+      const monthDateKeys = new Set();
+      Object.keys(attendanceByDate || {}).forEach(k => {
+        if (k.startsWith(monthPrefix)) {
+          monthDateKeys.add(k);
+        }
+      });
+
+      if (!targetMonthPrefix && selectedDate && selectedDate.startsWith(monthPrefix)) {
+        monthDateKeys.add(selectedDate);
+      }
+
+      monthDateKeys.forEach(dateKey => {
+        let rec = null;
+        if (attendanceByDate && attendanceByDate[dateKey]) {
+          rec = attendanceByDate[dateKey].find(r => r.empId === empId);
+        } else if (dateKey === selectedDate && currentAttendanceRecords) {
+          rec = currentAttendanceRecords.find(r => r.empId === empId);
+        }
+
+        if (rec && rec.status) {
+          totalMarkedDays += 1;
+          if (rec.status === 'Present') {
+            presentDays += 1;
+          } else if (rec.status === 'Half Day') {
+            presentDays += 0.5;
+          }
+          totalOtHours += Number(rec.overtimeHours) || 0;
+        }
+      });
+
+      return {
+        presentDays: Number(presentDays.toFixed(1)),
+        totalOtHours: Number(totalOtHours.toFixed(1)),
+        totalMarkedDays
+      };
+    };
+  }, [attendanceByDate, selectedDate, currentAttendanceRecords]);
 
   // Immutable date updater
   const updateRecordForDate = (dateStr, updateFn) => {
@@ -229,11 +344,6 @@ export const HRMSModule = () => {
   const [calendarMonth, setCalendarMonth] = useState(9); // 0-based: 9 = October
   const [calendarYear, setCalendarYear] = useState(2026);
   const [activeDayPopover, setActiveDayPopover] = useState(null); // Key of day with open status menu (e.g. '2026-10-06')
-
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
 
   // Open individual attendance calendar modal for a specific employee
   const handleOpenIndividualAttendance = (emp) => {
@@ -460,84 +570,155 @@ export const HRMSModule = () => {
     return cells;
   }, [calendarYear, calendarMonth]);
 
-  // Onboarding Form State
-  const [formData, setFormData] = useState({
+  // Onboarding & Edit Form State
+  const defaultFormData = {
     name: '',
     designation: 'Site Engineer',
     department: 'Site Execution',
     joiningDate: new Date().toISOString().split('T')[0],
-    phone: '+91 98220 00000',
-    email: 'engineer@sanmati.com',
-    bloodGroup: 'B+',
-    bankAccount: 'HDFC Bank / 50100987654321',
-    ifsc: 'HDFC0000123',
-    pan: 'AAYCS9281Q',
-    uan: '100908765432',
+    phone: '',
+    email: '',
+    pan: '',
+    bankAccount: '',
+    ifsc: '',
     basicSalary: 42000,
-    hra: 16800,
-    conveyance: 6000,
-    specialAllowance: 8000,
-    pfDeduction: 5040
-  });
+    overtime: 0,
+    pfDeduction: 5040,
+    professionalTax: 200
+  };
 
-  // Handle New Employee Onboarding
-  const handleCreateEmployee = (e) => {
+  const [formData, setFormData] = useState(defaultFormData);
+
+  // Open Add Modal
+  const handleOpenOnboardModal = () => {
+    setEditingEmployee(null);
+    setFormData(defaultFormData);
+    setIsOnboardModalOpen(true);
+  };
+
+  // Open Edit Modal
+  const handleOpenEditModal = (emp) => {
+    let bankOnly = emp.bankAccount || '';
+    let ifscOnly = '';
+    const ifscMatch = bankOnly.match(/\(IFSC:\s*([^)]+)\)/i);
+    if (ifscMatch) {
+      ifscOnly = ifscMatch[1].trim();
+      bankOnly = bankOnly.replace(/\(IFSC:[^)]+\)/i, '').trim();
+    }
+
+    setFormData({
+      name: emp.name || '',
+      designation: emp.designation || 'Site Engineer',
+      department: emp.department || 'Site Execution',
+      joiningDate: emp.joiningDate ? emp.joiningDate.slice(0, 10) : new Date().toISOString().split('T')[0],
+      phone: emp.phone || '',
+      email: emp.email || '',
+      pan: emp.pan || '',
+      bankAccount: bankOnly,
+      ifsc: ifscOnly,
+      basicSalary: emp.basicSalary || 0,
+      overtime: emp.overtime || 0,
+      pfDeduction: emp.pfDeduction || 0,
+      professionalTax: emp.professionalTax || 200
+    });
+    setEditingEmployee(emp);
+    setIsOnboardModalOpen(true);
+  };
+
+  // Handle Save (Create or Edit)
+  const handleSaveEmployee = (e) => {
     e.preventDefault();
-    const basic = Number(formData.basicSalary);
-    const hra = Number(formData.hra);
-    const conv = Number(formData.conveyance);
-    const sp = Number(formData.specialAllowance);
-    const pf = Number(formData.pfDeduction);
-    const pt = 200; // Standard Maharashtra Professional Tax
-    const net = basic + hra + conv + sp - pf - pt;
+    const basic = Number(formData.basicSalary) || 0;
+    const pf = Number(formData.pfDeduction) || 0;
+    const pt = Number(formData.professionalTax) || 200;
+    // Net Salary = Basic Salary - PF Deduction - Professional Tax
+    const net = basic - pf - pt;
 
+    let bankStr = formData.bankAccount.trim();
+    if (formData.ifsc && !bankStr.toUpperCase().includes('IFSC')) {
+      bankStr = bankStr + ' (IFSC: ' + formData.ifsc.trim().toUpperCase() + ')';
+    }
+
+    if (editingEmployee) {
+      const updatedEmp = {
+        ...editingEmployee,
+        name: formData.name.trim(),
+        designation: formData.designation,
+        department: formData.department,
+        joiningDate: formData.joiningDate,
+        phone: formData.phone.trim() || '+91 98220 00000',
+        email: formData.email.trim() || 'engineer@sanmati.com',
+        basicSalary: basic,
+        overtime,
+        pfDeduction: pf,
+        professionalTax: pt,
+        netSalary: net,
+        bankAccount: bankStr,
+        pan: formData.pan.trim().toUpperCase()
+      };
+
+      setHrmsEmployees(prev => prev.map(emp => emp.id === editingEmployee.id ? updatedEmp : emp));
+      saveModuleRecord('hrmsEmployees', updatedEmp.id, updatedEmp);
+
+      setAttendanceByDate(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(k => {
+          updated[k] = (updated[k] || []).map(r => r.empId === updatedEmp.id ? { ...r, name: updatedEmp.name, designation: updatedEmp.designation } : r);
+        });
+        return updated;
+      });
+
+      if (selectedEmployee?.id === editingEmployee.id) {
+        setSelectedEmployee(updatedEmp);
+      }
+      setEditingEmployee(null);
+      setIsOnboardModalOpen(false);
+      return;
+    }
+
+    // New Employee Onboarding
     const nextNum = hrmsEmployees.reduce((max, e) => {
       const match = e.id?.match(/EMP-KLP-(\d+)/);
       return match ? Math.max(max, parseInt(match[1], 10)) : max;
     }, 0) + 1;
-    const newId = `EMP-KLP-${String(nextNum).padStart(2, '0')}`;
+    const newId = 'EMP-KLP-' + String(nextNum).padStart(2, '0');
 
     const newEmp = {
       id: newId,
-      name: formData.name,
+      name: formData.name.trim(),
       designation: formData.designation,
       department: formData.department,
-      joiningDate: formData.joiningDate,
-      phone: formData.phone,
-      email: formData.email,
+      joiningDate: formData.joiningDate || new Date().toISOString().split('T')[0],
+      phone: formData.phone.trim() || '+91 98220 00000',
+      email: formData.email.trim() || 'engineer@sanmati.com',
       basicSalary: basic,
-      hra,
-      conveyance: conv,
-      specialAllowance: sp,
+      overtime,
       pfDeduction: pf,
       professionalTax: pt,
       netSalary: net,
       leaveBalance: { sick: 7, casual: 12, earned: 18 },
-      bankAccount: `${formData.bankAccount} (IFSC: ${formData.ifsc})`,
-      pan: formData.pan.toUpperCase(),
-      uan: formData.uan
+      bankAccount: bankStr || 'HDFC Bank / 50100987654321 (IFSC: HDFC0000123)',
+      pan: formData.pan.trim().toUpperCase() || 'AAYCS9281Q',
+      uan: '100908765432'
     };
 
     setHrmsEmployees([newEmp, ...hrmsEmployees]);
     saveModuleRecord('hrmsEmployees', newEmp.id, newEmp);
     
-    // Add to attendance register as well across dates
+    // Add to attendance register
     setAttendanceByDate(prev => {
       const updated = { ...prev };
       const newRec = {
         empId: newEmp.id,
         name: newEmp.name,
         designation: newEmp.designation,
-        site: 'Royal Palace Commercial Complex',
-        inTime: '09:00 AM',
-        outTime: '06:00 PM',
+        site: 'Head Office, Tarabai Park',
         status: 'Present',
-        gpsStatus: 'Inside Site Geofence (15m)',
         overtimeHours: 0,
         daysPresentMonth: 26
       };
       Object.keys(updated).forEach(k => {
-        updated[k] = [newRec, ...updated[k]];
+        updated[k] = [newRec, ...(updated[k] || [])];
       });
       return updated;
     });
@@ -565,62 +746,82 @@ export const HRMSModule = () => {
   const standardWorkingDays = 26;
 
   const payrollCalculations = useMemo(() => {
+    const salaryMonthPrefix = getMonthPrefix(selectedMonth);
     return hrmsEmployees.map(emp => {
-      const att = currentAttendanceRecords.find(a => a.empId === emp.id) || { daysPresentMonth: 26, overtimeHours: 0 };
-      const daysWorked = att.daysPresentMonth;
-      const otHours = Number(att.overtimeHours) || 0;
+      const stats = getEmployeeMonthlyStats(emp.id, salaryMonthPrefix);
+      const monthKey = salaryMonthPrefix;
+      const manualVal = manualDaysWorked[`${monthKey}_${emp.id}`] ?? manualDaysWorked[emp.id];
 
-      const basic = emp.basicSalary || 0;
-      const hra = emp.hra || 0;
-      const conv = emp.conveyance || 0;
-      const special = emp.specialAllowance || 0;
+      let daysWorked;
+      if (manualVal !== undefined) {
+        daysWorked = manualVal;
+      } else if (stats.totalMarkedDays > 0) {
+        daysWorked = stats.presentDays;
+      } else {
+        daysWorked = standardWorkingDays;
+      }
 
-      const grossStandard = basic + hra + conv + special;
+      const otHours = stats.totalOtHours;
+
+      const basic = Number(emp.basicSalary) || 0;
       
       // Pro-rata attendance earnings
       const attendanceRatio = Math.min(1, daysWorked / standardWorkingDays);
       const earnedBasic = Math.round(basic * attendanceRatio);
-      const earnedHra = Math.round(hra * attendanceRatio);
-      const earnedAllowances = Math.round((conv + special) * attendanceRatio);
-      const earnedGross = earnedBasic + earnedHra + earnedAllowances;
 
-      // Overtime Pay: (Basic / 26 days / 8 hrs * 1.5x)
+      // Overtime Pay: (Basic / 26 days / 8 hrs * 1.5x) or configured overtime
       const hourlyRate = (basic / standardWorkingDays / 8);
-      const overtimePay = Math.round(otHours * hourlyRate * 1.5);
+      const calculatedOt = Math.round(otHours * hourlyRate * 1.5);
+      const overtimePay = calculatedOt || Number(emp.overtime) || 0;
 
       // Deductions
-      const pf = emp.pfDeduction || Math.round(basic * 0.12);
-      const pt = emp.professionalTax || 200; // Maharashtra PT
-      const tds = 0; // TDS based on slabs
-      const totalDeductions = pf + pt + tds;
+      const pf = emp.pfDeduction !== undefined ? Number(emp.pfDeduction) : Math.round(basic * 0.12);
+      const pt = emp.professionalTax !== undefined ? Number(emp.professionalTax) : 200; // Maharashtra PT
+      const totalDeductions = pf + pt;
 
-      const netPayable = earnedGross + overtimePay - totalDeductions;
+      // Net Salary = Basic Salary + Overtime - PF Deduction - Professional Tax
+      const netPayable = earnedBasic + overtimePay - totalDeductions;
 
       return {
         ...emp,
         daysWorked,
+        isManualDays: manualVal !== undefined,
+        attendancePresentDays: stats.presentDays,
         otHours,
+        basicSalary: basic,
         earnedBasic,
-        earnedHra,
-        earnedAllowances,
-        earnedGross,
         overtimePay,
         pf,
         pt,
-        tds,
         totalDeductions,
         netPayable,
         status: isPayrollApproved ? 'Approved & Locked' : 'Calculated & Verified'
       };
     });
-  }, [hrmsEmployees, currentAttendanceRecords, isPayrollApproved]);
+  }, [hrmsEmployees, attendanceByDate, selectedMonth, selectedDate, currentAttendanceRecords, isPayrollApproved, manualDaysWorked]);
 
   // Aggregate totals
-  const totalGrossPayroll = payrollCalculations.reduce((sum, item) => sum + item.earnedGross + item.overtimePay, 0);
+  const totalGrossPayroll = payrollCalculations.reduce((sum, item) => sum + item.earnedBasic + item.overtimePay, 0);
   const totalDeductionsAll = payrollCalculations.reduce((sum, item) => sum + item.totalDeductions, 0);
   const totalNetDisbursement = payrollCalculations.reduce((sum, item) => sum + item.netPayable, 0);
 
-  // Subsection i Table Columns: Employee records
+  // Excel Export Handler for Payroll Table
+  const handleExportPayrollExcel = () => {
+    const exportData = payrollCalculations.map(c => ({
+      'Employee ID': c.id,
+      'Employee Name': c.name,
+      'Designation': c.designation,
+      'Department': c.department,
+      'Basic Salary (₹)': c.basicSalary,
+      'Days Worked': `${c.daysWorked} / ${standardWorkingDays}`,
+      'Overtime (₹)': c.overtimePay,
+      'PF Deduction (₹)': c.pf,
+      'Professional Tax (₹)': c.pt,
+      'Net Salary (₹)': c.netPayable,
+      'Status': c.status
+    }));
+    exportToExcel(exportData, `Sanmati_Payroll_Calculation_${selectedMonth}`);
+  };
   const employeeRecordColumns = [
     { 
       key: 'id', 
@@ -645,7 +846,7 @@ export const HRMSModule = () => {
         const initials = cleanName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EM';
         return (
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center font-bold text-[9px] shadow-2xs flex-shrink-0 tracking-tight">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#002046] to-[#004bb5] text-white flex items-center justify-center font-bold text-[9px] shadow-2xs flex-shrink-0 tracking-tight">
               {initials}
             </div>
             <div className="min-w-0">
@@ -715,7 +916,7 @@ export const HRMSModule = () => {
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setSelectedEmployee(row)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-red-50 text-slate-700 hover:text-red-600 border border-slate-200 hover:border-red-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#004bb5] border border-slate-200 hover:border-blue-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
             title="View Full Profile"
           >
             <Eye className="w-3 h-3 text-slate-500 group-hover:text-red-500" />
@@ -758,7 +959,7 @@ export const HRMSModule = () => {
             </div>
             
             <button
-              onClick={() => setIsOnboardModalOpen(true)}
+              onClick={() => handleOpenOnboardModal()}
               className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-xl text-sm font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Plus className="w-4 h-4" />
@@ -895,7 +1096,7 @@ export const HRMSModule = () => {
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
             <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h4 className="font-bold text-slate-900 text-sm font-heading">Daily Site Attendance & GPS Geofence Verification</h4>
+                <h4 className="font-bold text-slate-900 text-sm font-heading">Daily Site Attendance Register</h4>
                 <p className="text-[11px] text-slate-500">
                   Register for: <strong className="text-slate-800">{formatDisplayDate(selectedDate)}</strong> • {filteredAttendance.length} staff records
                 </p>
@@ -924,8 +1125,6 @@ export const HRMSModule = () => {
                   <tr className="bg-slate-50 border-b-2 border-slate-200 text-slate-800 text-xs">
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Employee</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Assigned Construction Site</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">In / Out Time</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">GPS Geofence Status</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Attendance Status</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Overtime (Hrs)</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Month Days</th>
@@ -935,7 +1134,7 @@ export const HRMSModule = () => {
                 <tbody className="divide-y divide-slate-100">
                   {filteredAttendance.length === 0 ? (
                     <tr>
-                      <td colSpan="8" className="px-4 py-8 text-center text-slate-400 text-xs">
+                      <td colSpan="6" className="px-4 py-8 text-center text-slate-400 text-xs">
                         No employees found matching the selected site filter.
                       </td>
                     </tr>
@@ -954,24 +1153,7 @@ export const HRMSModule = () => {
                           </span>
                         </td>
 
-                        <td className="px-3.5 py-2 text-xs text-center font-mono font-medium text-slate-800">
-                          <span>{rec.inTime}</span>
-                          <span className="text-slate-400 mx-1.5">-</span>
-                          <span>{rec.outTime}</span>
-                        </td>
 
-                        <td className="px-3.5 py-2 text-xs">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                            dateCategory === 'future'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : dateCategory === 'past'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          }`}>
-                            <MapPin className="w-3 h-3" />
-                            {rec.gpsStatus}
-                          </span>
-                        </td>
 
                         <td className="px-3.5 py-2 text-xs text-center">
                           <select
@@ -1029,18 +1211,27 @@ export const HRMSModule = () => {
                           </div>
                         </td>
 
-                        <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-900 font-bold text-xs">
-                          {rec.daysPresentMonth} / {standardWorkingDays}
-                        </td>
+                        {(() => {
+                            const stats = getEmployeeMonthlyStats(rec.empId);
+                            return (
+                              <td className="px-3.5 py-2 text-xs text-right font-mono font-bold">
+                                <span className={stats.presentDays > 0 ? "text-emerald-700 font-bold" : "text-slate-600 font-bold"}>
+                                  {stats.presentDays}
+                                </span>
+                                <span className="text-slate-400 font-normal"> / </span>
+                                <span className="text-slate-700 font-bold">{standardWorkingDays}</span>
+                              </td>
+                            );
+                          })()}
 
                         <td className="px-3.5 py-2 text-xs text-center whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => handleOpenIndividualAttendance(rec)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 border border-red-200 transition-all shadow-2xs cursor-pointer"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 active:bg-blue-200 text-[#004bb5] border border-blue-200 transition-all shadow-2xs cursor-pointer"
                             title={`हजेरी कॅलेंडर उघडा (${rec.name})`}
                           >
-                            <Calendar className="w-4 h-4 text-red-600" />
+                            <Calendar className="w-4 h-4 text-[#004bb5]" />
                           </button>
                         </td>
                       </tr>
@@ -1058,41 +1249,42 @@ export const HRMSModule = () => {
       {/* ========================================================================= */}
       {activeTab === 'salary' && (
         <div className="space-y-5">
-          {/* Salary Engine Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Gross Incurred</span>
-              <h3 className="text-2xl font-bold font-heading text-slate-900 mt-1 font-mono">
-                {formatCurrency(totalGrossPayroll)}
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">Basic + HRA + Allowances + Overtime</p>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">Total Statutory Deductions</span>
-              <h3 className="text-2xl font-bold font-heading text-rose-600 mt-1 font-mono">
-                {formatCurrency(totalDeductionsAll)}
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">Provident Fund (12%) + PT (₹200/mo)</p>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-emerald-200 bg-emerald-50/20 shadow-sm">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-800 block">Net Payable Disbursement</span>
-              <h3 className="text-2xl font-bold font-heading text-emerald-700 mt-1 font-mono">
-                {formatCurrency(totalNetDisbursement)}
-              </h3>
-              <p className="text-xs text-emerald-600 mt-1">Ready for Bank NEFT / RTGS Transfer</p>
-            </div>
-          </div>
-
           {/* Salary Breakdown Table */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="font-bold text-slate-900 text-sm font-heading">
-                  Automated Salary Calculation Sheet: {selectedMonth}
-                </h4>
-                <p className="text-[11px] text-slate-500">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-bold text-slate-900 text-sm font-heading">
+                    Automated Salary Calculation Sheet:
+                  </h4>
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={selectedMonth.split(' ')[0] || 'November'}
+                      onChange={(e) => {
+                        const yr = selectedMonth.split(' ')[1] || '2026';
+                        setSelectedMonth(`${e.target.value} ${yr}`);
+                      }}
+                      className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                      {monthNames.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={selectedMonth.split(' ')[1] || '2026'}
+                      onChange={(e) => {
+                        const m = selectedMonth.split(' ')[0] || 'November';
+                        setSelectedMonth(`${m} ${e.target.value}`);
+                      }}
+                      className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                    >
+                      {[2024, 2025, 2026, 2027, 2028].map(yr => (
+                        <option key={yr} value={yr}>{yr}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">
                   Standard cycle based on 26 monthly working days with overtime multiplier.
                 </p>
               </div>
@@ -1111,8 +1303,8 @@ export const HRMSModule = () => {
                 </button>
 
                 <button
-                  onClick={() => exportToExcel(payrollCalculations, `Sanmati_Payroll_Calculation_${selectedMonth}`)}
-                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                  onClick={handleExportPayrollExcel}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export Excel</span>
@@ -1125,13 +1317,11 @@ export const HRMSModule = () => {
                 <thead>
                   <tr className="bg-slate-50 border-b-2 border-slate-200 text-slate-800 text-xs">
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap">Employee</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Earned Basic</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">HRA & Allowances</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Basic Salary</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Days Worked</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Overtime Pay</th>
+                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Overtime</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">PF Deduction</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Prof. Tax (PT)</th>
-                    <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-right">Net Take-Home</th>
                     <th className="px-3 py-1.5 font-bold text-[10px] uppercase tracking-wider text-slate-600 whitespace-nowrap text-center">Status</th>
                   </tr>
                 </thead>
@@ -1143,40 +1333,103 @@ export const HRMSModule = () => {
                         <span className="text-[10px] text-slate-500 font-mono font-medium">{calc.id}</span>
                       </td>
                       <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-800 font-semibold">{formatCurrency(calc.earnedBasic)}</td>
-                      <td className="px-3.5 py-2 text-xs text-right font-mono text-slate-800 font-semibold">{formatCurrency(calc.earnedHra + calc.earnedAllowances)}</td>
-                      <td className="px-3.5 py-2 text-xs text-center font-mono font-bold text-slate-900">{calc.daysWorked} / {standardWorkingDays}</td>
+                      <td className="px-3.5 py-2 text-xs text-center font-mono">
+                        <div className="inline-flex items-center justify-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 shadow-2xs">
+                          <button
+                            type="button"
+                            onClick={() => updateEmployeeDaysWorked(calc.id, Math.max(0, Number(calc.daysWorked || 0) - 1))}
+                            className="text-slate-400 hover:text-slate-900 font-bold px-1 text-xs hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                            title="कमी करा (-1 दिवस)"
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="0"
+                            max="31"
+                            step="0.5"
+                            value={calc.daysWorked}
+                            onChange={(e) => updateEmployeeDaysWorked(calc.id, e.target.value)}
+                            className="w-10 text-center font-mono font-bold text-slate-900 text-xs bg-white border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            title="कामाचे दिवस बदला (Days Worked)"
+                          />
+                          <span className="text-slate-500 font-semibold text-xs">/ {standardWorkingDays}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateEmployeeDaysWorked(calc.id, Math.min(31, Number(calc.daysWorked || 0) + 1))}
+                            className="text-slate-400 hover:text-slate-900 font-bold px-1 text-xs hover:bg-slate-200 rounded transition-colors cursor-pointer"
+                            title="वाढवा (+1 दिवस)"
+                          >
+                            +
+                          </button>
+                          {calc.isManualDays && (
+                            <button
+                              type="button"
+                              onClick={() => resetEmployeeDaysWorked(calc.id)}
+                              className="text-[10px] text-blue-600 hover:text-blue-800 ml-0.5 hover:underline font-sans cursor-pointer"
+                              title={`हजेरीनुसार रीसेट करा (${calc.attendancePresentDays} दिवस)`}
+                            >
+                              ↺
+                            </button>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-3.5 py-2 text-xs text-right font-mono text-emerald-700 font-bold">+{formatCurrency(calc.overtimePay)}</td>
                       <td className="px-3.5 py-2 text-xs text-right font-mono text-rose-600 font-semibold">-{formatCurrency(calc.pf)}</td>
                       <td className="px-3.5 py-2 text-xs text-right font-mono text-rose-600 font-semibold">-{formatCurrency(calc.pt)}</td>
-                      <td className="px-3.5 py-2 text-xs text-right font-mono font-bold text-emerald-700 text-xs font-bold">
-                        {formatCurrency(calc.netPayable)}
-                      </td>
                       <td className="px-3.5 py-2 text-xs text-center">
                         <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           {calc.status}
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  ))} 
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       )}
-
       {/* ========================================================================= */}
       {/* SUBSECTION iv: PAYSLIP GENERATION                                         */}
       {/* ========================================================================= */}
       {activeTab === 'payslips' && (
         <div className="space-y-5">
           {/* Header Action Bar */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h4 className="font-bold text-slate-900 text-sm font-heading">
-                Monthly Payslip Generation & Distribution ({selectedMonth})
-              </h4>
-              <p className="text-[11px] text-slate-500">
+              <div className="flex flex-wrap items-center gap-2">
+                <h4 className="font-bold text-slate-900 text-sm font-heading">
+                  Monthly Payslip Generation & Distribution:
+                </h4>
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={selectedMonth.split(' ')[0] || 'November'}
+                    onChange={(e) => {
+                      const yr = selectedMonth.split(' ')[1] || '2026';
+                      setSelectedMonth(`${e.target.value} ${yr}`);
+                    }}
+                    className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    {monthNames.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedMonth.split(' ')[1] || '2026'}
+                    onChange={(e) => {
+                      const m = selectedMonth.split(' ')[0] || 'November';
+                      setSelectedMonth(`${m} ${e.target.value}`);
+                    }}
+                    className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:outline-none focus:border-blue-500 cursor-pointer"
+                  >
+                    {[2024, 2025, 2026, 2027, 2028].map(yr => (
+                      <option key={yr} value={yr}>{yr}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
                 Official payroll vouchers with SANMATI CONSTRUCTIONS seal, PAN, and authorized signatures.
               </p>
             </div>
@@ -1189,7 +1442,7 @@ export const HRMSModule = () => {
               return (
                 <div key={emp.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-gold-400/60 transition-all flex flex-col justify-between">
                   <div>
-                    <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div className="border-b border-slate-100 pb-3">
                       <div>
                         <span className="text-[10px] font-bold font-mono text-gold-600 bg-gold-50 px-2 py-0.5 rounded border border-gold-200">
                           {emp.id}
@@ -1197,27 +1450,19 @@ export const HRMSModule = () => {
                         <h4 className="text-base font-bold text-slate-900 mt-1">{emp.name}</h4>
                         <p className="text-xs text-slate-500">{emp.designation} • {emp.department}</p>
                       </div>
-
-                      <div className="text-right">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Net Take-Home</span>
-                        <span className="text-xl font-bold font-mono text-emerald-700">
-                          {formatCurrency(calc.netPayable || emp.netSalary)}
-                        </span>
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 py-3 text-xs border-b border-slate-100">
                       <div>
-                        <span className="text-[11px] text-slate-500 block">Earnings Breakdown:</span>
-                        <p className="text-slate-800">Basic: <strong className="font-mono">{formatCurrency(emp.basicSalary)}</strong></p>
-                        <p className="text-slate-800">HRA: <strong className="font-mono">{formatCurrency(emp.hra)}</strong></p>
-                        <p className="text-slate-800">Allowances: <strong className="font-mono">{formatCurrency(emp.conveyance + emp.specialAllowance)}</strong></p>
+                        <span className="text-[11px] text-slate-500 block">Earnings:</span>
+                        <p className="text-slate-800">Basic Salary: <strong className="font-mono">{formatCurrency(emp.basicSalary)}</strong></p>
+                        <p className="text-slate-800">Overtime: <strong className="font-mono text-emerald-700">+{formatCurrency(calc.overtimePay !== undefined ? calc.overtimePay : (emp.overtime || 0))}</strong></p>
                       </div>
 
                       <div>
-                        <span className="text-[11px] text-slate-500 block">Deductions Breakdown:</span>
-                        <p className="text-rose-600">Provident Fund (PF): <strong className="font-mono">-{formatCurrency(emp.pfDeduction)}</strong></p>
-                        <p className="text-rose-600">Professional Tax (PT): <strong className="font-mono">-{formatCurrency(emp.professionalTax || 200)}</strong></p>
+                        <span className="text-[11px] text-slate-500 block">Deductions:</span>
+                        <p className="text-rose-600">PF Deduction: <strong className="font-mono">-{formatCurrency(calc.pf !== undefined ? calc.pf : emp.pfDeduction)}</strong></p>
+                        <p className="text-rose-600">Prof. Tax (PT): <strong className="font-mono">-{formatCurrency(calc.pt !== undefined ? calc.pt : (emp.professionalTax || 200))}</strong></p>
                         <p className="text-slate-500 text-[10px] mt-1 font-mono">Bank: {emp.bankAccount?.split('/')[0] || 'HDFC Bank'}</p>
                       </div>
                     </div>
@@ -1231,15 +1476,15 @@ export const HRMSModule = () => {
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setViewPayslipEmployee(emp)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
+                        onClick={() => setViewPayslipEmployee({ ...emp, ...calc })}
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Preview</span>
                       </button>
 
                       <button
-                        onClick={() => generatePayslipPDF(emp, selectedMonth)}
+                        onClick={() => generatePayslipPDF({ ...emp, ...calc }, selectedMonth)}
                         className="px-3 py-1.5 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -1387,7 +1632,7 @@ export const HRMSModule = () => {
 
                     {hrmsEmployees.length > 1 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">कर्मचारी बदला:</span>
+                        <span className="text-[11px] font-bold text-slate-500 hidden sm:inline">कर्मचारी निवडा:</span>
                         <select
                           value={individualEmployee.id || individualEmployee.empId}
                           onChange={(e) => {
@@ -1404,6 +1649,27 @@ export const HRMSModule = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Live Working Days Counter Badge */}
+                {(() => {
+                  const calMonthPrefix = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}`;
+                  const calStats = getEmployeeMonthlyStats(individualEmployee.id || individualEmployee.empId, calMonthPrefix);
+                  return (
+                    <div className="p-2.5 bg-emerald-50/90 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 shadow-2xs">
+                      <div className="flex items-center gap-2 font-bold">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <span>महिना हजेरी (Working Days):</span>
+                        <span className="font-mono text-emerald-800 text-sm">{calStats.presentDays} / {standardWorkingDays} Days</span>
+                      </div>
+                      {calStats.totalOtHours > 0 && (
+                        <div className="flex items-center gap-1 font-mono font-bold text-purple-700 bg-purple-100/80 px-2 py-0.5 rounded-md text-[11px]">
+                          <Clock className="w-3 h-3 text-purple-600" />
+                          <span>+{calStats.totalOtHours}h Overtime</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Weekdays Header Row */}
                 <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold">
@@ -1682,6 +1948,7 @@ export const HRMSModule = () => {
             </div>
 
             {/* Earnings & Deductions Comparison Table */}
+            {/* Earnings & Deductions Comparison Table */}
             <div className="grid grid-cols-2 gap-4">
               {/* Earnings Column */}
               <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -1695,21 +1962,13 @@ export const HRMSModule = () => {
                     <span className="font-mono font-bold text-slate-800">{formatCurrency(viewPayslipEmployee.basicSalary)}</span>
                   </div>
                   <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">House Rent Allowance (HRA)</span>
-                    <span className="font-mono font-bold text-slate-800">{formatCurrency(viewPayslipEmployee.hra)}</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">Conveyance Allowance</span>
-                    <span className="font-mono font-bold text-slate-800">{formatCurrency(viewPayslipEmployee.conveyance)}</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">Site Special Allowance</span>
-                    <span className="font-mono font-bold text-slate-800">{formatCurrency(viewPayslipEmployee.specialAllowance)}</span>
+                    <span className="text-slate-600">Overtime</span>
+                    <span className="font-mono font-bold text-emerald-700">+{formatCurrency(viewPayslipEmployee.overtimePay !== undefined ? viewPayslipEmployee.overtimePay : (viewPayslipEmployee.overtime || 0))}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t font-bold text-slate-900">
                     <span>Total Gross Earnings</span>
                     <span className="font-mono">
-                      {formatCurrency(viewPayslipEmployee.basicSalary + viewPayslipEmployee.hra + viewPayslipEmployee.conveyance + viewPayslipEmployee.specialAllowance)}
+                      {formatCurrency((Number(viewPayslipEmployee.basicSalary) || 0) + Number(viewPayslipEmployee.overtimePay !== undefined ? viewPayslipEmployee.overtimePay : (viewPayslipEmployee.overtime || 0)))}
                     </span>
                   </div>
                 </div>
@@ -1724,24 +1983,16 @@ export const HRMSModule = () => {
                 <div className="p-3 space-y-2 text-xs divide-y divide-slate-100">
                   <div className="flex justify-between pt-1">
                     <span className="text-slate-600">Provident Fund (PF)</span>
-                    <span className="font-mono font-bold text-rose-600">-{formatCurrency(viewPayslipEmployee.pfDeduction)}</span>
+                    <span className="font-mono font-bold text-rose-600">-{formatCurrency(viewPayslipEmployee.pf !== undefined ? viewPayslipEmployee.pf : viewPayslipEmployee.pfDeduction)}</span>
                   </div>
                   <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">Professional Tax (PT - Maha)</span>
-                    <span className="font-mono font-bold text-rose-600">-{formatCurrency(viewPayslipEmployee.professionalTax || 200)}</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">Income Tax (TDS)</span>
-                    <span className="font-mono font-bold text-slate-500">₹0.00</span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="text-slate-600">Other Deductions</span>
-                    <span className="font-mono font-bold text-slate-500">₹0.00</span>
+                    <span className="text-slate-600">Professional Tax (PT)</span>
+                    <span className="font-mono font-bold text-rose-600">-{formatCurrency(viewPayslipEmployee.pt !== undefined ? viewPayslipEmployee.pt : (viewPayslipEmployee.professionalTax || 200))}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t font-bold text-rose-700">
                     <span>Total Deductions</span>
                     <span className="font-mono">
-                      -{formatCurrency((viewPayslipEmployee.pfDeduction || 0) + (viewPayslipEmployee.professionalTax || 200))}
+                      -{formatCurrency((Number(viewPayslipEmployee.pf !== undefined ? viewPayslipEmployee.pf : viewPayslipEmployee.pfDeduction) || 0) + (Number(viewPayslipEmployee.pt !== undefined ? viewPayslipEmployee.pt : viewPayslipEmployee.professionalTax) || 200))}
                     </span>
                   </div>
                 </div>
@@ -1749,19 +2000,27 @@ export const HRMSModule = () => {
             </div>
 
             {/* Net Salary Highlight Box */}
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-center justify-between">
-              <div>
-                <span className="text-xs uppercase font-bold text-emerald-800 tracking-wider">Net Take-Home Salary</span>
-                <p className="text-[11px] text-slate-700 mt-0.5">
-                  Amount in words: <strong className="text-slate-900">{numberToWordsIndian(viewPayslipEmployee.netSalary)}</strong>
-                </p>
-                <p className="text-[10px] text-emerald-700 mt-0.5">Disbursement: Direct Bank Transfer (NEFT / RTGS) • 26 Paid Days</p>
-              </div>
-              <span className="text-2xl font-black font-mono text-emerald-800">
-                {formatCurrency(viewPayslipEmployee.netSalary)}
-              </span>
-            </div>
-
+            {(() => {
+              const modalBasic = Number(viewPayslipEmployee.basicSalary) || 0;
+              const modalOt = Number(viewPayslipEmployee.overtimePay !== undefined ? viewPayslipEmployee.overtimePay : (viewPayslipEmployee.overtime || 0));
+              const modalPf = Number(viewPayslipEmployee.pf !== undefined ? viewPayslipEmployee.pf : viewPayslipEmployee.pfDeduction) || 0;
+              const modalPt = Number(viewPayslipEmployee.pt !== undefined ? viewPayslipEmployee.pt : (viewPayslipEmployee.professionalTax || 200));
+              const modalNet = modalBasic + modalOt - modalPf - modalPt;
+              return (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs uppercase font-bold text-emerald-800 tracking-wider">Net Take-Home Salary</span>
+                    <p className="text-[11px] text-slate-700 mt-0.5">
+                      Amount in words: <strong className="text-slate-900">{numberToWordsIndian(modalNet)}</strong>
+                    </p>
+                    <p className="text-[10px] text-emerald-700 mt-0.5">Disbursement: Direct Bank Transfer (NEFT / RTGS) • 26 Paid Days</p>
+                  </div>
+                  <span className="text-2xl font-black font-mono text-emerald-800">
+                    {formatCurrency(modalNet)}
+                  </span>
+                </div>
+              );
+            })()}
             {/* Signature Area */}
             <div className="grid grid-cols-2 pt-6 text-center text-xs text-slate-500 border-t border-slate-200">
               <div>
@@ -1809,15 +2068,16 @@ export const HRMSModule = () => {
           title={`Staff Record: ${selectedEmployee.name}`}
           subtitle={`Employee Code: ${selectedEmployee.id}`}
         >
-          <div className="space-y-4 text-xs">
+          <div className="space-y-3.5 text-xs">
+            {/* Category 1, 2, 3: Employee, Contact & Bank Details */}
             <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div>
                 <span className="text-slate-500 block text-[11px]">Designation:</span>
-                <span className="text-slate-900 font-bold">{selectedEmployee.designation}</span>
+                <span className="text-slate-900 font-bold">{selectedEmployee.designation || 'Site Engineer'}</span>
               </div>
               <div>
                 <span className="text-slate-500 block text-[11px]">Department:</span>
-                <span className="text-slate-900 font-semibold">{selectedEmployee.department}</span>
+                <span className="text-slate-900 font-semibold">{selectedEmployee.department || 'Site Execution'}</span>
               </div>
               <div>
                 <span className="text-slate-500 block text-[11px]">Date of Joining:</span>
@@ -1825,31 +2085,70 @@ export const HRMSModule = () => {
               </div>
               <div>
                 <span className="text-slate-500 block text-[11px]">PAN Card Number:</span>
-                <span className="text-slate-900 font-mono font-bold">{selectedEmployee.pan}</span>
+                <span className="text-slate-900 font-mono font-bold">{selectedEmployee.pan || '-'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[11px]">Contact Mobile:</span>
+                <span className="text-slate-900 font-mono font-bold">{selectedEmployee.phone || '+91 98220 00000'}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[11px]">Official Email:</span>
+                <span className="text-slate-900 font-medium">{selectedEmployee.email || 'engineer@sanmati.com'}</span>
               </div>
               <div className="col-span-2">
                 <span className="text-slate-500 block text-[11px]">Registered Bank Account:</span>
-                <span className="text-slate-900 font-mono">{selectedEmployee.bankAccount}</span>
+                <span className="text-slate-900 font-mono font-semibold">{selectedEmployee.bankAccount || '-'}</span>
               </div>
             </div>
 
-            {/* Leave Balance Overview */}
-            <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-2">
-              <span className="font-bold text-slate-800 text-xs block">Annual Leave Balances</span>
-              <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                  <span className="text-slate-500 text-[10px] block">Sick Leave</span>
-                  <span className="font-bold text-slate-900 font-mono">{selectedEmployee.leaveBalance?.sick || 7} Days</span>
+            {/* Category 4: Salary Structure (Monthly INR) */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-2.5">
+              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 border-b border-slate-200/70 pb-1.5">
+                <DollarSign className="w-3.5 h-3.5 text-[#004bb5]" />
+                <span>Salary Structure (Monthly INR)</span>
+              </h5>
+              <div className="grid grid-cols-3 gap-2.5">
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">1. Basic Salary</span>
+                  <span className="text-slate-900 font-mono font-bold text-xs">{formatCurrency(selectedEmployee.basicSalary || 0)}</span>
                 </div>
-                <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                  <span className="text-slate-500 text-[10px] block">Casual Leave</span>
-                  <span className="font-bold text-slate-900 font-mono">{selectedEmployee.leaveBalance?.casual || 12} Days</span>
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">2. PF Deduction</span>
+                  <span className="text-rose-600 font-mono font-bold text-xs">-{formatCurrency(selectedEmployee.pfDeduction || 0)}</span>
                 </div>
-                <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                  <span className="text-slate-500 text-[10px] block">Earned Leave</span>
-                  <span className="font-bold text-slate-900 font-mono">{selectedEmployee.leaveBalance?.earned || 18} Days</span>
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200/80">
+                  <span className="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">3. Prof. Tax (PT)</span>
+                  <span className="text-rose-600 font-mono font-bold text-xs">-{formatCurrency(selectedEmployee.professionalTax !== undefined ? selectedEmployee.professionalTax : 200)}</span>
                 </div>
               </div>
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-900 flex justify-between items-center">
+                <span className="font-semibold">Calculated Net Salary (Monthly Take-Home):</span>
+                <span className="font-bold font-mono text-xs text-emerald-700">
+                  {formatCurrency(selectedEmployee.netSalary || ((Number(selectedEmployee.basicSalary) || 0) - (Number(selectedEmployee.pfDeduction) || 0) - (selectedEmployee.professionalTax !== undefined ? Number(selectedEmployee.professionalTax) : 200)))}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={() => setSelectedEmployee(null)}
+                className="erp-btn-secondary text-xs cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const emp = selectedEmployee;
+                  setSelectedEmployee(null);
+                  handleOpenEditModal(emp);
+                }}
+                className="px-3.5 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Edit Employee Details</span>
+              </button>
             </div>
           </div>
         </Modal>
@@ -1861,75 +2160,161 @@ export const HRMSModule = () => {
       {isOnboardModalOpen && (
         <Modal
           isOpen={isOnboardModalOpen}
-          onClose={() => setIsOnboardModalOpen(false)}
-          title="Onboard New Employee / Staff"
-          subtitle="Add employee record and define salary breakdown"
+          onClose={() => {
+            setIsOnboardModalOpen(false);
+            setEditingEmployee(null);
+          }}
+          title={editingEmployee ? ("Edit Employee Details: " + editingEmployee.name) : "Onboard New Employee / Staff"}
+          subtitle={editingEmployee ? ("Employee ID: " + editingEmployee.id + " • Update employee profile, banking & salary") : "Add employee record and define salary breakdown"}
           maxWidth="max-w-2xl"
         >
-          <form onSubmit={handleCreateEmployee} className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh More"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="erp-input"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Designation *</label>
-                <select
-                  value={formData.designation}
-                  onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                  className="erp-input"
-                >
-                  <option value="Senior Site Engineer">Senior Site Engineer</option>
-                  <option value="Site Engineer">Site Engineer</option>
-                  <option value="Junior Civil Surveyor">Junior Civil Surveyor</option>
-                  <option value="Billing Engineer">Billing Engineer</option>
-                  <option value="Storekeeper">Storekeeper</option>
-                  <option value="Safety Officer">Safety Officer</option>
-                  <option value="Quality Control Engineer">Quality Control Engineer</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">Department</label>
-                <select
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="erp-input"
-                >
-                  <option value="Site Execution">Site Execution</option>
-                  <option value="Operations & Civil">Operations & Civil</option>
-                  <option value="Survey & Quality">Survey & Quality</option>
-                  <option value="Accounts & Finance">Accounts & Finance</option>
-                  <option value="Inventory & Stores">Inventory & Stores</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-slate-700 font-medium mb-1">PAN Card Number</label>
-                <input
-                  type="text"
-                  maxLength={10}
-                  placeholder="ABCDE1234F"
-                  value={formData.pan}
-                  onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
-                  className="erp-input font-mono uppercase"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-              <h5 className="font-bold text-slate-900 text-xs">Salary Structure (Monthly INR)</h5>
+          <form onSubmit={handleSaveEmployee} className="space-y-4 text-xs">
+            {/* Category 1: Employee & Job Details */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-[#004bb5]" />
+                <span>Employee & Job Details (कर्मचारी व पद तपशील)</span>
+              </h5>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-600 mb-1">Basic Salary *</label>
+                  <label className="block text-slate-700 font-medium mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh More"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="erp-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Designation *</label>
+                  <select
+                    value={formData.designation}
+                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    className="erp-input"
+                  >
+                    <option value="Senior Site Engineer">Senior Site Engineer</option>
+                    <option value="Site Engineer">Site Engineer</option>
+                    <option value="Junior Civil Surveyor">Junior Civil Surveyor</option>
+                    <option value="Billing Engineer">Billing Engineer</option>
+                    <option value="Storekeeper">Storekeeper</option>
+                    <option value="Safety Officer">Safety Officer</option>
+                    <option value="Quality Control Engineer">Quality Control Engineer</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Accountant">Accountant</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Department</label>
+                  <select
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    className="erp-input"
+                  >
+                    <option value="Site Execution">Site Execution</option>
+                    <option value="Operations & Civil">Operations & Civil</option>
+                    <option value="Survey & Quality">Survey & Quality</option>
+                    <option value="Accounts & Finance">Accounts & Finance</option>
+                    <option value="Inventory & Stores">Inventory & Stores</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Date of Joining *</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.joiningDate}
+                    onChange={(e) => setFormData({ ...formData, joiningDate: e.target.value })}
+                    className="erp-input font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Category 2: Contact Information */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-[#004bb5]" />
+                <span>Contact & Statutory Information (संपर्क व कर तपशील)</span>
+              </h5>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Contact No (Phone) *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+91 98220 00000"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="erp-input font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">Official Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="employee@sanmati.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="erp-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">PAN Card Number</label>
+                  <input
+                    type="text"
+                    maxLength={10}
+                    placeholder="ABCDE1234F"
+                    value={formData.pan}
+                    onChange={(e) => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
+                    className="erp-input font-mono uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Category 3: Registered Bank Account */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-[#004bb5]" />
+                <span>Registered Bank Account (बँक खाते तपशील)</span>
+              </h5>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-slate-700 font-medium mb-1">Bank Name & Account No *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. HDFC Bank / 50100987654321"
+                    value={formData.bankAccount}
+                    onChange={(e) => setFormData({ ...formData, bankAccount: e.target.value })}
+                    className="erp-input font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-medium mb-1">IFSC Code</label>
+                  <input
+                    type="text"
+                    maxLength={11}
+                    placeholder="HDFC0000123"
+                    value={formData.ifsc}
+                    onChange={(e) => setFormData({ ...formData, ifsc: e.target.value.toUpperCase() })}
+                    className="erp-input font-mono uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Category 4: Salary Structure (Monthly INR) */}
+            <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200 space-y-3">
+              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <DollarSign className="w-3.5 h-3.5 text-[#004bb5]" />
+                <span>Salary Structure (Monthly INR)</span>
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-slate-600 mb-1">1. Basic Salary (₹) *</label>
                   <input
                     type="number"
                     required
@@ -1939,34 +2324,7 @@ export const HRMSModule = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-1">House Rent Allowance (HRA)</label>
-                  <input
-                    type="number"
-                    value={formData.hra}
-                    onChange={(e) => setFormData({ ...formData, hra: Number(e.target.value) })}
-                    className="erp-input font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Conveyance Allowance</label>
-                  <input
-                    type="number"
-                    value={formData.conveyance}
-                    onChange={(e) => setFormData({ ...formData, conveyance: Number(e.target.value) })}
-                    className="erp-input font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Special Allowance</label>
-                  <input
-                    type="number"
-                    value={formData.specialAllowance}
-                    onChange={(e) => setFormData({ ...formData, specialAllowance: Number(e.target.value) })}
-                    className="erp-input font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 mb-1">Provident Fund (PF) Deduct</label>
+                  <label className="block text-slate-600 mb-1">2. PF Deduction (₹)</label>
                   <input
                     type="number"
                     value={formData.pfDeduction}
@@ -1975,22 +2333,31 @@ export const HRMSModule = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-600 mb-1">Professional Tax (PT)</label>
+                  <label className="block text-slate-600 mb-1">3. Professional Tax (PT)</label>
                   <input
                     type="number"
-                    disabled
-                    value={200}
-                    className="erp-input font-mono text-slate-500 bg-slate-100"
+                    value={formData.professionalTax}
+                    onChange={(e) => setFormData({ ...formData, professionalTax: Number(e.target.value) })}
+                    className="erp-input font-mono text-rose-600"
                   />
                 </div>
+              </div>
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-[11px] text-emerald-800 flex justify-between items-center">
+                <span>Calculated Net Salary:</span>
+                <span className="font-bold font-mono text-xs">
+                  {formatCurrency((Number(formData.basicSalary) || 0) - (Number(formData.pfDeduction) || 0) - (Number(formData.professionalTax) || 200))}
+                </span>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
               <button
                 type="button"
-                onClick={() => setIsOnboardModalOpen(false)}
-                className="erp-btn-secondary text-xs"
+                onClick={() => {
+                  setIsOnboardModalOpen(false);
+                  setEditingEmployee(null);
+                }}
+                className="erp-btn-secondary text-xs cursor-pointer"
               >
                 Cancel
               </button>
@@ -1998,7 +2365,7 @@ export const HRMSModule = () => {
                 type="submit"
                 className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white shadow-xs rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
               >
-                Save Employee Record
+                {editingEmployee ? "Update Employee Record" : "Save Employee Record"}
               </button>
             </div>
           </form>

@@ -647,7 +647,7 @@ export const AccountsModule = () => {
       render: (row) => (
         <div className="truncate max-w-[180px]" title={row.projectName}>
           <span className="inline-flex items-center gap-1 text-xs text-slate-700">
-            <Building className="w-3 h-3 text-red-600 flex-shrink-0" />
+            <Building className="w-3 h-3 text-[#004bb5] flex-shrink-0" />
             <span className="truncate">{row.projectName}</span>
           </span>
         </div>
@@ -854,7 +854,7 @@ export const AccountsModule = () => {
       header: 'Invoice No', 
       minWidth: '130px', 
       nowrap: true, 
-      render: (row) => <span className="font-mono font-bold text-red-600 whitespace-nowrap">{row.invoiceNumber}</span> 
+      render: (row) => <span className="font-mono font-bold text-[#004bb5] whitespace-nowrap">{row.invoiceNumber}</span> 
     },
     {
       key: 'customerName',
@@ -915,7 +915,7 @@ export const AccountsModule = () => {
       minWidth: '130px',
       nowrap: true,
       render: (row) => {
-        let badge = 'bg-red-50 text-red-800 border-red-200';
+        let badge = 'bg-amber-50 text-amber-800 border-amber-200';
         if (row.paymentStatus === 'Paid') badge = 'bg-emerald-50 text-emerald-800 border-emerald-200';
         if (row.paymentStatus === 'Partial') badge = 'bg-amber-50 text-amber-800 border-amber-200';
         if (row.paymentStatus === 'Overdue') badge = 'bg-rose-50 text-rose-800 border-rose-200 animate-pulse';
@@ -1067,7 +1067,7 @@ export const AccountsModule = () => {
       header: 'Voucher ID', 
       minWidth: '120px', 
       nowrap: true, 
-      render: (row) => <span className="font-mono font-bold text-red-600 whitespace-nowrap">{row.id}</span> 
+      render: (row) => <span className="font-mono font-bold text-[#004bb5] whitespace-nowrap">{row.id}</span> 
     },
     { 
       key: 'date', 
@@ -1410,7 +1410,7 @@ export const AccountsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 2. Account Management • Subsection (i)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1429,7 +1429,7 @@ export const AccountsModule = () => {
               </button>
               <button
                 onClick={handleOpenAddExpense}
-                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <ArrowUpRight className="w-4 h-4" />
                 <span>Add Expense</span>
@@ -1455,15 +1455,15 @@ export const AccountsModule = () => {
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Total Actual Outflow (Expense)</span>
-              <div className="text-lg font-bold text-rose-600 font-mono mt-1">
+              <div className="text-lg font-bold text-slate-800 font-mono mt-1">
                 {formatCurrency(totalFilteredExpense)}
               </div>
-              <span className="text-[11px] text-rose-600 font-medium">Material & labour disbursements</span>
+              <span className="text-[11px] text-slate-500 font-medium">Material & labour disbursements</span>
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Net Operating Cashflow</span>
               <div className={`text-2xl font-black font-mono mt-1 ${
-                totalFilteredIncome >= totalFilteredExpense ? 'text-emerald-600' : 'text-rose-600'
+                totalFilteredIncome >= totalFilteredExpense ? 'text-emerald-600' : 'text-slate-900'
               }`}>
                 {formatCurrency(totalFilteredIncome - totalFilteredExpense)}
               </div>
@@ -1482,9 +1482,7 @@ export const AccountsModule = () => {
                     key={type}
                     onClick={() => setRecordsTypeFilter(type)}
                     className={`px-3 py-1 rounded-lg font-semibold text-xs transition-colors cursor-pointer focus:outline-none ${
-                      recordsTypeFilter === type 
-                        ? 'bg-red-600 hover:bg-red-700 text-white shadow-2xs' 
-                        : 'bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600'
+                      recordsTypeFilter === type ? 'bg-[#002046] text-white shadow-2xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
                     {type}
@@ -1498,7 +1496,7 @@ export const AccountsModule = () => {
                 <select
                   value={recordsProjectFilter}
                   onChange={(e) => setRecordsProjectFilter(e.target.value)}
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-red-500"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-[#004bb5]"
                 >
                   <option value="All">All Projects ({projects.length})</option>
                   {projects.map(p => (
@@ -1559,7 +1557,7 @@ export const AccountsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 2. Account Management • Subsection (ii)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1602,7 +1600,7 @@ export const AccountsModule = () => {
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Overdue Invoices Alert</span>
-              <div className="text-lg font-bold text-rose-600 font-mono mt-1">
+              <div className="text-lg font-bold text-slate-800 font-mono mt-1">
                 {overdueInvoicesCount} Invoices
               </div>
               <span className="text-[11px] text-rose-600 font-medium">Past due date</span>
@@ -1633,7 +1631,7 @@ export const AccountsModule = () => {
               <select
                 value={paymentCustomerFilter}
                 onChange={(e) => setPaymentCustomerFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Customers</option>
                 {clients.map(c => (
@@ -1698,7 +1696,7 @@ export const AccountsModule = () => {
                 onClick={() => { setLedgerType('Customer'); setSelectedPartyLedger('All'); }}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   ledgerType === 'Customer' 
-                    ? 'bg-white text-red-600 shadow-xs' 
+                    ? 'bg-white text-[#002046] font-bold shadow-xs' 
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1709,7 +1707,7 @@ export const AccountsModule = () => {
                 onClick={() => { setLedgerType('Vendor'); setSelectedPartyLedger('All'); }}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   ledgerType === 'Vendor' 
-                    ? 'bg-white text-red-600 shadow-xs' 
+                    ? 'bg-white text-[#002046] font-bold shadow-xs' 
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1724,7 +1722,7 @@ export const AccountsModule = () => {
               <select
                 value={selectedPartyLedger}
                 onChange={(e) => setSelectedPartyLedger(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-red-500 min-w-[200px]"
+                className="bg-slate-50 border border-slate-200 text-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-[#004bb5] min-w-[200px]"
               >
                 <option value="All">All {ledgerType} Accounts</option>
                 {partiesList.map(p => (
@@ -1735,7 +1733,7 @@ export const AccountsModule = () => {
           </div>
 
           {/* Running Balance Banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-red-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-[#002046] to-[#002d62] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
             <div>
               <span className="text-amber-300 text-[10px] font-bold uppercase tracking-wider block">
                 {ledgerType === 'Customer' ? 'Sundry Debtors Balance' : 'Sundry Creditors Balance'}
@@ -1772,7 +1770,7 @@ export const AccountsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 2. Account Management • Subsection (iv)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1831,7 +1829,7 @@ export const AccountsModule = () => {
               <div className={`text-xl font-black font-mono mt-1 ${netActualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {formatCurrency(netActualProfit)}
               </div>
-              <span className="text-[10px] text-red-700 bg-red-50 px-1.5 py-0.5 rounded font-bold mt-1 inline-block">Net Realized</span>
+              <span className="text-[10px] text-[#004bb5] bg-[#e8f1fc] px-1.5 py-0.5 rounded font-bold mt-1 inline-block">Net Realized</span>
             </div>
 
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
@@ -1920,7 +1918,7 @@ export const AccountsModule = () => {
                 <tbody className="divide-y divide-slate-100 bg-white text-xs">
                   {projectFinancialBreakdown.length > 0 ? (
                     projectFinancialBreakdown.map((p, idx) => (
-                      <tr key={idx} className="hover:bg-red-50/20 transition-colors">
+                      <tr key={idx} className="hover:bg-blue-50/20 transition-colors">
                         <td className="px-3.5 py-2 font-bold text-slate-900">
                           {p.name}
                           <span className="block text-[10px] text-slate-400 font-normal">{p.location}</span>
@@ -1961,14 +1959,14 @@ export const AccountsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 2. Account Management • Subsection (v)
               </div>
               <div className="flex items-center gap-2.5 mt-0.5">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                   v. NDT Records & Register
                 </h2>
-                <span className="text-xs font-bold bg-red-50 text-red-600 px-2.5 py-0.5 rounded-full border border-red-200">
+                <span className="text-xs font-bold bg-[#e8f1fc] text-[#004bb5] px-2.5 py-0.5 rounded-full border border-[#cce0fc]">
                   {nfdRecords.length} {nfdRecords.length === 1 ? 'record' : 'records'}
                 </span>
               </div>
@@ -1996,7 +1994,7 @@ export const AccountsModule = () => {
               </button>
               <button
                 onClick={handleOpenAddNfd}
-                className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add NDT Record</span>
@@ -2046,7 +2044,7 @@ export const AccountsModule = () => {
                   placeholder="Search by NDT No, Bank, Project, Lien..."
                   value={nfdSearchTerm}
                   onChange={(e) => setNfdSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-red-500"
+                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#004bb5]"
                 />
               </div>
 
@@ -2058,7 +2056,7 @@ export const AccountsModule = () => {
                     onClick={() => setNfdStatusFilter(st)}
                     className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                       nfdStatusFilter === st
-                        ? 'bg-red-600 text-white shadow-2xs'
+                        ? 'bg-[#002046] text-white shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
@@ -2071,7 +2069,7 @@ export const AccountsModule = () => {
               <select
                 value={nfdBankFilter}
                 onChange={(e) => setNfdBankFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Banks</option>
                 {NFD_BANKS.map(b => (
@@ -2109,7 +2107,7 @@ export const AccountsModule = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white text-xs">
                     {filteredNfdRecords.map((item) => (
-                      <tr key={item.id} className="hover:bg-red-50/20 transition-colors">
+                      <tr key={item.id} className="hover:bg-blue-50/20 transition-colors">
                         <td className="px-3.5 py-2.5 font-bold font-mono text-slate-900">
                           {item.nfdNumber}
                           <span className="block text-[10px] text-slate-400 font-normal font-sans">
@@ -2122,7 +2120,7 @@ export const AccountsModule = () => {
                         </td>
                         <td className="px-3.5 py-2.5">
                           <span className="font-medium text-slate-700 block">{item.projectName || 'General / Corporate'}</span>
-                          <span className="text-[10px] text-red-600 font-semibold">{item.purpose}</span>
+                          <span className="text-[10px] text-[#004bb5] font-semibold">{item.purpose}</span>
                           {item.lienTo && item.lienTo !== 'None' && (
                             <span className="block text-[10px] text-amber-700 font-medium">Lien: {item.lienTo}</span>
                           )}
@@ -2185,7 +2183,7 @@ export const AccountsModule = () => {
             </div>
           ) : (
             <div className="p-12 text-center bg-white border border-slate-200/90 rounded-2xl shadow-2xs">
-              <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 border border-red-200/80 flex items-center justify-center mx-auto mb-2">
+              <div className="w-10 h-10 rounded-full bg-blue-50 text-[#004bb5] border border-blue-200/80 flex items-center justify-center mx-auto mb-2">
                 <Landmark className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-slate-800">No NDT Records Registered</h4>
@@ -2194,7 +2192,7 @@ export const AccountsModule = () => {
               </p>
               <button
                 onClick={handleOpenAddNfd}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors shadow-2xs inline-flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 bg-[#002046] hover:bg-[#001736] text-white rounded-lg text-xs font-bold transition-colors shadow-2xs inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add First NDT Record</span>
@@ -2654,7 +2652,7 @@ export const AccountsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-colors shadow-2xs cursor-pointer"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg transition-colors shadow-2xs cursor-pointer"
             >
               {editingTransaction ? "Update Expense Record" : "Save & Disburse Expense"}
             </button>
@@ -2980,7 +2978,7 @@ export const AccountsModule = () => {
             <div className="p-6 bg-slate-50 border border-slate-300 rounded-2xl space-y-4 text-slate-900 font-sans">
               <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-black text-sm text-red-700">SANMATI CONSTRUCTIONS</h3>
+                  <h3 className="font-black text-sm text-[#002046]">SANMATI CONSTRUCTIONS</h3>
                   <p className="text-[10px] text-slate-500">Kolhapur, Maharashtra • GSTIN: 27AAYCS9281Q1ZU</p>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
@@ -3290,13 +3288,13 @@ export const AccountsModule = () => {
             {selectedTxnDossier.receiptAttachment && (
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
                 <span className="text-slate-500 font-medium">Receipt File:</span>
-                <span className="font-mono text-xs text-red-600 font-bold">{selectedTxnDossier.receiptAttachment}</span>
+                <span className="font-mono text-xs text-[#004bb5] font-bold">{selectedTxnDossier.receiptAttachment}</span>
               </div>
             )}
             {selectedTxnDossier.billAttachment && (
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
                 <span className="text-slate-500 font-medium">Bill File:</span>
-                <span className="font-mono text-xs text-red-600 font-bold">{selectedTxnDossier.billAttachment}</span>
+                <span className="font-mono text-xs text-[#004bb5] font-bold">{selectedTxnDossier.billAttachment}</span>
               </div>
             )}
 
@@ -3589,7 +3587,7 @@ export const AccountsModule = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-2xs cursor-pointer"
+              className="px-5 py-2 bg-[#002046] hover:bg-[#001736] text-white font-bold rounded-lg transition-colors shadow-2xs cursor-pointer"
             >
               {editingNfd ? "Update NDT Record" : "Save NDT Record"}
             </button>
@@ -3627,7 +3625,7 @@ export const AccountsModule = () => {
               </div>
               <div className="flex justify-between items-center border-b border-slate-200 pb-2">
                 <span className="text-slate-500 font-medium">Purpose / Facility:</span>
-                <strong className="text-red-600 font-bold">{selectedNfdDossier.purpose}</strong>
+                <strong className="text-[#004bb5] font-bold">{selectedNfdDossier.purpose}</strong>
               </div>
               <div className="flex justify-between items-center border-b border-slate-200 pb-2">
                 <span className="text-slate-500 font-medium">Deposit Amount:</span>

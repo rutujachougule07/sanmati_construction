@@ -646,18 +646,14 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
 
     // 5. Earnings & Deductions Comparison Table
     const basic = Number(employee.basicSalary) || 0;
-    const hra = Number(employee.hra) || 0;
-    const conveyance = Number(employee.conveyance) || 0;
-    const special = Number(employee.specialAllowance) || 0;
-    const gross = basic + hra + conveyance + special;
+    const overtime = Number(employee.overtimePay !== undefined ? employee.overtimePay : (employee.overtime || 0)) || 0;
+    const gross = basic + overtime;
 
-    const pf = Number(employee.pfDeduction) || 0;
-    const pt = Number(employee.professionalTax || 200);
-    const tds = 0;
-    const otherDed = 0;
-    const totalDed = pf + pt + tds + otherDed;
+    const pf = Number(employee.pf !== undefined ? employee.pf : employee.pfDeduction) || 0;
+    const pt = Number(employee.pt !== undefined ? employee.pt : (employee.professionalTax || 200));
+    const totalDed = pf + pt;
 
-    const net = employee.netSalary ? Number(employee.netSalary) : (gross - totalDed);
+    const net = basic + overtime - pf - pt;
 
     applyAutoTable(doc, {
       startY: doc.lastAutoTable.finalY + 3.5,
@@ -665,11 +661,8 @@ export const generatePayslipPDF = (employee, month = "November 2026") => {
       theme: 'grid',
       head: [['EARNINGS COMPONENT', 'AMOUNT (Rs.)', 'DEDUCTIONS COMPONENT', 'AMOUNT (Rs.)']],
       body: [
-        ['Basic Salary', `Rs. ${formatNumber(basic)}`, 'Provident Fund (EPF)', `Rs. ${formatNumber(pf)}`],
-        ['House Rent Allowance (HRA)', `Rs. ${formatNumber(hra)}`, 'Professional Tax (PT - Maharashtra)', `Rs. ${formatNumber(pt)}`],
-        ['Conveyance Allowance', `Rs. ${formatNumber(conveyance)}`, 'Income Tax (TDS)', `Rs. 0.00`],
-        ['Site Special Allowance', `Rs. ${formatNumber(special)}`, 'Loan / Advance Recovery', `Rs. 0.00`],
-        ['Overtime / Incentive Pay', `Rs. 0.00`, 'Other Deductions', `Rs. 0.00`],
+        ['Basic Salary', `Rs. ${formatNumber(basic)}`, 'Provident Fund (PF)', `Rs. ${formatNumber(pf)}`],
+        ['Overtime', `Rs. ${formatNumber(overtime)}`, 'Professional Tax (PT)', `Rs. ${formatNumber(pt)}`],
         [
           { content: 'TOTAL GROSS EARNINGS (A)', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } },
           { content: `Rs. ${formatNumber(gross)}`, styles: { fontStyle: 'bold', halign: 'right', fillColor: [241, 245, 249] } },

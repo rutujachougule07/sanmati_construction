@@ -1011,7 +1011,7 @@ export const VendorsModule = () => {
               <select
                 value={vendorCategoryFilter}
                 onChange={(e) => setVendorCategoryFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Categories</option>
                 {VENDOR_CATEGORIES.map(cat => (
@@ -1025,7 +1025,7 @@ export const VendorsModule = () => {
               <select
                 value={vendorStatusFilter}
                 onChange={(e) => setVendorStatusFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Status</option>
                 <option value="Active">Active</option>
@@ -1051,7 +1051,7 @@ export const VendorsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 3. Vendor Management • Sub-module (ii)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1079,7 +1079,7 @@ export const VendorsModule = () => {
             <select
               value={contactVendorFilter}
               onChange={(e) => setContactVendorFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+              className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
             >
               <option value="All">All Vendors</option>
               {vendors.map(v => (
@@ -1105,7 +1105,7 @@ export const VendorsModule = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider">
+              <div className="text-[10px] font-extrabold text-[#004bb5] uppercase tracking-wider">
                 3. Vendor Management • Sub-module (iii)
               </div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
@@ -1146,7 +1146,7 @@ export const VendorsModule = () => {
               <select
                 value={purchaseVendorFilter}
                 onChange={(e) => setPurchaseVendorFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Vendors</option>
                 {vendors.map(v => (
@@ -1160,7 +1160,7 @@ export const VendorsModule = () => {
               <select
                 value={purchaseProjectFilter}
                 onChange={(e) => setPurchaseProjectFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Projects</option>
                 {projects.map(p => (
@@ -1174,7 +1174,7 @@ export const VendorsModule = () => {
               <select
                 value={purchaseDeliveryFilter}
                 onChange={(e) => setPurchaseDeliveryFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Statuses</option>
                 {DELIVERY_STATUSES.map(s => (
@@ -1256,7 +1256,7 @@ export const VendorsModule = () => {
               <select
                 value={paymentStatusFilter}
                 onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Statuses</option>
                 <option value="Pending">Pending</option>
@@ -1271,7 +1271,7 @@ export const VendorsModule = () => {
               <select
                 value={paymentVendorFilter}
                 onChange={(e) => setPaymentVendorFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-red-500"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="All">All Vendors</option>
                 {vendors.map(v => (
@@ -1309,7 +1309,7 @@ export const VendorsModule = () => {
                 value={vendorForm.name}
                 onChange={(e) => setVendorForm({ ...vendorForm, name: e.target.value })}
                 placeholder="Enter vendor / supplier name"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1319,7 +1319,7 @@ export const VendorsModule = () => {
                 value={vendorForm.companyName}
                 onChange={(e) => setVendorForm({ ...vendorForm, companyName: e.target.value })}
                 placeholder="Enter company / firm legal name"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1330,7 +1330,7 @@ export const VendorsModule = () => {
               <select
                 value={vendorForm.category}
                 onChange={(e) => setVendorForm({ ...vendorForm, category: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               >
                 {VENDOR_CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -1344,7 +1344,7 @@ export const VendorsModule = () => {
                 value={vendorForm.contactPerson}
                 onChange={(e) => setVendorForm({ ...vendorForm, contactPerson: e.target.value })}
                 placeholder="Enter contact person name"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1357,7 +1357,7 @@ export const VendorsModule = () => {
                 value={vendorForm.phone}
                 onChange={(e) => setVendorForm({ ...vendorForm, phone: e.target.value })}
                 placeholder="+91 XXXXX XXXXX"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1367,7 +1367,7 @@ export const VendorsModule = () => {
                 value={vendorForm.email}
                 onChange={(e) => setVendorForm({ ...vendorForm, email: e.target.value })}
                 placeholder="vendor@email.com"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1381,7 +1381,7 @@ export const VendorsModule = () => {
                 value={vendorForm.gstin}
                 onChange={(e) => setVendorForm({ ...vendorForm, gstin: e.target.value.toUpperCase() })}
                 placeholder="27AABCU1234F1Z5"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1392,7 +1392,7 @@ export const VendorsModule = () => {
                 value={vendorForm.pan}
                 onChange={(e) => setVendorForm({ ...vendorForm, pan: e.target.value.toUpperCase() })}
                 placeholder="AABCU1234F"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1466,7 +1466,7 @@ export const VendorsModule = () => {
               value={vendorForm.address}
               onChange={(e) => setVendorForm({ ...vendorForm, address: e.target.value })}
               placeholder="MIDC Shiroli / Gokul Shirgaon, Kolhapur"
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
             />
           </div>
 
@@ -1583,7 +1583,7 @@ export const VendorsModule = () => {
               required
               value={contactForm.vendorName}
               onChange={(e) => setContactForm({ ...contactForm, vendorName: e.target.value })}
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
             >
               <option value="">Select Vendor</option>
               {vendors.map(v => (
@@ -1601,7 +1601,7 @@ export const VendorsModule = () => {
                 value={contactForm.contactPerson}
                 onChange={(e) => setContactForm({ ...contactForm, contactPerson: e.target.value })}
                 placeholder="e.g. Rahul Shinde"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1611,7 +1611,7 @@ export const VendorsModule = () => {
                 value={contactForm.designation}
                 onChange={(e) => setContactForm({ ...contactForm, designation: e.target.value })}
                 placeholder="e.g. Batching Plant Dispatch Head"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1625,7 +1625,7 @@ export const VendorsModule = () => {
                 value={contactForm.phone}
                 onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                 placeholder="+91 98221 11223"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1635,7 +1635,7 @@ export const VendorsModule = () => {
                 value={contactForm.alternatePhone}
                 onChange={(e) => setContactForm({ ...contactForm, alternatePhone: e.target.value })}
                 placeholder="+91 94220 99887"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               />
             </div>
           </div>
@@ -1647,7 +1647,7 @@ export const VendorsModule = () => {
               value={contactForm.email}
               onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
               placeholder="r.shinde@kolhapurcement.com"
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
             />
           </div>
 
@@ -1658,7 +1658,7 @@ export const VendorsModule = () => {
               value={contactForm.plantAddress}
               onChange={(e) => setContactForm({ ...contactForm, plantAddress: e.target.value })}
               placeholder="Plot No. 44, MIDC Shiroli, Kolhapur"
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
             />
           </div>
 
@@ -1696,7 +1696,7 @@ export const VendorsModule = () => {
                 required
                 value={purchaseForm.vendorName}
                 onChange={(e) => setPurchaseForm({ ...purchaseForm, vendorName: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="">Select Vendor</option>
                 {vendors.map(v => (
@@ -1710,7 +1710,7 @@ export const VendorsModule = () => {
                 required
                 value={purchaseForm.projectName}
                 onChange={(e) => setPurchaseForm({ ...purchaseForm, projectName: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
               >
                 <option value="">Select Project</option>
                 {projects.map(p => (
@@ -1824,7 +1824,7 @@ export const VendorsModule = () => {
                 value={purchaseForm.totalAmount}
                 onChange={(e) => setPurchaseForm({ ...purchaseForm, totalAmount: e.target.value })}
                 placeholder="e.g. 150000"
-                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-red-500"
+                className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#004bb5]"
               />
             </div>
             <div>
@@ -1927,7 +1927,7 @@ export const VendorsModule = () => {
                   value={paymentForm.amountPaid}
                   onChange={(e) => setPaymentForm({ ...paymentForm, amountPaid: e.target.value })}
                   placeholder="Enter amount"
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-emerald-600 focus:outline-none focus:border-red-500"
+                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-emerald-600 focus:outline-none focus:border-[#004bb5]"
                 />
               </div>
               <div>
@@ -1935,7 +1935,7 @@ export const VendorsModule = () => {
                 <select
                   value={paymentForm.paymentMode}
                   onChange={(e) => setPaymentForm({ ...paymentForm, paymentMode: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
+                  className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#004bb5]"
                 >
                   {PAYMENT_MODES.map(m => (
                     <option key={m} value={m}>{m}</option>

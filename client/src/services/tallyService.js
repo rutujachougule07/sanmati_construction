@@ -134,6 +134,67 @@ export const buildTallyLedgerXML = ({
 };
 
 /**
+ * Generate standard Tally XML for any Voucher Type (Sales, Purchase, Payment, Receipt, Contra, Journal)
+ */
+export const buildGenericVoucherXML = ({
+  companyName = "SANMATI CONSTRUCTIONS (FY 2026-2027)",
+  voucherType = "Payment",
+  voucherNo,
+  date = new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+  debitLedger,
+  creditLedger,
+  amount,
+  narration = ""
+}) => {
+  const formattedDate = date.replace(/-/g, '');
+  const numAmount = Number(amount) || 0;
+  const vchTypeName = voucherType.replace(' Voucher', '');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<ENVELOPE>
+  <HEADER>
+    <TALLYREQUEST>Import Data</TALLYREQUEST>
+  </HEADER>
+  <BODY>
+    <IMPORTDATA>
+      <REQUESTDESC>
+        <REPORTNAME>Vouchers</REPORTNAME>
+        <STATICVARIABLES>
+          <SVCURRENTCOMPANY>${companyName}</SVCURRENTCOMPANY>
+        </STATICVARIABLES>
+      </REQUESTDESC>
+      <REQUESTDATA>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER VCHTYPE="${vchTypeName}" ACTION="Create" OBJVIEW="Accounting Voucher View">
+            <DATE>${formattedDate}</DATE>
+            <VOUCHERTYPENAME>${vchTypeName}</VOUCHERTYPENAME>
+            <VOUCHERNUMBER>${voucherNo}</VOUCHERNUMBER>
+            <PARTYLEDGERNAME>${creditLedger || debitLedger}</PARTYLEDGERNAME>
+            <PERSISTEDVIEW>Accounting Voucher View</PERSISTEDVIEW>
+            <NARRATION>${narration || `${vchTypeName} transaction transferred from Sanmati ERP.`}</NARRATION>
+            
+            <!-- Debit Ledger -->
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>${debitLedger}</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-${numAmount.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            
+            <!-- Credit Ledger -->
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>${creditLedger}</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>${numAmount.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+      </REQUESTDATA>
+    </IMPORTDATA>
+  </BODY>
+</ENVELOPE>`;
+};
+
+/**
  * Download generated Tally XML file directly
  */
 export const downloadTallyXML = (xmlContent, filename = "TallyImport.xml") => {

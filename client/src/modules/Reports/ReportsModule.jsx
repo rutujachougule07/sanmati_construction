@@ -101,7 +101,8 @@ const SectionHeader = ({ badge, title, subtitle }) => (
 export const ReportsModule = () => {
   const { projects = [], clients = [], vendors = [], raBills = [], expenses = [], hrmsEmployees = [] } = useERPData();
   const [searchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'custom';
+  const tabFromUrl = searchParams.get('tab');
+  const activeTab = (!tabFromUrl || tabFromUrl === 'projectwise' || tabFromUrl === 'export') ? 'custom' : tabFromUrl;
 
   // Section (i) state
   const [reportType, setReportType] = useState('projectBilling');
@@ -193,8 +194,8 @@ export const ReportsModule = () => {
     },
     employeeSalaries: {
       label: 'HRMS Payroll & Salary Register',
-      headers: ['Emp ID', 'Name', 'Designation', 'Basic', 'HRA', 'PF Deduction', 'Net Salary'],
-      getData: () => hrmsEmployees.map(e => [e.employeeId, e.name, e.designation, formatCurrency(e.basicSalary), formatCurrency(e.hra), formatCurrency(e.pfDeduction), formatCurrency(e.netSalary)]),
+      headers: ['Emp ID', 'Name', 'Designation', 'Basic Salary', 'Overtime', 'PF Deduction', 'Prof. Tax (PT)', 'Net Salary'],
+      getData: () => hrmsEmployees.map(e => [e.id || e.employeeId, e.name, e.designation, formatCurrency(e.basicSalary), formatCurrency(e.overtime || 0), formatCurrency(e.pfDeduction), formatCurrency(e.professionalTax || 200), formatCurrency(e.netSalary)]),
       summary: () => ({ count: hrmsEmployees.length, total: hrmsEmployees.reduce((s, e) => s + (e.netSalary || 0), 0) })
     },
     siteExpenses: {
@@ -314,10 +315,10 @@ export const ReportsModule = () => {
     {
       icon: Users, color: 'border-purple-200 bg-purple-50',
       title: 'HRMS Payroll & Salary Register',
-      desc: 'Basic, HRA, PF Deduction, Net Salary — All Employees',
-      onPDF: () => { try { generatePDFReport({ title: 'HRMS Payroll Register', headers: ['ID', 'Name', 'Designation', 'Basic', 'Net Salary'], rows: hrmsEmployees.map(e => [e.employeeId, e.name, e.designation, formatCurrency(e.basicSalary), formatCurrency(e.netSalary)]), fileName: 'Payroll_Register.pdf' }); showToast('PDF डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } },
-      onExcel: () => { try { exportToExcel(hrmsEmployees.map(e => ({ ID: e.employeeId, Name: e.name, Designation: e.designation, Basic: e.basicSalary, Net: e.netSalary })), 'Payroll_Register.xlsx'); showToast('Excel डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } },
-      onCSV: () => { try { exportToCSV(hrmsEmployees.map(e => ({ ID: e.employeeId, Name: e.name, Designation: e.designation, Basic: e.basicSalary, Net: e.netSalary })), 'Payroll_Register.csv'); showToast('CSV डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } }
+      desc: 'Basic Salary, Overtime, PF Deduction, Professional Tax, Net Salary — All Employees',
+      onPDF: () => { try { generatePDFReport({ title: 'HRMS Payroll Register', headers: ['ID', 'Name', 'Designation', 'Basic Salary', 'Overtime', 'PF Deduction', 'Prof. Tax', 'Net Salary'], rows: hrmsEmployees.map(e => [e.id || e.employeeId, e.name, e.designation, formatCurrency(e.basicSalary), formatCurrency(e.overtime || 0), formatCurrency(e.pfDeduction), formatCurrency(e.professionalTax || 200), formatCurrency(e.netSalary)]), fileName: 'Payroll_Register.pdf' }); showToast('PDF डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } },
+      onExcel: () => { try { exportToExcel(hrmsEmployees.map(e => ({ ID: e.id || e.employeeId, Name: e.name, Designation: e.designation, 'Basic Salary': e.basicSalary, Overtime: e.overtime || 0, 'PF Deduction': e.pfDeduction, 'Prof. Tax': e.professionalTax || 200, 'Net Salary': e.netSalary })), 'Payroll_Register.xlsx'); showToast('Excel डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } },
+      onCSV: () => { try { exportToCSV(hrmsEmployees.map(e => ({ ID: e.id || e.employeeId, Name: e.name, Designation: e.designation, 'Basic Salary': e.basicSalary, Overtime: e.overtime || 0, 'PF Deduction': e.pfDeduction, 'Prof. Tax': e.professionalTax || 200, 'Net Salary': e.netSalary })), 'Payroll_Register.csv'); showToast('CSV डाऊनलोड झाला! ✓'); } catch (e) { showToast(e.message, 'error'); } }
     },
     {
       icon: Building, color: 'border-rose-200 bg-rose-50',
@@ -718,8 +719,6 @@ export const ReportsModule = () => {
       {/* Content based on active tab */}
       {activeTab === 'custom' && renderCustom()}
       {activeTab === 'datewise' && renderDatewise()}
-      {activeTab === 'projectwise' && renderProjectwise()}
-      {activeTab === 'export' && renderExport()}
     </div>
   );
 };
