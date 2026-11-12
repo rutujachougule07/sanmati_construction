@@ -49,6 +49,19 @@ export const ERPDataProvider = ({ children }) => {
       if (saved) {
         try {
           let parsed = JSON.parse(saved);
+          if (key === 'tenders' && Array.isArray(parsed)) {
+            parsed = parsed.filter(t => 
+              t.id !== 'TND-2026-01' && 
+              t.id !== 'TND-2026-02' &&
+              !t.title?.includes('Flyover Approach Road') &&
+              !t.tenderName?.includes('Flyover Approach Road') &&
+              !t.title?.includes('Indoor Badminton') &&
+              !t.tenderName?.includes('Indoor Badminton') &&
+              !t.tenderName?.includes('Shiroli Heavy Industrial') &&
+              !t.tenderName?.includes('Medical Research Center')
+            );
+            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
+          }
           if (key === 'projects' && Array.isArray(parsed)) {
             parsed = parsed.filter(p => !p.name?.includes('Royal Palace') && !p.name?.includes('D.Y. Patil') && !p.name?.includes('MIDC Shiroli'));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
@@ -59,6 +72,18 @@ export const ERPDataProvider = ({ children }) => {
           }
           if (key === 'vendors' && Array.isArray(parsed)) {
             parsed = parsed.filter(v => !v.name?.includes('Rajaram Steel') && !v.name?.includes('Ultratech Cement') && !v.name?.includes('Kolhapur Earthmovers') && !v.name?.includes('Mahavir Hardware'));
+            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
+          }
+          if (key === 'inventory' && Array.isArray(parsed)) {
+            parsed = parsed.filter(m => !(
+              ['MAT-001', 'MAT-002', 'MAT-003', 'MAT-004', 'MAT-005'].includes(m.id) && (
+                m.name?.includes('Ultratech Super Cement') ||
+                m.name?.includes('TMT Rebar Fe500D') ||
+                m.name?.includes('Panchganga Natural River Sand') ||
+                m.name?.includes('Crushed Stone Metal') ||
+                m.name?.includes('Siporex AAC Lightweight')
+              )
+            ));
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'hrmsEmployees' && Array.isArray(parsed)) {
@@ -118,6 +143,7 @@ export const ERPDataProvider = ({ children }) => {
   const [boqItems, setBoqItems] = usePersistedState('boqItems', INITIAL_BOQ_ITEMS);
   const [raBills, setRaBills] = usePersistedState('raBills', INITIAL_RA_BILLS);
   const [inventory, setInventory] = usePersistedState('inventory', INITIAL_INVENTORY);
+  const [stockMovements, setStockMovements] = usePersistedState('stockMovements', []);
   const [gpsLogs, setGpsLogs] = usePersistedState('gpsLogs', INITIAL_GPS_LOGS);
   const [hrmsEmployees, setHrmsEmployees] = usePersistedState('hrmsEmployees', INITIAL_HRMS_EMPLOYEES);
   const [tallyConfig, setTallyConfig] = usePersistedState('tallyConfig', INITIAL_TALLY_CONFIG);
@@ -126,6 +152,7 @@ export const ERPDataProvider = ({ children }) => {
   const [quotations, setQuotations] = usePersistedState('quotations', INITIAL_QUOTATIONS);
   const [expenses, setExpenses] = usePersistedState('expenses', INITIAL_EXPENSES);
   const [notifications, setNotifications] = usePersistedState('notifications', INITIAL_NOTIFICATIONS);
+  const [subcontractors, setSubcontractors] = usePersistedState('subcontractors', []);
 
   // Live project guarantee: ensure dummy projects are never shown
   useEffect(() => {
@@ -218,6 +245,30 @@ export const ERPDataProvider = ({ children }) => {
       }),
       subscribeToModuleCollection('approvals', (data) => {
         if (data && data.length > 0) setApprovals(data);
+      }),
+      subscribeToModuleCollection('inventory', (data) => {
+        if (data && data.length > 0) {
+          const filtered = data.filter(m => !(
+            ['MAT-001', 'MAT-002', 'MAT-003', 'MAT-004', 'MAT-005'].includes(m.id) && (
+              m.name?.includes('Ultratech Super Cement') ||
+              m.name?.includes('TMT Rebar Fe500D') ||
+              m.name?.includes('Panchganga Natural River Sand') ||
+              m.name?.includes('Crushed Stone Metal') ||
+              m.name?.includes('Siporex AAC Lightweight')
+            )
+          ));
+          if (filtered.length > 0) setInventory(filtered);
+        }
+      }),
+      subscribeToModuleCollection('stockMovements', (data) => {
+        if (data && data.length > 0) {
+          const sorted = [...data].sort((a, b) =>
+            String(b.date || '').localeCompare(String(a.date || '')) ||
+            String(b.createdAt || '').localeCompare(String(a.createdAt || '')) ||
+            String(b.id || '').localeCompare(String(a.id || ''))
+          );
+          setStockMovements(sorted);
+        }
       })
     ];
 
@@ -239,6 +290,8 @@ export const ERPDataProvider = ({ children }) => {
         { key: 'sanmati_vendorPurchases', col: 'vendorPurchases' },
         { key: 'sanmati_vendorPayments', col: 'vendorPayments' },
         { key: 'sanmati_projects', col: 'projects' },
+        { key: 'sanmati_inventory', col: 'inventory' },
+        { key: 'sanmati_stockMovements', col: 'stockMovements' },
       ];
 
       collectionsToSync.forEach(({ key, col }) => {
@@ -438,60 +491,386 @@ export const ERPDataProvider = ({ children }) => {
   };
 
   // --- Inventory & Stock Movement ---
-  const issueStockToSite = ({ materialId, projectId, quantity, issuedTo, remarks }) => {
-    const qty = Number(quantity);
-    let materialName = '';
-    let unitCost = 0;
-
-    setInventory(prev => prev.map(mat => {
-      if (mat.id === materialId) {
-        materialName = mat.name;
-        unitCost = mat.unitPrice || 0;
-        const newStock = Math.max(0, mat.currentStock - qty);
-        const prevAlloc = mat.projectAllocation?.[projectId] || 0;
-        return {
-          ...mat,
-          currentStock: newStock,
-          status: newStock <= mat.minimumThreshold ? 'Low Stock Alert' : 'Adequate',
-          projectAllocation: {
-            ...mat.projectAllocation,
-            [projectId]: prevAlloc + qty
-          }
-        };
-      }
-      return mat;
-    }));
-
-    // Update project actual expenditure
-    const totalCost = qty * unitCost;
-    setProjects(prev => prev.map(p => {
-      if (p.id === projectId) {
-        return {
-          ...p,
-          actualExpenditure: (p.actualExpenditure || 0) + totalCost
-        };
-      }
-      return p;
-    }));
-
-    addNotification('Material Issued to Site', `${qty} units of ${materialName} issued to project ${projectId}. Total: ₹${totalCost}.`, 'info');
+  const computeStockStatus = (currentStock, minimumThreshold) => {
+    const curr = Number(currentStock) || 0;
+    const min = Number(minimumThreshold) || 0;
+    if (curr <= 0) return 'Out of Stock';
+    if (curr <= min) return 'Low Stock Alert';
+    return 'Available';
   };
 
-  const receiveStockInward = ({ materialId, quantity, vendorId, unitPrice }) => {
-    const qty = Number(quantity);
+  const addMaterialItem = (materialData) => {
+    const opening = Math.max(0, Number(materialData.openingStock ?? materialData.currentStock) || 0);
+    const minThreshold = Math.max(0, Number(materialData.minimumThreshold) || 0);
+    const unitPrice = Math.max(0, Number(materialData.unitPrice) || 0);
+    const matchedVendor = vendors.find(v => v.id === materialData.supplierId);
+    const supplierName = materialData.supplierName || matchedVendor?.name || '';
+    const supplierPhone = materialData.supplierPhone || matchedVendor?.phone || '';
+
+    const nextIdx = inventory.reduce((max, item) => {
+      const m = String(item.id || '').match(/^MAT-(\d+)$/);
+      return m ? Math.max(max, Number(m[1])) : max;
+    }, 0) + 1;
+
+    const newMaterial = {
+      id: materialData.id || `MAT-${String(nextIdx).padStart(3, '0')}`,
+      name: (materialData.name || '').trim(),
+      category: materialData.category || 'Cement & Concrete',
+      unit: materialData.unit || 'Bag',
+      openingStock: opening,
+      currentStock: opening,
+      minimumThreshold: minThreshold,
+      unitPrice,
+      supplierId: materialData.supplierId || '',
+      supplierName,
+      supplierPhone,
+      location: materialData.location || 'Central Warehouse',
+      projectAllocation: {},
+      status: computeStockStatus(opening, minThreshold),
+      createdAt: new Date().toISOString()
+    };
+
+    setInventory(prev => [newMaterial, ...prev]);
+    saveModuleRecord('inventory', newMaterial.id, newMaterial);
+
+    if (opening <= minThreshold) {
+      addNotification(
+        'Low Stock Alert',
+        `${newMaterial.name} was added with ${opening} ${newMaterial.unit} (Min Level: ${minThreshold} ${newMaterial.unit}).`,
+        'warning'
+      );
+    } else {
+      addNotification('Material Added', `${newMaterial.name} (${opening} ${newMaterial.unit}) added to inventory.`, 'success');
+    }
+    return newMaterial;
+  };
+
+  const updateMaterialItem = (materialId, updates) => {
+    let updatedItem = null;
+    let triggeredLowStock = false;
+
     setInventory(prev => prev.map(mat => {
-      if (mat.id === materialId) {
-        const updatedStock = mat.currentStock + qty;
-        return {
-          ...mat,
-          currentStock: updatedStock,
-          unitPrice: unitPrice ? Number(unitPrice) : mat.unitPrice,
-          status: updatedStock > mat.minimumThreshold ? 'Adequate' : mat.status
-        };
+      if (mat.id !== materialId) return mat;
+      const matchedVendor = vendors.find(v => v.id === (updates.supplierId ?? mat.supplierId));
+      const nextStock = updates.currentStock !== undefined ? Math.max(0, Number(updates.currentStock) || 0) : mat.currentStock;
+      const nextMin = updates.minimumThreshold !== undefined ? Math.max(0, Number(updates.minimumThreshold) || 0) : mat.minimumThreshold;
+      const nextStatus = computeStockStatus(nextStock, nextMin);
+      if (nextStock <= nextMin && mat.currentStock > mat.minimumThreshold) {
+        triggeredLowStock = true;
       }
-      return mat;
+      updatedItem = {
+        ...mat,
+        ...updates,
+        currentStock: nextStock,
+        minimumThreshold: nextMin,
+        unitPrice: updates.unitPrice !== undefined ? Math.max(0, Number(updates.unitPrice) || 0) : mat.unitPrice,
+        supplierName: updates.supplierName !== undefined ? updates.supplierName : (matchedVendor?.name || mat.supplierName || ''),
+        supplierPhone: updates.supplierPhone !== undefined ? updates.supplierPhone : (matchedVendor?.phone || mat.supplierPhone || ''),
+        status: nextStatus
+      };
+      return updatedItem;
     }));
-    addNotification('Stock Received Inward', `${qty} units added to central inventory.`, 'success');
+
+    if (updatedItem) {
+      saveModuleRecord('inventory', materialId, updatedItem);
+      if (triggeredLowStock) {
+        addNotification(
+          'Low Stock Alert',
+          `${updatedItem.name} is now below minimum stock level (${updatedItem.currentStock}/${updatedItem.minimumThreshold} ${updatedItem.unit}).`,
+          'warning'
+        );
+      }
+    }
+    return updatedItem;
+  };
+
+  const deleteMaterialItem = (materialId) => {
+    setInventory(prev => prev.filter(mat => mat.id !== materialId));
+    removeModuleRecord('inventory', materialId);
+  };
+
+  const issueStockToSite = ({ materialId, projectId, quantity, issueDate, issuedBy, issuedTo, reason, remarks }) => {
+    const qty = Number(quantity);
+    if (!qty || qty <= 0) {
+      return { error: 'Please enter a valid positive issue quantity.' };
+    }
+    const targetMat = inventory.find(m => m.id === materialId);
+    if (!targetMat) {
+      return { error: 'Selected material was not found in inventory.' };
+    }
+    if (qty > (Number(targetMat.currentStock) || 0)) {
+      return { error: `Cannot issue ${qty} ${targetMat.unit}. Only ${targetMat.currentStock} ${targetMat.unit} available in stock.` };
+    }
+
+    const proj = projects.find(p => p.id === projectId);
+    const projectName = proj ? proj.name : (projectId || 'General Site Dispatch');
+    const unitCost = Number(targetMat.unitPrice) || 0;
+    const totalCost = Number((qty * unitCost).toFixed(2));
+    const previousStock = Number(targetMat.currentStock) || 0;
+    const newStock = Number(Math.max(0, previousStock - qty).toFixed(3));
+    const newStatus = computeStockStatus(newStock, targetMat.minimumThreshold);
+    const prevAlloc = Number(targetMat.projectAllocation?.[projectId]) || 0;
+
+    const updatedMat = {
+      ...targetMat,
+      currentStock: newStock,
+      status: newStatus,
+      projectAllocation: {
+        ...(targetMat.projectAllocation || {}),
+        ...(projectId ? { [projectId]: Number((prevAlloc + qty).toFixed(3)) } : {})
+      }
+    };
+
+    setInventory(prev => prev.map(mat => (mat.id === materialId ? updatedMat : mat)));
+    saveModuleRecord('inventory', updatedMat.id, updatedMat);
+
+    // Update project actual expenditure if linked to a valid project
+    if (proj) {
+      const updatedProj = {
+        ...proj,
+        actualExpenditure: (Number(proj.actualExpenditure) || 0) + totalCost
+      };
+      setProjects(prev => prev.map(p => (p.id === projectId ? updatedProj : p)));
+      saveModuleRecord('projects', proj.id, updatedProj);
+    }
+
+    const outCount = stockMovements.filter(m => m.type === 'STOCK_OUT').length + 1;
+    const yr = (issueDate || new Date().toISOString().slice(0, 10)).slice(0, 4);
+    const voucherNo = `MIV-${yr}-${String(outCount).padStart(4, '0')}`;
+    const movement = {
+      id: `MOV-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      voucherNo,
+      type: 'STOCK_OUT',
+      materialId: targetMat.id,
+      materialName: targetMat.name,
+      category: targetMat.category,
+      unit: targetMat.unit,
+      quantity: qty,
+      rate: unitCost,
+      totalValue: totalCost,
+      previousStock,
+      resultingStock: newStock,
+      projectId: projectId || '',
+      projectName,
+      date: issueDate || new Date().toISOString().slice(0, 10),
+      issuedBy: (issuedBy || '').trim() || 'Storekeeper',
+      issuedTo: (issuedTo || '').trim() || 'Site Engineer',
+      reason: (reason || remarks || '').trim() || 'Site Material Consumption',
+      createdAt: new Date().toISOString()
+    };
+
+    setStockMovements(prev => [movement, ...prev]);
+    saveModuleRecord('stockMovements', movement.id, movement);
+
+    addNotification(
+      'Material Issued to Site',
+      `${qty} ${targetMat.unit} of ${targetMat.name} issued to ${projectName} (${voucherNo}). Total: ₹${totalCost.toLocaleString('en-IN')}.`,
+      'info'
+    );
+
+    if (newStock <= (Number(targetMat.minimumThreshold) || 0)) {
+      addNotification(
+        'Low Stock Alert',
+        `URGENT: ${targetMat.name} stock dropped to ${newStock} ${targetMat.unit} (Min Level: ${targetMat.minimumThreshold} ${targetMat.unit}). Create Purchase Request.`,
+        'warning'
+      );
+    }
+
+    return { movement, updatedMaterial: updatedMat };
+  };
+
+  const receiveStockInward = ({ materialId, quantity, supplierId, vendorId, supplierName, purchaseRate, unitPrice, invoiceNo, receivedDate, grnDetails, remarks }) => {
+    const qty = Number(quantity);
+    if (!qty || qty <= 0) {
+      return { error: 'Please enter a valid positive received quantity.' };
+    }
+    const targetMat = inventory.find(m => m.id === materialId);
+    if (!targetMat) {
+      return { error: 'Selected material was not found in inventory.' };
+    }
+
+    const resolvedVendorId = supplierId || vendorId || targetMat.supplierId || '';
+    const matchedVendor = vendors.find(v => v.id === resolvedVendorId);
+    const resolvedSupplierName = (supplierName || '').trim() || matchedVendor?.name || targetMat.supplierName || 'Direct Supplier';
+    const nextRate = Number(purchaseRate ?? unitPrice) > 0 ? Number(purchaseRate ?? unitPrice) : (Number(targetMat.unitPrice) || 0);
+    const previousStock = Number(targetMat.currentStock) || 0;
+    const updatedStock = Number((previousStock + qty).toFixed(3));
+    const newStatus = computeStockStatus(updatedStock, targetMat.minimumThreshold);
+
+    const updatedMat = {
+      ...targetMat,
+      currentStock: updatedStock,
+      unitPrice: nextRate,
+      supplierId: resolvedVendorId,
+      supplierName: resolvedSupplierName,
+      status: newStatus
+    };
+
+    setInventory(prev => prev.map(mat => (mat.id === materialId ? updatedMat : mat)));
+    saveModuleRecord('inventory', updatedMat.id, updatedMat);
+
+    const inCount = stockMovements.filter(m => m.type === 'STOCK_IN').length + 1;
+    const yr = (receivedDate || new Date().toISOString().slice(0, 10)).slice(0, 4);
+    const voucherNo = `GRN-${yr}-${String(inCount).padStart(4, '0')}`;
+    const totalValue = Number((qty * nextRate).toFixed(2));
+    const movement = {
+      id: `MOV-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      voucherNo,
+      type: 'STOCK_IN',
+      materialId: targetMat.id,
+      materialName: targetMat.name,
+      category: targetMat.category,
+      unit: targetMat.unit,
+      quantity: qty,
+      rate: nextRate,
+      totalValue,
+      previousStock,
+      resultingStock: updatedStock,
+      supplierId: resolvedVendorId,
+      supplierName: resolvedSupplierName,
+      invoiceNo: (invoiceNo || '').trim() || '-',
+      date: receivedDate || new Date().toISOString().slice(0, 10),
+      grnDetails: (grnDetails || remarks || '').trim() || 'Goods Received in Warehouse',
+      createdAt: new Date().toISOString()
+    };
+
+    setStockMovements(prev => [movement, ...prev]);
+    saveModuleRecord('stockMovements', movement.id, movement);
+
+    addNotification(
+      'Stock Received Inward',
+      `${qty} ${targetMat.unit} of ${targetMat.name} added from ${resolvedSupplierName} (${voucherNo}). New Stock: ${updatedStock} ${targetMat.unit}.`,
+      'success'
+    );
+
+    return { movement, updatedMaterial: updatedMat };
+  };
+
+  const deleteStockMovement = (movementId) => {
+    const targetMov = stockMovements.find(m => m.id === movementId);
+    if (!targetMov) return;
+
+    const remainingAll = stockMovements.filter(m => m.id !== movementId);
+    removeModuleRecord('stockMovements', movementId);
+
+    // Recalculate running stock chronologically for the affected material
+    const targetMat = inventory.find(m => m.id === targetMov.materialId);
+    if (targetMat) {
+      let runningStock = Number(targetMat.openingStock ?? 0) || 0;
+      const recalculatedAlloc = {};
+      const updatedById = {};
+
+      // Rebuild running balances chronologically (oldest -> newest) using date, createdAt, and id
+      const chronoMatMovements = remainingAll
+        .filter(m => m.materialId === targetMat.id)
+        .sort((a, b) =>
+          String(a.date || '').localeCompare(String(b.date || '')) ||
+          String(a.createdAt || '').localeCompare(String(b.createdAt || '')) ||
+          String(a.id || '').localeCompare(String(b.id || ''))
+        );
+
+      chronoMatMovements.forEach(mov => {
+        const prev = runningStock;
+        const qty = Number(mov.quantity) || 0;
+        if (mov.type === 'STOCK_IN') {
+          runningStock = Number((runningStock + qty).toFixed(3));
+        } else {
+          runningStock = Number(Math.max(0, runningStock - qty).toFixed(3));
+          if (mov.projectId) {
+            recalculatedAlloc[mov.projectId] = Number(((recalculatedAlloc[mov.projectId] || 0) + qty).toFixed(3));
+          }
+        }
+        if (mov.previousStock !== prev || mov.resultingStock !== runningStock) {
+          const recalculatedMov = { ...mov, previousStock: prev, resultingStock: runningStock };
+          updatedById[mov.id] = recalculatedMov;
+          saveModuleRecord('stockMovements', mov.id, recalculatedMov);
+        }
+      });
+
+      const finalMovements = remainingAll.map(m => updatedById[m.id] || m);
+      setStockMovements(finalMovements);
+
+      const newStatus = computeStockStatus(runningStock, targetMat.minimumThreshold);
+      const updatedMat = {
+        ...targetMat,
+        currentStock: runningStock,
+        status: newStatus,
+        projectAllocation: recalculatedAlloc
+      };
+      setInventory(prev => prev.map(mat => (mat.id === targetMat.id ? updatedMat : mat)));
+      saveModuleRecord('inventory', targetMat.id, updatedMat);
+    } else {
+      setStockMovements(remainingAll);
+    }
+
+    // Reverse project expenditure if a Stock-Out voucher was removed
+    if (targetMov.type === 'STOCK_OUT' && targetMov.projectId) {
+      const proj = projects.find(p => p.id === targetMov.projectId);
+      if (proj) {
+        const updatedProj = {
+          ...proj,
+          actualExpenditure: Math.max(0, Number(((Number(proj.actualExpenditure) || 0) - (Number(targetMov.totalValue) || 0)).toFixed(2)))
+        };
+        setProjects(prev => prev.map(p => (p.id === proj.id ? updatedProj : p)));
+        saveModuleRecord('projects', proj.id, updatedProj);
+      }
+    }
+
+    addNotification(
+      'Stock Record Deleted',
+      `${targetMov.voucherNo || targetMov.id} (${targetMov.materialName}: ${targetMov.quantity} ${targetMov.unit}) removed and stock balance recalculated.`,
+      'info'
+    );
+  };
+
+  const createLowStockPurchaseRequest = ({ materialId, requestedQty, supplierName, expectedRate, notes, requestedBy }) => {
+    const targetMat = inventory.find(m => m.id === materialId);
+    if (!targetMat) return null;
+
+    const minThreshold = Number(targetMat.minimumThreshold) || 0;
+    const currentStock = Number(targetMat.currentStock) || 0;
+    const defaultReorder = Math.max(1, Math.ceil((minThreshold * 2) - currentStock));
+    const qty = Number(requestedQty) > 0 ? Number(requestedQty) : defaultReorder;
+    const rate = Number(expectedRate) > 0 ? Number(expectedRate) : (Number(targetMat.unitPrice) || 0);
+    const amount = Number((qty * rate).toFixed(2));
+    const resolvedSupplier = (supplierName || '').trim() || targetMat.supplierName || 'Preferred Supplier';
+    const requester = (requestedBy || '').trim() || 'Central Storekeeper';
+    const prId = `PR-${Date.now().toString().slice(-6)}`;
+
+    const newApproval = {
+      id: prId,
+      type: 'Material request',
+      referenceId: targetMat.id,
+      materialId: targetMat.id,
+      materialName: targetMat.name,
+      requestedQty: qty,
+      unit: targetMat.unit,
+      supplierName: resolvedSupplier,
+      title: `Purchase Request: ${qty} ${targetMat.unit} of ${targetMat.name}`,
+      requester,
+      date: new Date().toISOString().slice(0, 10),
+      amount,
+      status: 'Submitted',
+      currentApprover: 'Sanmati Patil (Owner)',
+      comments: (notes || '').trim() || `Low-Stock Reorder (${currentStock}/${minThreshold} ${targetMat.unit}). Supplier: ${resolvedSupplier}`,
+      history: [
+        {
+          step: 'Purchase Request raised from Low-Stock Alert',
+          date: new Date().toLocaleString(),
+          user: requester,
+          comments: `Qty: ${qty} ${targetMat.unit} | Supplier: ${resolvedSupplier} | Est: ₹${amount.toLocaleString('en-IN')}`
+        }
+      ]
+    };
+
+    setApprovals(prev => [newApproval, ...prev]);
+    saveModuleRecord('approvals', newApproval.id, newApproval);
+    addNotification(
+      'Purchase Request Raised',
+      `${prId}: Reorder request for ${qty} ${targetMat.unit} of ${targetMat.name} sent for approval.`,
+      'info'
+    );
+    return newApproval;
   };
 
   // --- GPS Check-In / Check-Out with Geofencing Verification ---
@@ -601,6 +980,7 @@ export const ERPDataProvider = ({ children }) => {
     setBoqItems(INITIAL_BOQ_ITEMS);
     setRaBills(INITIAL_RA_BILLS);
     setInventory(INITIAL_INVENTORY);
+    setStockMovements([]);
     setGpsLogs(INITIAL_GPS_LOGS);
     setHrmsEmployees(INITIAL_HRMS_EMPLOYEES);
     setTallyConfig(INITIAL_TALLY_CONFIG);
@@ -1918,6 +2298,7 @@ export const ERPDataProvider = ({ children }) => {
         boqItems,
         raBills,
         inventory,
+        stockMovements,
         gpsLogs,
         hrmsEmployees,
         tallyConfig,
@@ -2004,8 +2385,14 @@ export const ERPDataProvider = ({ children }) => {
         updateProjectActivity,
         addBOQItem,
         createRABill,
+        addMaterialItem,
+        updateMaterialItem,
+        deleteMaterialItem,
         issueStockToSite,
         receiveStockInward,
+        deleteStockMovement,
+        createLowStockPurchaseRequest,
+        setStockMovements,
         recordGPSCheckIn,
         updateApprovalStatus,
         syncToTally,
@@ -2013,11 +2400,21 @@ export const ERPDataProvider = ({ children }) => {
         markNotificationRead,
         clearAllNotifications,
         setClients,
+        setProjects,
+        setBoqItems,
+        setRaBills,
+        setInventory,
+        setGpsLogs,
+        setApprovals,
+        setNotifications,
+        setTallyConfig,
         setVendors,
         setQuotations,
         setTenders,
         setExpenses,
         setHrmsEmployees,
+        subcontractors,
+        setSubcontractors,
         resetAllData
       }}
     >

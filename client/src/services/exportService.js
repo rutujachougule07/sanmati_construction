@@ -468,9 +468,210 @@ export const generateProjectDossierPDF = (project, client, projectBills = []) =>
 };
 
 /**
- * Generate Official Construction RA Bill PDF
+ * Generate Official Construction RA Bill PDF - Exactly matching the Invoice UI Modal
  */
 export const generateRABillPDF = (raBill, project, client) => {
+  try {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const billNumber = raBill.billNo || raBill.billNumber || 'SC/RAB/2026/01';
+    const curAmt = Number(raBill.currentBillAmount || raBill.amount || 0);
+    const completedVal = Number(raBill.completedWorkValue || curAmt);
+    const prevBilled = Number(raBill.previousBills || 0);
+    const retentionAmount = raBill.retentionAmount !== undefined && raBill.retentionAmount !== null
+      ? Number(raBill.retentionAmount)
+      : Math.round(curAmt * 0.05);
+    const gstAmount = raBill.gstAmount !== undefined && raBill.gstAmount !== null
+      ? Number(raBill.gstAmount)
+      : Math.round(curAmt * 0.18);
+    const netPayable = raBill.netPayable !== undefined && raBill.netPayable !== null
+      ? Number(raBill.netPayable)
+      : (curAmt - retentionAmount + gstAmount);
+
+    const projectName = raBill.projectName || project?.name || 'uhbuyug';
+    const totalProjVal = raBill.totalProjectValue || Number(project?.budget || project?.contractValue || project?.totalBudget || 0);
+    const billStatus = raBill.status || 'Approved';
+    const workDescription = raBill.completedWork || 'Basement excavation, foundation casting & ground floor RCC columns completion';
+
+    // 1. Outer Frame (matching modal card styling)
+    doc.setDrawColor(226, 232, 240); // slate-200
+    doc.setLineWidth(0.4);
+    doc.roundedRect(12, 12, 186, 273, 4, 4, 'S');
+
+    // 2. Centered Header (Identical to Modal Header)
+    doc.setTextColor(0, 32, 70); // Deep Navy #002046
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SANMATI CONSTRUCTIONS', 105, 25, { align: 'center' });
+
+    doc.setFontSize(8.5);
+    doc.setTextColor(100, 116, 139); // slate-500
+    doc.setFont('helvetica', 'normal');
+    doc.text('Government & Private Civil Contractors * Kolhapur, Maharashtra', 105, 31, { align: 'center' });
+
+    // Pill Badge: "RUNNING ACCOUNT (RA) BILL INVOICE"
+    doc.setFillColor(239, 246, 255); // bg-blue-50
+    doc.setDrawColor(191, 219, 254); // border-blue-200
+    doc.setLineWidth(0.3);
+    doc.roundedRect(68, 35, 74, 6.5, 3, 3, 'FD');
+
+    doc.setTextColor(0, 32, 70); // text-[#002046]
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RUNNING ACCOUNT (RA) BILL INVOICE', 105, 39.5, { align: 'center' });
+
+    // Horizontal separator
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.3);
+    doc.line(18, 46, 192, 46);
+
+    // 3. Metadata Grid (Matching Modal Left & Right)
+    // Left Column
+    doc.setFontSize(9);
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.setFont('helvetica', 'bold');
+    doc.text('RA Bill No:', 20, 54);
+    doc.setFont('helvetica', 'normal');
+    doc.text(billNumber, 44, 54);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Bill Date:', 20, 61);
+    doc.setFont('helvetica', 'normal');
+    doc.text(formatDate(raBill.date), 44, 61);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Project:', 20, 68);
+    doc.setFont('helvetica', 'normal');
+    doc.text(projectName, 44, 68);
+
+    // Right Column
+    doc.setFont('helvetica', 'bold');
+    doc.text('Status:', 130, 54);
+    doc.setTextColor(4, 120, 87); // emerald-700
+    doc.text(billStatus, 146, 54);
+
+    doc.setTextColor(15, 23, 42);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Total Project Value:', 130, 61);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Rs. ${formatNumber(totalProjVal)}`, 164, 61);
+
+    // 4. Exact Matching Invoice Table (Identical to Modal Table in Image 1)
+    const tableBody = [
+      [
+        `Cumulative Completed Work Value\n${workDescription}`,
+        `Rs. ${formatNumber(completedVal)}`
+      ],
+      [
+        'Less: Previous Running Bills Cleared',
+        `- Rs. ${formatNumber(prevBilled)}`
+      ],
+      [
+        'Gross Current RA Bill Amount',
+        `Rs. ${formatNumber(curAmt)}`
+      ],
+      [
+        'Less: 5% Retention Security Deposit',
+        `- Rs. ${formatNumber(retentionAmount)}`
+      ],
+      [
+        'Add: 18% GST Statutory Tax',
+        `+ Rs. ${formatNumber(gstAmount)}`
+      ],
+      [
+        'NET PAYABLE BILL AMOUNT',
+        `Rs. ${formatNumber(netPayable)}`
+      ]
+    ];
+
+    applyAutoTable(doc, {
+      startY: 75,
+      margin: { left: 18, right: 18 },
+      head: [['Bill Particulars', 'Amount (INR)']],
+      body: tableBody,
+      theme: 'plain',
+      headStyles: {
+        fillColor: [248, 250, 252], // bg-slate-50
+        textColor: [71, 85, 105],   // text-slate-600
+        fontSize: 9,
+        fontStyle: 'bold',
+        cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
+        lineWidth: { bottom: 0.3 },
+        lineColor: [226, 232, 240]
+      },
+      styles: {
+        fontSize: 8.5,
+        cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
+        textColor: [30, 41, 59],
+        lineWidth: { bottom: 0.2 },
+        lineColor: [241, 245, 249]
+      },
+      columnStyles: {
+        0: { cellWidth: 120 },
+        1: { cellWidth: 54, halign: 'right', fontStyle: 'bold' }
+      },
+      didParseCell: (data) => {
+        // Gross Current RA Bill row (index 2) -> bg-slate-50/70 font-bold
+        if (data.row.index === 2) {
+          data.cell.styles.fillColor = [248, 250, 252];
+          data.cell.styles.fontStyle = 'bold';
+          if (data.column.index === 1) {
+            data.cell.styles.textColor = [0, 32, 70]; // #002046
+          }
+        }
+        // Less Retention row (index 3) -> text-amber-700
+        if (data.row.index === 3 && data.column.index === 1) {
+          data.cell.styles.textColor = [180, 83, 9];
+        }
+        // Net Payable row (index 5) -> bg-emerald-50 text-emerald-950 font-black
+        if (data.row.index === 5) {
+          data.cell.styles.fillColor = [236, 253, 245]; // emerald-50
+          data.cell.styles.textColor = [6, 78, 59];     // emerald-950
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fontSize = 10;
+        }
+      }
+    });
+
+    const finalY = doc.lastAutoTable.finalY || 165;
+
+    // Certified Record Note
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184); // text-slate-400
+    doc.setFont('helvetica', 'normal');
+    doc.text('Sanmati ERP Certified Billing Record', 20, finalY + 12);
+
+    // Official Signatures
+    const sigY = finalY + 35;
+    doc.setFontSize(8);
+    doc.setTextColor(71, 85, 105); // text-slate-600
+    doc.setDrawColor(203, 213, 225); // slate-300
+    doc.setLineWidth(0.3);
+
+    // Site Engineer
+    doc.line(22, sigY, 68, sigY);
+    doc.text('Prepared By (Site Engineer)', 22, sigY + 5);
+
+    // Project Manager
+    doc.line(82, sigY, 128, sigY);
+    doc.text('Checked By (Project Manager)', 82, sigY + 5);
+
+    // Managing Director
+    doc.line(142, sigY, 188, sigY);
+    doc.text('Approved By (Managing Director)', 142, sigY + 5);
+
+    const safeBillName = `Invoice_${billNumber.replace(/[\/\\]/g, '_')}`;
+    return savePdfSafely(doc, safeBillName);
+  } catch (error) {
+    console.error('RA Bill PDF Error:', error);
+    return false;
+  }
+};
+
+/**
+ * Generate Official Construction Daily Site Progress Report (DPR) PDF
+ */
+export const generateDPRPDF = (dpr, project) => {
   try {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -488,73 +689,73 @@ export const generateRABillPDF = (raBill, project, client) => {
     doc.text(`${COMPANY_DETAILS.address}`, 14, 18);
     doc.text(`GSTIN: ${COMPANY_DETAILS.gstin} | PAN: ${COMPANY_DETAILS.pan}`, 14, 23);
 
-    // Bill Title
+    // DPR Title & Date
     doc.setTextColor(30, 30, 30);
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.text(`RUNNING ACCOUNT (RA) BILL - ${raBill.billNumber}`, 14, 38);
+    doc.text(`DAILY SITE PROGRESS REPORT (DPR) - ${formatDate(dpr.date)}`, 14, 38);
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Bill Date: ${formatDate(raBill.date)}`, 140, 38);
-    doc.text(`Period: ${formatDate(raBill.periodFrom)} to ${formatDate(raBill.periodTo)}`, 140, 44);
+    doc.text(`Report Date: ${formatDate(dpr.date)}`, 140, 38);
+    doc.text(`Schedule: ${dpr.isDelayed ? 'Delayed' : 'On Track'}`, 140, 44);
 
-    // Project & Client Info Box
+    // Project & Engineer Info Box
     doc.setFillColor(245, 247, 250);
-    doc.rect(14, 48, 182, 28, 'F');
+    doc.rect(14, 48, 182, 30, 'F');
     doc.setDrawColor(210, 215, 225);
-    doc.rect(14, 48, 182, 28, 'S');
+    doc.rect(14, 48, 182, 30, 'S');
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text("Project:", 18, 55);
-    doc.text("Client:", 18, 62);
-    doc.text("Site Location:", 18, 69);
+    doc.text("Site Location:", 18, 62);
+    doc.text("Site Engineer:", 18, 69);
+    doc.text("Weather / Climate:", 18, 76);
 
     doc.setFont('helvetica', 'normal');
-    doc.text(project ? project.name : (raBill.projectName || '-'), 45, 55);
-    doc.text(client ? client.name : (raBill.clientName || '-'), 45, 62);
-    doc.text(project ? project.location : 'Kolhapur, Maharashtra', 45, 69);
+    doc.text(project?.name || dpr.projectName || 'Construction Project', 55, 55);
+    doc.text(project?.location || 'Kolhapur, Maharashtra', 55, 62);
+    doc.text(dpr.engineer || 'Er. Amit Deshmukh', 55, 69);
+    doc.text(dpr.weather || 'Normal Work Day / Clear Weather', 55, 76);
 
-    // Bill Breakdown Table
+    // Table of Site Particulars
     applyAutoTable(doc, {
-      startY: 82,
-      head: [['Particulars', 'Quantities & Rates', 'Amount (INR)']],
+      startY: 85,
+      head: [['Category / Head', 'Site Progress Particulars & Observations']],
       body: [
-        ['Current Completed Work Value', `${raBill.currentQty || '-'} units @ Rs. ${formatNumber(raBill.contractRate)}`, `Rs. ${formatNumber(raBill.currentBillAmount)}`],
-        ['Less: Retention Deducted (' + (raBill.retentionPercent || 5) + '%)', 'Security retention as per contract clause', `- Rs. ${formatNumber(raBill.retentionAmount)}`],
-        ['Less: Mobilization / Advance Recovery', 'Running contract recovery', `- Rs. ${formatNumber(raBill.advanceRecovery || 0)}`],
-        ['Less: Other Site Deductions', 'Water/Electricity/Penalties if any', `- Rs. ${formatNumber(raBill.otherDeductions || 0)}`],
-        ['Taxable Subtotal', 'Net base value for GST calculation', `Rs. ${formatNumber(raBill.taxableSubtotal)}`],
-        ['Add: CGST @ 9%', 'Central GST (Intra-state Maharashtra)', `Rs. ${formatNumber(raBill.cgst)}`],
-        ['Add: SGST @ 9%', 'State GST (Intra-state Maharashtra)', `Rs. ${formatNumber(raBill.sgst)}`],
-        ['NET PAYABLE AMOUNT', 'Total Claimed Amount in this RA Bill', `Rs. ${formatNumber(raBill.netPayable)}`]
+        ['Activities Executed Today', dpr.activitiesExecuted || '-'],
+        ['Labour Deployment Count', dpr.labourCount || 'Masons: 6, Helpers: 14, Bar Benders: 8'],
+        ['Materials Consumed Today', dpr.materialsConsumed || 'Cement: 150 bags, Sand: 2 brass, Steel: 1.5 MT'],
+        ['Schedule / Delays Assessment', dpr.isDelayed ? `Delayed: ${dpr.delayRemarks || 'Site Obstruction'}` : 'Schedule On Track - Work proceeding as per planned milestones'],
+        ['Safety & Quality Check', 'PPE safety gear mandatory, curing verified, cube test & slump test compliant']
       ],
       headStyles: { fillColor: [26, 32, 42], textColor: [212, 175, 55], fontStyle: 'bold' },
-      styles: { fontSize: 8.5, cellPadding: 3 },
+      styles: { fontSize: 8.5, cellPadding: 3.5 },
       columnStyles: {
-        2: { halign: 'right', fontStyle: 'bold' }
+        0: { fontStyle: 'bold', width: 55 }
       }
     });
 
-    // Signature blocks
-    const finalY = doc.lastAutoTable.finalY + 25;
+    // Signatures
+    const finalY = (doc.lastAutoTable?.finalY || 160) + 25;
     doc.setFontSize(8.5);
     doc.setTextColor(80, 80, 80);
 
     doc.line(18, finalY, 65, finalY);
-    doc.text("Prepared By (Site Engineer)", 18, finalY + 5);
+    doc.text("Site Engineer Signature", 18, finalY + 5);
 
     doc.line(80, finalY, 130, finalY);
-    doc.text("Checked By (Project Manager)", 80, finalY + 5);
+    doc.text("Project Manager Verified", 80, finalY + 5);
 
     doc.line(145, finalY, 192, finalY);
-    doc.text("Approved By (Managing Director)", 145, finalY + 5);
+    doc.text("Client Site Rep Approved", 145, finalY + 5);
 
-    const safeBillName = `RABill_${(raBill.billNumber || 'Bill').replace(/[\/\\]/g, '_')}`;
-    return savePdfSafely(doc, safeBillName);
+    const safeDate = formatDate(dpr.date).replace(/[\/\\]/g, '-');
+    const safeName = `DPR_${safeDate}_${(project?.name || 'Site').slice(0, 15).replace(/[^a-zA-Z0-9]/g, '_')}`;
+    return savePdfSafely(doc, safeName);
   } catch (error) {
-    console.error('RA Bill PDF Error:', error);
+    console.error('DPR PDF Error:', error);
     return false;
   }
 };

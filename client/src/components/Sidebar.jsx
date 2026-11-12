@@ -43,7 +43,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse
 
   // Helper to parse query param
   const currentSearch = new URLSearchParams(location.search);
-  const currentTab = currentSearch.get('tab') || 'records';
+  const currentTab = currentSearch.get('tab');
 
   return (
     <>

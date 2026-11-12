@@ -110,83 +110,7 @@ export const INITIAL_RA_BILLS = [];
 
 export const INITIAL_VENDORS = [];
 
-export const INITIAL_INVENTORY = [
-  {
-    id: "MAT-001",
-    name: "Ultratech Super Cement (50kg)",
-    category: "Cement & Concrete",
-    unit: "Bags",
-    currentStock: 480,
-    minimumThreshold: 150,
-    unitPrice: 385,
-    location: "Central Warehouse, Kawala Naka",
-    projectAllocation: {
-      "PRJ-KLP-001": 250,
-      "PRJ-KLP-002": 180,
-      "PRJ-KLP-003": 50
-    },
-    status: "Adequate"
-  },
-  {
-    id: "MAT-002",
-    name: "TMT Rebar Fe500D (16mm)",
-    category: "Reinforcement Steel",
-    unit: "MT",
-    currentStock: 18.5,
-    minimumThreshold: 8.0,
-    unitPrice: 62500,
-    location: "Royal Palace Site Yard",
-    projectAllocation: {
-      "PRJ-KLP-001": 14.5,
-      "PRJ-KLP-002": 4.0
-    },
-    status: "Adequate"
-  },
-  {
-    id: "MAT-003",
-    name: "Panchganga Natural River Sand",
-    category: "Aggregates",
-    unit: "Brass",
-    currentStock: 14,
-    minimumThreshold: 20,
-    unitPrice: 7800,
-    location: "Kawala Naka Site Yard",
-    projectAllocation: {
-      "PRJ-KLP-001": 10,
-      "PRJ-KLP-002": 4
-    },
-    status: "Low Stock Alert"
-  },
-  {
-    id: "MAT-004",
-    name: "Crushed Stone Metal 20mm",
-    category: "Aggregates",
-    unit: "Brass",
-    currentStock: 35,
-    minimumThreshold: 15,
-    unitPrice: 3200,
-    location: "Kawala Naka Site Yard",
-    projectAllocation: {
-      "PRJ-KLP-001": 25,
-      "PRJ-KLP-002": 10
-    },
-    status: "Adequate"
-  },
-  {
-    id: "MAT-005",
-    name: "Siporex AAC Lightweight Blocks (600x200x150mm)",
-    category: "Masonry",
-    unit: "Pieces",
-    currentStock: 2400,
-    minimumThreshold: 800,
-    unitPrice: 65,
-    location: "Central Warehouse",
-    projectAllocation: {
-      "PRJ-KLP-001": 2400
-    },
-    status: "Adequate"
-  }
-];
+export const INITIAL_INVENTORY = [];
 
 export const INITIAL_GPS_LOGS = [
   {
@@ -297,36 +221,7 @@ export const INITIAL_APPROVALS = [
   }
 ];
 
-export const INITIAL_TENDERS = [
-  {
-    id: "TND-2026-01",
-    tenderId: "PWD/KLP/2026/W-104",
-    title: "Construction of Multi-Level Flyover Approach Road & Grade Separator",
-    authority: "Public Works Department (PWD), Division Kolhapur",
-    tenderValue: 142000000,
-    emdAmount: 1420000,
-    deadline: "2026-11-25",
-    submissionDate: "2026-11-20",
-    eligibility: "Class 1A Contractor with minimum 50 Cr turnover",
-    status: "Under Technical Evaluation",
-    documents: ["TenderNotice.pdf", "DetailedEstimate.pdf", "BG_Format.pdf"],
-    bidQuotationAmount: 138500000
-  },
-  {
-    id: "TND-2026-02",
-    tenderId: "KMC/ENGG/2026/SP-44",
-    title: "Construction of Indoor Badminton & Olympic Swimming Complex at Shahu Stadium",
-    authority: "Kolhapur Municipal Corporation",
-    tenderValue: 68000000,
-    emdAmount: 680000,
-    deadline: "2026-12-10",
-    submissionDate: null,
-    eligibility: "Specialized Sports Complex Contractor with PWD Registration",
-    status: "Preparation",
-    documents: ["KMC_RFP.pdf", "ArchitecturalLayout.dwg"],
-    bidQuotationAmount: 65500000
-  }
-];
+export const INITIAL_TENDERS = [];
 
 export const INITIAL_QUOTATIONS = [
   {
@@ -356,7 +251,6 @@ export const INITIAL_QUOTATIONS = [
 export const INITIAL_EXPENSES = [];
 
 export const INITIAL_NOTIFICATIONS = [
-  { id: "NOT-1", title: "Low Stock Alert", message: "River Sand at Kawala Naka site has dropped below minimum safety threshold (14/20 Brass).", time: "10 mins ago", type: "warning", read: false },
   { id: "NOT-2", title: "RA Bill Approved", message: "RA Bill 02 for Royal Palace Complex has been authorized by MD.", time: "1 hour ago", type: "success", read: false },
   { id: "NOT-4", title: "GPS Check-In Verified", message: "Site Engineer Amit Deshmukh checked in within geofence radius.", time: "Today 08:58 AM", type: "info", read: true }
 ];
