@@ -44,14 +44,8 @@ import { COMPANY_DETAILS } from '../../utils/constants';
 import { formatCurrency, formatDate, formatNumber, numberToWordsIndian } from '../../utils/formatters';
 import { generatePDFReport } from '../../services/exportService';
 
-// Default initial items matching user's exact specification
-const DEFAULT_PRICING_ITEMS = [
-  { id: 'item-1', name: 'Cement', type: 'Material', qty: 100, unit: 'Bags', rate: 400, amount: 40000 },
-  { id: 'item-2', name: 'Steel', type: 'Material', qty: 500, unit: 'Kg', rate: 65, amount: 32500 },
-  { id: 'item-3', name: 'Sand', type: 'Material', qty: 20, unit: 'Brass', rate: 1500, amount: 30000 },
-  { id: 'item-4', name: 'Labour', type: 'Service', qty: 10, unit: 'Days', rate: 2000, amount: 20000 },
-  { id: 'item-5', name: 'Transportation', type: 'Service', qty: 1, unit: 'Nos', rate: 5000, amount: 5000 }
-];
+// Default initial items
+const DEFAULT_PRICING_ITEMS = [];
 
 export const QuotationsModule = () => {
   const { quotations, setQuotations, clients } = useERPData();
@@ -65,7 +59,7 @@ export const QuotationsModule = () => {
 
   // Selected Quotation ID for pricing & PDF generation
   const [selectedQuoId, setSelectedQuoId] = useState(() => {
-    return quotations?.[0]?.id || quotations?.[0]?.quotationNo || 'QT-001';
+    return quotations?.[0]?.id || quotations?.[0]?.quotationNo || '';
   });
 
   // Success toast when a quotation is created with quick jump to Pricing
@@ -109,7 +103,7 @@ export const QuotationsModule = () => {
     projectLocation: 'Kolhapur, Maharashtra',
     validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
     description: '',
-    totalAmount: 147500
+    totalAmount: 0
   });
 
   // Open Create Modal
@@ -121,13 +115,13 @@ export const QuotationsModule = () => {
       quotationDate: new Date().toISOString().split('T')[0],
       customerName: clients?.[0]?.name || '',
       customerAddress: clients?.[0]?.address || 'Kolhapur',
-      mobileNumber: clients?.[0]?.mobileNumber || '+91 98220 12345',
-      email: clients?.[0]?.email || 'customer@gmail.com',
-      projectName: 'Building Construction Work',
-      projectLocation: 'Kawala Naka, Kolhapur',
+      mobileNumber: clients?.[0]?.mobileNumber || '',
+      email: clients?.[0]?.email || '',
+      projectName: '',
+      projectLocation: 'Kolhapur',
       validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      description: 'Building Construction work complete including foundation, RCC, brickwork, and plaster.',
-      totalAmount: 147500
+      description: '',
+      totalAmount: 0
     });
     setEditingQuo(null);
     setIsCreateModalOpen(true);
@@ -208,18 +202,18 @@ export const QuotationsModule = () => {
         validUntil: formData.validUntil,
         validTill: formData.validUntil,
         description: formData.description,
-        items: [...DEFAULT_PRICING_ITEMS],
-        subtotal: 127500,
-        discount: 2500,
-        taxableAmount: 125000,
+        items: [],
+        subtotal: Number(formData.totalAmount) || 0,
+        discount: 0,
+        taxableAmount: Number(formData.totalAmount) || 0,
         gstRate: 18,
-        gstAmount: 22500,
-        totalAmount: Number(formData.totalAmount) || 147500,
-        totalQuotationValue: Number(formData.totalAmount) || 147500,
+        gstAmount: 0,
+        totalAmount: Number(formData.totalAmount) || 0,
+        totalQuotationValue: Number(formData.totalAmount) || 0,
         status: 'Draft',
         paymentTerms: '15% Advance, 75% against work progress measurements, 10% on handover.',
-        workCompletionTerms: 'Work completion within 4 months from site clearance.',
-        termsAndConditions: '1. Quotation valid for 30 days. 2. Water & electricity provided by client.'
+        workCompletionTerms: 'Work completion within agreed project schedule.',
+        termsAndConditions: '1. Quotation valid for 30 days. 2. Taxes as applicable.'
       };
 
       setQuotations(prev => [newQuo, ...(prev || [])]);
@@ -279,8 +273,8 @@ export const QuotationsModule = () => {
   /* -------------------------------------------------------------
    * PRICING BUILDER STATE & CALCULATIONS
    * ------------------------------------------------------------- */
-  const [pricingItems, setPricingItems] = useState(DEFAULT_PRICING_ITEMS);
-  const [discountAmt, setDiscountAmt] = useState(2500);
+  const [pricingItems, setPricingItems] = useState([]);
+  const [discountAmt, setDiscountAmt] = useState(0);
   const [gstPercent, setGstPercent] = useState(18);
 
   // Sync pricing items whenever activeQuotation changes
@@ -289,10 +283,13 @@ export const QuotationsModule = () => {
       if (activeQuotation.items && activeQuotation.items.length > 0) {
         setPricingItems(activeQuotation.items);
       } else {
-        setPricingItems(DEFAULT_PRICING_ITEMS);
+        setPricingItems([]);
       }
-      setDiscountAmt(activeQuotation.discount !== undefined ? activeQuotation.discount : 2500);
+      setDiscountAmt(activeQuotation.discount !== undefined ? activeQuotation.discount : 0);
       setGstPercent(activeQuotation.gstRate || 18);
+    } else {
+      setPricingItems([]);
+      setDiscountAmt(0);
     }
   }, [activeQuotation?.id, activeQuotation?.quotationNo]);
 
@@ -735,7 +732,13 @@ export const QuotationsModule = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {pricingItems.map((item, index) => (
+              {pricingItems.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="px-4 py-8 text-center text-slate-400">
+                    कोणतेही Items जोडलेले नाहीत. कृपया वर दिलेल्या '+ Add Material' किंवा '+ Add Service' बटणावर क्लिक करा.
+                  </td>
+                </tr>
+              ) : pricingItems.map((item, index) => (
                 <tr key={item.id} className="hover:bg-slate-50/50">
                   <td className="px-3 py-2 text-center font-mono text-slate-400">
                     {index + 1}

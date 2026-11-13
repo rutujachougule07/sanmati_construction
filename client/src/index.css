@@ -785,8 +785,8 @@ option {
 .bi-table-wrapper {
   overflow-x: auto;
   max-inline-size: 100%;
-  container-type: inline-size;
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 main table.bi-analysis-table {
@@ -802,7 +802,7 @@ main table.bi-analysis-table thead tr {
 }
 
 main table.bi-analysis-table thead th {
-  padding: 0.56rem 0.42rem !important;
+  padding: 0.58rem 0.55rem !important;
   font-size: 0.7rem !important;
   font-weight: 700 !important;
   color: #334155 !important;
@@ -820,8 +820,8 @@ main table.bi-analysis-table thead th:last-child {
 
 main table.bi-analysis-table tbody th,
 main table.bi-analysis-table tbody td {
-  padding: 0.64rem 0.42rem !important;
-  font-size: 0.72rem !important;
+  padding: 0.62rem 0.55rem !important;
+  font-size: 0.73rem !important;
   color: #1e293b;
   border-bottom: 1px solid #f1f5f9 !important;
   vertical-align: middle;
@@ -839,47 +839,4 @@ main table.bi-analysis-table tbody td .bi-status-pill {
 main table.bi-analysis-table tbody tr:last-child th,
 main table.bi-analysis-table tbody tr:last-child td {
   border-bottom: none !important;
-}
-
-@container (width < 520px) {
-  main table.bi-analysis-table,
-  main table.bi-analysis-table thead,
-  main table.bi-analysis-table tbody,
-  main table.bi-analysis-table tr,
-  main table.bi-analysis-table th,
-  main table.bi-analysis-table td {
-    display: block;
-  }
-
-  main table.bi-analysis-table thead {
-    display: none;
-  }
-
-  main table.bi-analysis-table tbody tr {
-    margin-block-end: 0.75rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    background: #ffffff;
-    overflow: hidden;
-  }
-
-  main table.bi-analysis-table tbody th[scope="row"] {
-    background: #f8fafc;
-    font-weight: 700 !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-  }
-
-  main table.bi-analysis-table tbody td {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  main table.bi-analysis-table tbody td[data-label]::before {
-    content: attr(data-label) ": ";
-    font-weight: 600;
-    color: #64748b;
-    flex-shrink: 0;
-  }
 }

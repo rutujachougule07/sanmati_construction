@@ -29,16 +29,20 @@ import {
 const ERPDataContext = createContext(null);
 
 export const ERPDataProvider = ({ children }) => {
-  // Clear any existing cached dummy records in localStorage so modules 1, 2, and 3 start completely blank
-  const DATA_VERSION = 'v9_zero_dummy_projects_strictly_empty';
+  // Clear any existing cached dummy records in localStorage so all modules start completely blank
+  const DATA_VERSION = 'v11_zero_dummy_all_sections_strictly_empty';
   if (typeof window !== 'undefined' && localStorage.getItem('sanmati_data_version') !== DATA_VERSION) {
     const keys = [
-      'clients', 'leads', 'followUps', 'customerActivities',
-      'incomeRecords', 'expenseRecords', 'paymentTracking', 'ledgerEntries',
+      'clients', 'leads', 'followUps', 'customerActivities', 'heroBanners',
+      'incomeRecords', 'expenseRecords', 'paymentTracking', 'ledgerEntries', 'nfdRecords',
       'vendors', 'vendorContacts', 'vendorPurchases', 'vendorPayments',
-      'projects', 'boqItems', 'raBills', 'expenses'
+      'projects', 'boqItems', 'raBills', 'expenses', 'subcontractors',
+      'gpsLogs', 'hrmsEmployees', 'tallyConfig', 'approvals', 'tenders',
+      'quotations', 'notifications', 'stockMovements', 'inventory',
+      'attendance_clean_ledger'
     ];
     keys.forEach(k => localStorage.removeItem(`sanmati_${k}`));
+    ['tally_comp_v2', 'tally_ledgers_v2', 'tally_vouchers_v2', 'tally_verify_v2', 'tally_verify_done'].forEach(k => localStorage.removeItem(k));
     localStorage.setItem('sanmati_data_version', DATA_VERSION);
   }
 
@@ -116,14 +120,6 @@ export const ERPDataProvider = ({ children }) => {
           }
           if (key === 'customerActivities' && Array.isArray(parsed)) {
             parsed = parsed.map(a => a.employeeName === 'Er. Rajesh Kulkarni' ? { ...a, employeeName: '' } : a);
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'leads' && Array.isArray(parsed) && parsed.length === 0) {
-            parsed = INITIAL_LEADS;
-            localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
-          }
-          if (key === 'heroBanners' && (!parsed || (Array.isArray(parsed) && parsed.length === 0))) {
-            parsed = INITIAL_HERO_BANNERS;
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           return parsed;
@@ -990,9 +986,10 @@ export const ERPDataProvider = ({ children }) => {
     setExpenses(INITIAL_EXPENSES);
     setNotifications(INITIAL_NOTIFICATIONS);
     setLeads([]);
+    setHeroBanners([]);
     setFollowUps([]);
     setCustomerActivities([]);
-    addNotification('System Reset', 'All enterprise mock databases have been restored to initial Kolhapur records.', 'info');
+    addNotification('System Reset', 'All enterprise databases have been reset to a clean state.', 'info');
   };
 
   // --- CRM Helper Actions ---

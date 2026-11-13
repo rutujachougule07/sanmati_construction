@@ -48,22 +48,8 @@ export const MODULES_CONFIG = [
     ]
   },
   { 
-    id: 'accounts', 
-    name: '2. Account Management', 
-    path: '/accounts', 
-    icon: 'Landmark', 
-    roles: Object.values(USER_ROLES),
-    subcategories: [
-      { id: 'acc-records', name: 'i. Income and expense records', path: '/accounts?tab=records', icon: 'Receipt', tab: 'records' },
-      { id: 'acc-payments', name: 'ii. Payment tracking', path: '/accounts?tab=payments', icon: 'CreditCard', tab: 'payments' },
-      { id: 'acc-ledger', name: 'iii. Account ledger', path: '/accounts?tab=ledger', icon: 'BookOpen', tab: 'ledger' },
-      { id: 'acc-summaries', name: 'iv. Financial summaries', path: '/accounts?tab=summaries', icon: 'BarChart3', tab: 'summaries' },
-      { id: 'acc-nfd', name: 'v. NDT', path: '/accounts?tab=nfd', icon: 'FileSpreadsheet', tab: 'nfd' }
-    ]
-  },
-  { 
     id: 'vendors', 
-    name: '3. Vendor Management', 
+    name: '2. Vendor Management', 
     path: '/vendors', 
     icon: 'Truck', 
     roles: Object.values(USER_ROLES),
@@ -75,21 +61,8 @@ export const MODULES_CONFIG = [
     ]
   },
   { 
-    id: 'tally', 
-    name: '4. Tally Integration', 
-    path: '/tally', 
-    icon: 'ArrowLeftRight', 
-    roles: Object.values(USER_ROLES),
-    subcategories: [
-      { id: 'tally-integ', name: 'i. Tally Data Integration', path: '/tally?tab=integration', icon: 'RefreshCw', tab: 'integration' },
-      { id: 'tally-sync', name: 'ii. Account Data Synchronisation', path: '/tally?tab=sync', icon: 'Layers', tab: 'sync' },
-      { id: 'tally-vouchers', name: 'iii. Voucher and Transaction Transfer', path: '/tally?tab=vouchers', icon: 'ArrowRightLeft', tab: 'vouchers' },
-      { id: 'tally-verify', name: 'iv. Data Verification', path: '/tally?tab=verification', icon: 'CheckCircle', tab: 'verification' }
-    ]
-  },
-  { 
     id: 'reports', 
-    name: '5. Custom Reports', 
+    name: '3. Custom Reports', 
     path: '/reports', 
     icon: 'FileText', 
     roles: Object.values(USER_ROLES),
@@ -100,7 +73,7 @@ export const MODULES_CONFIG = [
   },
   { 
     id: 'hrms', 
-    name: '6. HRMS & Payroll', 
+    name: '4. HRMS & Payroll', 
     path: '/hrms', 
     icon: 'UserCheck', 
     roles: Object.values(USER_ROLES),
@@ -112,21 +85,8 @@ export const MODULES_CONFIG = [
     ]
   },
   { 
-    id: 'geotracking', 
-    name: '7. Geotracking & Geofencing', 
-    path: '/geotracking', 
-    icon: 'MapPin', 
-    roles: Object.values(USER_ROLES),
-    subcategories: [
-      { id: 'geo-tracking', name: 'i. Location tracking for every user', path: '/geotracking?tab=tracking', icon: 'Navigation', tab: 'tracking' },
-      { id: 'geo-attendance', name: 'ii. GPS-based attendance', path: '/geotracking?tab=gps-attendance', icon: 'UserCheck', tab: 'gps-attendance' },
-      { id: 'geo-geofence', name: 'iii. Geofence area configuration', path: '/geotracking?tab=geofence', icon: 'Shield', tab: 'geofence' },
-      { id: 'geo-history', name: 'iv. Location history and reports', path: '/geotracking?tab=history', icon: 'History', tab: 'history' }
-    ]
-  },
-  { 
     id: 'quotations', 
-    name: '8. Quotation Management', 
+    name: '5. Quotation Management', 
     path: '/quotations', 
     icon: 'FileText', 
     roles: Object.values(USER_ROLES),
@@ -139,7 +99,7 @@ export const MODULES_CONFIG = [
   },
   { 
     id: 'tenders', 
-    name: '9. Tender Management', 
+    name: '6. Tender Management', 
     path: '/tenders', 
     icon: 'Gavel', 
     roles: Object.values(USER_ROLES),
@@ -152,7 +112,7 @@ export const MODULES_CONFIG = [
   },
   { 
     id: 'projects', 
-    name: '10. Construction Project Management', 
+    name: '7. Construction Project Management', 
     path: '/projects', 
     icon: 'HardHat', 
     roles: Object.values(USER_ROLES),
@@ -165,7 +125,7 @@ export const MODULES_CONFIG = [
   },
   {
     id: 'mis',
-    name: '12. MIS Reports',
+    name: '8. MIS Reports',
     path: '/mis',
     icon: 'PieChart',
     roles: Object.values(USER_ROLES),
@@ -178,7 +138,7 @@ export const MODULES_CONFIG = [
   },
   {
     id: 'inventory',
-    name: '13. Inventory Management',
+    name: '9. Inventory Management',
     path: '/inventory',
     icon: 'Boxes',
     roles: [
@@ -194,6 +154,46 @@ export const MODULES_CONFIG = [
       { id: 'inv-records', name: 'ii. Stock-in and stock-out records', path: '/inventory?tab=records', icon: 'ArrowLeftRight', tab: 'records' },
       { id: 'inv-issue', name: 'iii. Material issue tracking', path: '/inventory?tab=issue', icon: 'ClipboardList', tab: 'issue' },
       { id: 'inv-alerts', name: 'iv. Low-stock alerts', path: '/inventory?tab=alerts', icon: 'AlertTriangle', tab: 'alerts' }
+    ]
+  },
+  { 
+    id: 'accounts', 
+    name: '10. Account Management', 
+    path: '/accounts', 
+    icon: 'Landmark', 
+    roles: Object.values(USER_ROLES),
+    subcategories: [
+      { id: 'acc-records', name: 'i. Income and expense records', path: '/accounts?tab=records', icon: 'Receipt', tab: 'records' },
+      { id: 'acc-payments', name: 'ii. Payment tracking', path: '/accounts?tab=payments', icon: 'CreditCard', tab: 'payments' },
+      { id: 'acc-ledger', name: 'iii. Account ledger', path: '/accounts?tab=ledger', icon: 'BookOpen', tab: 'ledger' },
+      { id: 'acc-summaries', name: 'iv. Financial summaries', path: '/accounts?tab=summaries', icon: 'BarChart3', tab: 'summaries' },
+      { id: 'acc-nfd', name: 'v. NDT', path: '/accounts?tab=nfd', icon: 'FileSpreadsheet', tab: 'nfd' }
+    ]
+  },
+  { 
+    id: 'tally', 
+    name: '11. Tally Integration', 
+    path: '/tally', 
+    icon: 'ArrowLeftRight', 
+    roles: Object.values(USER_ROLES),
+    subcategories: [
+      { id: 'tally-integ', name: 'i. Tally Data Integration', path: '/tally?tab=integration', icon: 'RefreshCw', tab: 'integration' },
+      { id: 'tally-sync', name: 'ii. Account Data Synchronisation', path: '/tally?tab=sync', icon: 'Layers', tab: 'sync' },
+      { id: 'tally-vouchers', name: 'iii. Voucher and Transaction Transfer', path: '/tally?tab=vouchers', icon: 'ArrowRightLeft', tab: 'vouchers' },
+      { id: 'tally-verify', name: 'iv. Data Verification', path: '/tally?tab=verification', icon: 'CheckCircle', tab: 'verification' }
+    ]
+  },
+  { 
+    id: 'geotracking', 
+    name: '12. Geotracking & Geofencing', 
+    path: '/geotracking', 
+    icon: 'MapPin', 
+    roles: Object.values(USER_ROLES),
+    subcategories: [
+      { id: 'geo-tracking', name: 'i. Location tracking for every user', path: '/geotracking?tab=tracking', icon: 'Navigation', tab: 'tracking' },
+      { id: 'geo-attendance', name: 'ii. GPS-based attendance', path: '/geotracking?tab=gps-attendance', icon: 'UserCheck', tab: 'gps-attendance' },
+      { id: 'geo-geofence', name: 'iii. Geofence area configuration', path: '/geotracking?tab=geofence', icon: 'Shield', tab: 'geofence' },
+      { id: 'geo-history', name: 'iv. Location history and reports', path: '/geotracking?tab=history', icon: 'History', tab: 'history' }
     ]
   }
 ];

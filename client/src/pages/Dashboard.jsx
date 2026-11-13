@@ -73,7 +73,7 @@ const KPI_CARD_STYLES = {
   }
 };
 
-const KPICard = ({ label, value, trend, trendDirection = 'up', icon: Icon, tone }) => {
+const KPICard = ({ label, value, trend, trendDirection = 'up', icon: Icon, tone, className = '' }) => {
   const style = KPI_CARD_STYLES[tone] || KPI_CARD_STYLES.blue;
   const trendColorClass =
     trendDirection === 'down'
@@ -84,12 +84,12 @@ const KPICard = ({ label, value, trend, trendDirection = 'up', icon: Icon, tone 
   const trendPrefix = trendDirection === 'up' ? '↑ ' : trendDirection === 'down' ? '↓ ' : '';
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300/90 transition-all px-3.5 py-3.5 relative overflow-hidden flex items-center gap-3 min-w-0">
+    <div className={`bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] hover:shadow-md hover:border-slate-300/90 transition-all p-3 sm:p-3.5 relative overflow-hidden flex items-center gap-2.5 sm:gap-3 min-w-0 ${className}`}>
       {/* Subtle bottom-right decorative wave */}
       <svg
         aria-hidden="true"
         viewBox="0 0 180 70"
-        className="absolute bottom-0 right-0 w-24 h-11 pointer-events-none opacity-65 block"
+        className="absolute bottom-0 right-0 w-20 sm:w-24 h-9 sm:h-11 pointer-events-none opacity-50 block"
         preserveAspectRatio="none"
       >
         <path
@@ -107,17 +107,20 @@ const KPICard = ({ label, value, trend, trendDirection = 'up', icon: Icon, tone 
       </svg>
 
       {/* Left Icon Badge */}
-      <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 relative z-10 ${style.iconWrap}`}>
-        <Icon className="w-5 h-5 stroke-[1.8]" />
+      <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center shrink-0 relative z-10 ${style.iconWrap}`}>
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5 stroke-[1.8]" />
       </div>
 
       {/* Right Content */}
       <div className="min-w-0 relative z-10 flex-1">
-        <p className="text-[11px] font-semibold text-slate-600 truncate">{label}</p>
-        <div className="text-lg sm:text-[19px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 whitespace-nowrap">
+        <p className="text-[11px] font-semibold text-slate-600 truncate" title={label}>{label}</p>
+        <div 
+          className="text-[16px] sm:text-[18px] xl:text-[17px] 2xl:text-[19px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 truncate"
+          title={String(value)}
+        >
           {value}
         </div>
-        <p className={`text-[10.5px] font-semibold mt-0.5 truncate ${trendColorClass}`}>
+        <p className={`text-[10px] sm:text-[10.5px] font-semibold mt-0.5 truncate ${trendColorClass}`}>
           {trendPrefix}{trend}
         </p>
       </div>
@@ -350,16 +353,16 @@ export const Dashboard = () => {
         </div>
 
         {/* Foreground Content */}
-        <div className="relative z-10 px-5 sm:px-7 py-5 sm:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative z-10 px-4 sm:px-7 py-4.5 sm:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm sm:text-[15px] text-slate-700 font-medium">
+            <p className="text-xs sm:text-sm md:text-[15px] text-slate-700 font-medium">
               Welcome Back, <span className="font-bold text-slate-900">{welcomeName}!</span> 👋
             </p>
-            <h1 className="text-2xl sm:text-[30px] font-extrabold tracking-tight leading-tight mt-0.5">
+            <h1 className="text-xl sm:text-2xl md:text-[28px] lg:text-[30px] font-extrabold tracking-tight leading-tight mt-0.5">
               <span className="text-[#0f172a]">Business Intelligence </span>
               <span className="text-[#c28e1e]">Dashboard</span>
             </h1>
-            <p className="text-xs sm:text-[13px] text-slate-500 font-medium mt-1">
+            <p className="text-[11px] sm:text-xs md:text-[13px] text-slate-500 font-medium mt-1">
               Real-time business performance, project insights and financial analysis
             </p>
           </div>
@@ -370,7 +373,7 @@ export const Dashboard = () => {
               type="button"
               onClick={() => setIsPeriodMenuOpen((prev) => !prev)}
               aria-expanded={isPeriodMenuOpen}
-              className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/95 hover:bg-white border border-slate-200/90 shadow-sm text-xs sm:text-[13px] font-semibold text-slate-700 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/95 hover:bg-white border border-slate-200/90 shadow-2xs text-xs sm:text-[13px] font-semibold text-slate-700 transition-all cursor-pointer"
             >
               <Calendar className="w-4 h-4 text-[#0b449b] shrink-0" />
               <span className="whitespace-nowrap">{activePreset.label}</span>
@@ -378,7 +381,7 @@ export const Dashboard = () => {
             </button>
 
             {isPeriodMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-xl bg-white border border-slate-200 shadow-lg p-1.5 z-30">
+              <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl bg-white border border-slate-200 shadow-xl p-1.5 z-30">
                 {periodPresets.map((option) => {
                   const isActive = option.id === selectedPeriodId;
                   return (
@@ -404,7 +407,7 @@ export const Dashboard = () => {
 
                 {selectedPeriodId === 'custom' && (
                   <div className="mt-1.5 pt-2 px-2 pb-1.5 border-t border-slate-100 space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
                       <label className="block">
                         <span className="block text-[10px] font-semibold text-slate-500 mb-0.5">From</span>
                         <input
@@ -440,16 +443,23 @@ export const Dashboard = () => {
       </section>
 
       {/* 2. Top 5 KPI Summary Cards */}
-      <section aria-label="Key Performance Indicators" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {kpiCards.map((card) => (
-          <KPICard key={card.label} {...card} />
+      <section
+        aria-label="Key Performance Indicators"
+        className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4"
+      >
+        {kpiCards.map((card, idx) => (
+          <KPICard
+            key={card.label}
+            {...card}
+            className={idx === 4 ? 'min-[480px]:col-span-2 md:col-span-1 xl:col-span-1' : ''}
+          />
         ))}
       </section>
 
       {/* 3. Middle Analytics Row: Financial Performance | Revenue Breakdown | Key Financial Summary */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-[1.28fr_1.12fr_0.95fr] gap-4 sm:gap-5">
+      <section className="grid grid-cols-1 md:grid-cols-12 2xl:grid-cols-[1.3fr_1.1fr_0.95fr] gap-4 sm:gap-5">
         {/* Card A: Financial Performance */}
-        <div className="lg:col-span-12 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
+        <div className="col-span-1 md:col-span-12 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div className="flex items-start justify-between gap-2.5 mb-3">
             <div className="flex items-start gap-2.5">
               <div className="mt-0.5 text-[#0f294a] shrink-0">
@@ -471,13 +481,13 @@ export const Dashboard = () => {
             )}
           </div>
 
-          <div className="h-56 w-full min-w-0">
+          <div className="h-56 sm:h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={monthlySeries.chartData}
-                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                margin={{ top: 8, right: 8, left: -10, bottom: 0 }}
                 barGap={3}
-                barCategoryGap="22%"
+                barCategoryGap="20%"
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis
@@ -492,8 +502,8 @@ export const Dashboard = () => {
                   ticks={monthlySeries.yTicks}
                   axisLine={false}
                   tickLine={false}
-                  width={68}
-                  tick={{ fontSize: 10.5, fill: '#475569', fontWeight: 500 }}
+                  width={58}
+                  tick={{ fontSize: 10, fill: '#475569', fontWeight: 500 }}
                   tickFormatter={(v) => formatYAxisTick(v, monthlySeries.unit)}
                 />
                 <Tooltip
@@ -567,7 +577,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Card B: Revenue Breakdown */}
-        <div className="lg:col-span-6 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
+        <div className="col-span-1 md:col-span-6 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-5 h-5 text-[#0f294a] shrink-0" />
             <h2 className="text-[15px] font-bold text-slate-900 leading-tight">
@@ -575,17 +585,17 @@ export const Dashboard = () => {
             </h2>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 my-auto py-1">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 my-auto py-1">
             {/* Donut Chart with Centered Total */}
-            <div className="relative w-36 h-36 xl:w-40 xl:h-40 shrink-0">
+            <div className="relative w-36 h-36 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={revenueBreakdown.slices}
                     cx="50%"
                     cy="50%"
-                    innerRadius={47}
-                    outerRadius={69}
+                    innerRadius={46}
+                    outerRadius={68}
                     startAngle={90}
                     endAngle={-270}
                     dataKey="value"
@@ -613,7 +623,7 @@ export const Dashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
-                <span className="text-[12px] font-extrabold text-slate-900 leading-tight whitespace-nowrap">
+                <span className="text-[12px] font-extrabold text-slate-900 leading-tight truncate max-w-[85px]" title={kpis.totalRevenue}>
                   {kpis.totalRevenue}
                 </span>
                 <span className="text-[9.5px] font-medium text-slate-500 mt-0.5">
@@ -657,7 +667,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Card C: Key Financial Summary */}
-        <div className="lg:col-span-6 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-5 flex flex-col justify-between min-w-0">
+        <div className="col-span-1 md:col-span-6 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-5 h-5 text-[#0f294a] shrink-0" />
             <h2 className="text-[15px] font-bold text-slate-900 leading-tight">
@@ -710,9 +720,9 @@ export const Dashboard = () => {
       </section>
 
       {/* 4. Bottom Row: Project-Wise Analysis | Project Status | Quick Actions */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-[2.4fr_1.05fr_0.95fr] gap-4 sm:gap-5">
+      <section className="grid grid-cols-1 md:grid-cols-12 2xl:grid-cols-[2fr_1fr_1fr] gap-4 sm:gap-5">
         {/* Card A: Project-Wise Analysis Table */}
-        <div className="lg:col-span-12 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 min-w-0 flex flex-col">
+        <div className="col-span-1 md:col-span-12 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 min-w-0 flex flex-col">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5">
             <div className="flex items-start gap-2.5">
               <Layers className="w-5 h-5 text-[#0f294a] mt-0.5 shrink-0" />
@@ -740,9 +750,9 @@ export const Dashboard = () => {
             tabIndex={0}
             role="region"
             aria-labelledby="project-analysis-heading"
-            className="bi-table-wrapper rounded-xl border border-slate-200/70"
+            className="bi-table-wrapper rounded-xl border border-slate-200/70 overflow-x-auto w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
-            <table className="bi-analysis-table">
+            <table className="bi-analysis-table w-full min-w-[500px]">
               <caption className="sr-only">
                 Project-Wise Analysis: Budget, expense and progress tracking
               </caption>
@@ -767,19 +777,19 @@ export const Dashboard = () => {
                         onClick={() => navigate('/projects')}
                         className="hover:bg-slate-50/70 transition-colors cursor-pointer"
                       >
-                        <td data-label="#" className="font-medium text-slate-500 tabular-nums">
+                        <td className="font-medium text-slate-500 tabular-nums">
                           {row.rank}
                         </td>
                         <th scope="row" className="text-left font-semibold text-slate-800 whitespace-nowrap">
                           {row.name}
                         </th>
-                        <td data-label="Total Budget" className="text-right font-semibold text-slate-800 tabular-nums whitespace-nowrap">
+                        <td className="text-right font-semibold text-slate-800 tabular-nums whitespace-nowrap">
                           {row.budget}
                         </td>
-                        <td data-label="Expense" className="text-right font-semibold text-slate-800 tabular-nums whitespace-nowrap">
+                        <td className="text-right font-semibold text-slate-800 tabular-nums whitespace-nowrap">
                           {row.expense}
                         </td>
-                        <td data-label="Progress" className="whitespace-nowrap">
+                        <td className="whitespace-nowrap">
                           <div className="flex items-center gap-1.5 min-w-[76px]">
                             <div className="w-12 xl:w-14 h-2 rounded-full bg-slate-200/80 overflow-hidden shrink-0">
                               <div
@@ -792,7 +802,7 @@ export const Dashboard = () => {
                             </span>
                           </div>
                         </td>
-                        <td data-label="Status" className="text-center whitespace-nowrap">
+                        <td className="text-center whitespace-nowrap">
                           <span
                             className={`bi-status-pill inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-semibold border ${
                               isCompleted
@@ -833,7 +843,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Card B: Project Status */}
-        <div className="lg:col-span-6 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
+        <div className="col-span-1 md:col-span-6 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-5 h-5 text-[#0f294a] shrink-0" />
             <h2 className="text-[15px] font-bold text-slate-900 leading-tight">
@@ -841,7 +851,7 @@ export const Dashboard = () => {
             </h2>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 my-auto py-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-auto py-2">
             {/* Donut with Inside Percentages */}
             <div className="relative w-36 h-36 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -888,9 +898,9 @@ export const Dashboard = () => {
             </div>
 
             {/* Right Legend */}
-            <div className="space-y-2.5 text-[11.5px] font-semibold text-slate-700 shrink-0">
+            <div className="space-y-2 text-xs sm:text-[12px] font-semibold text-slate-700 shrink-0">
               {projectStatus.legend.map((item) => (
-                <div key={item.label} className="flex items-center gap-1.5 whitespace-nowrap">
+                <div key={item.label} className="flex items-center gap-2 whitespace-nowrap">
                   <span
                     className="w-2.5 h-2.5 rounded-[3px] shrink-0"
                     style={{ backgroundColor: item.color }}
@@ -903,7 +913,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Card C: Quick Actions */}
-        <div className="lg:col-span-6 xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-5 flex flex-col justify-between min-w-0">
+        <div className="col-span-1 md:col-span-6 2xl:col-span-1 bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.04)] p-4 sm:p-5 flex flex-col justify-between min-w-0">
           <div className="flex items-center gap-2 mb-3.5">
             <Zap className="w-5 h-5 text-[#c8941c] fill-[#eab308] shrink-0" />
             <h2 className="text-[15px] font-bold text-slate-900 leading-tight">
@@ -911,16 +921,16 @@ export const Dashboard = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 my-auto">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 my-auto">
             {quickActions.map((action) => (
               <button
                 key={action.label}
                 type="button"
                 onClick={action.onClick}
-                className="rounded-xl border border-slate-200/85 bg-gradient-to-b from-white to-slate-50/60 hover:from-white hover:to-[#eef4ff]/60 hover:border-[#93c5fd] hover:shadow-sm active:scale-[0.98] transition-all px-3 py-4 flex flex-col items-center justify-center text-center gap-2 cursor-pointer"
+                className="rounded-xl border border-slate-200/85 bg-gradient-to-b from-white to-slate-50/60 hover:from-white hover:to-[#eef4ff]/60 hover:border-[#93c5fd] hover:shadow-sm active:scale-[0.98] transition-all px-2.5 sm:px-3 py-3 sm:py-4 flex flex-col items-center justify-center text-center gap-1.5 sm:gap-2 cursor-pointer min-h-[92px]"
               >
                 {action.renderIcon()}
-                <span className="text-xs font-bold text-slate-800 leading-tight">
+                <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-snug">
                   {action.label}
                 </span>
               </button>

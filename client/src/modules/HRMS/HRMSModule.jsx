@@ -202,7 +202,7 @@ export const HRMSModule = () => {
       empId: emp.id,
       name: emp.name,
       designation: emp.designation,
-      site: idx === 0 ? 'Head Office, Tarabai Park' : idx === 1 ? 'Royal Palace Commercial Complex' : idx === 2 ? 'Tarabai Park High-Rise' : 'Head Office, Tarabai Park',
+      site: emp.site || emp.department || 'Head Office',
       inTime: isFuture ? '09:00 AM (Scheduled)' : '09:00 AM',
       outTime: isFuture ? '06:00 PM (Scheduled)' : '06:00 PM',
       status: 'Present',
@@ -210,7 +210,7 @@ export const HRMSModule = () => {
         ? 'Advance Scheduled' 
         : isPast 
         ? 'Historical Entry' 
-        : (idx === 0 ? 'Office Geofence' : 'Inside Site Geofence (15m)'),
+        : 'Office Geofence',
       overtimeHours: 0,
       daysPresentMonth: 1
     }));
@@ -430,7 +430,7 @@ export const HRMSModule = () => {
             empId,
             name: targetEmp.name,
             designation: targetEmp.designation,
-            site: targetEmp.site || 'Royal Palace Commercial Complex',
+            site: targetEmp.site || targetEmp.department || 'Head Office',
             inTime: '09:00 AM',
             outTime: '06:00 PM',
             status: newStatus,
@@ -528,7 +528,7 @@ export const HRMSModule = () => {
             empId,
             name: targetEmp.name,
             designation: targetEmp.designation,
-            site: targetEmp.site || 'Royal Palace Commercial Complex',
+            site: targetEmp.site || targetEmp.department || 'Head Office',
             inTime: '09:00 AM',
             outTime: '06:00 PM',
             status: nextStatus,

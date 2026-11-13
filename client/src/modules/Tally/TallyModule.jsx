@@ -18,53 +18,15 @@ import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../../components/Modal';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
-// ─── Default Data Matching User Specification ───────────────────────────────
+// ─── Default Data: Clean Blank Slate ──────────────────────────────────────
 
-const DEFAULT_COMPANIES = [
-  {
-    id: 'COMP-01',
-    name: 'Sanmati Constructions',
-    fy: '2026-27',
-    tallyDetails: 'TallyPrime 4.1 | Port: 9000 | Host: localhost',
-    gstin: '27AAYCS9281Q1ZU',
-    address: 'Shop No. 4, Royal Plaza, Station Road, Kolhapur',
-    status: 'Active',
-    dataFile: 'Sanmati_Constructions_2026_27_Masters.xml',
-    uploadedAt: '2026-11-05 10:30 AM',
-    importedRecords: 48
-  }
-];
+const DEFAULT_COMPANIES = [];
 
-const DEFAULT_LEDGERS = [
-  { id: 'LED-001', tallyLedger: 'ABC Supplier', erpLedger: 'ABC Supplier', group: 'Sundry Creditors', balance: 1220000, status: 'Matched' },
-  { id: 'LED-002', tallyLedger: 'XYZ Supplier', erpLedger: '', group: 'Sundry Creditors', balance: 450000, status: 'Not Found' },
-  { id: 'LED-003', tallyLedger: 'SBI Bank', erpLedger: 'SBI Bank', group: 'Bank Accounts', balance: 3500000, status: 'Matched' },
-  { id: 'LED-004', tallyLedger: 'HDFC Bank Current A/c', erpLedger: 'HDFC Bank Current A/c', group: 'Bank Accounts', balance: 4820000, status: 'Matched' },
-  { id: 'LED-005', tallyLedger: 'Cash In Hand', erpLedger: 'Cash In Hand', group: 'Cash-in-Hand', balance: 285000, status: 'Matched' },
-  { id: 'LED-006', tallyLedger: 'UltraTech Cement Ltd', erpLedger: '', group: 'Sundry Creditors', balance: 875000, status: 'Not Found' },
-  { id: 'LED-007', tallyLedger: 'Royal Palace Developers', erpLedger: 'Royal Palace Developers', group: 'Sundry Debtors', balance: 21500000, status: 'Matched' },
-  { id: 'LED-008', tallyLedger: 'Site Fuel Expenses', erpLedger: 'Diesel Expenses', group: 'Direct Expenses', balance: 450000, status: 'Different Info' },
-  { id: 'LED-009', tallyLedger: 'Construction Revenue A/c', erpLedger: 'Construction Revenue A/c', group: 'Sales Accounts', balance: 48500000, status: 'Matched' },
-  { id: 'LED-010', tallyLedger: 'Material Purchase A/c', erpLedger: 'Material Purchase A/c', group: 'Purchase Accounts', balance: 32100000, status: 'Matched' }
-];
+const DEFAULT_LEDGERS = [];
 
-const DEFAULT_VOUCHERS = [
-  { id: 'VCH-001', date: '05/11/26', voucher: 'Receipt', party: 'ABC Customer', amount: 50000, narration: 'Payment received via UPI', status: 'Imported' },
-  { id: 'VCH-002', date: '05/11/26', voucher: 'Payment', party: 'XYZ Supplier', amount: 20000, narration: 'Part payment against material invoice', status: 'Imported' },
-  { id: 'VCH-003', date: '06/11/26', voucher: 'Purchase', party: 'Cement Supplier', amount: 30000, narration: '100 Bags OPC 53 Grade Cement', status: 'Imported' },
-  { id: 'VCH-004', date: '06/11/26', voucher: 'Sales', party: 'Royal Palace Developers', amount: 10000000, narration: 'RA Bill No. 1 Project Milestone', status: 'Imported' },
-  { id: 'VCH-005', date: '06/11/26', voucher: 'Contra', party: 'Cash to SBI Bank', amount: 75000, narration: 'Cash deposited in SBI Current A/c', status: 'Imported' },
-  { id: 'VCH-006', date: '06/11/26', voucher: 'Payment', party: 'Site Labour Wages', amount: 45000, narration: 'Weekly labour disbursement', status: 'Imported' }
-];
+const DEFAULT_VOUCHERS = [];
 
-const DEFAULT_VERIFICATION = [
-  { id: 'VER-001', details: 'Cash Balance', tally: 50000, erp: 50000, diff: 0, status: 'Matched' },
-  { id: 'VER-002', details: 'Bank Balance', tally: 100000, erp: 100000, diff: 0, status: 'Matched' },
-  { id: 'VER-003', details: 'Total Purchase', tally: 80000, erp: 80000, diff: 0, status: 'Matched' },
-  { id: 'VER-004', details: 'Total Sales', tally: 150000, erp: 140000, diff: -10000, status: 'Mismatch', note: 'Sales मध्ये ₹10,000 चा फरक आहे. Entry पुन्हा Import किंवा Correct करा.' },
-  { id: 'VER-005', details: 'Sundry Debtors Balance', tally: 21500000, erp: 21500000, diff: 0, status: 'Matched' },
-  { id: 'VER-006', details: 'Sundry Creditors Balance', tally: 1220000, erp: 1220000, diff: 0, status: 'Matched' }
-];
+const DEFAULT_VERIFICATION = [];
 
 export const TallyModule = () => {
   const { currentUser } = useAuth();
@@ -86,7 +48,7 @@ export const TallyModule = () => {
     } catch { return DEFAULT_COMPANIES; }
   });
 
-  const [activeCompanyId, setActiveCompanyId] = useState(companies[0]?.id || 'COMP-01');
+  const [activeCompanyId, setActiveCompanyId] = useState(companies[0]?.id || '');
   const activeCompany = useMemo(() => {
     return companies.find(c => c.id === activeCompanyId) || companies[0];
   }, [companies, activeCompanyId]);
@@ -97,11 +59,11 @@ export const TallyModule = () => {
   const [isImporting, setIsImporting] = useState(false);
 
   const [newCompanyForm, setNewCompanyForm] = useState({
-    name: 'Sanmati Constructions',
+    name: '',
     fy: '2026-27',
     tallyDetails: 'TallyPrime 4.1 | Port: 9000 | Host: localhost',
-    gstin: '27AAYCS9281Q1ZU',
-    address: 'Shop No. 4, Royal Plaza, Station Road, Kolhapur'
+    gstin: '',
+    address: ''
   });
 
   // ─── 2. State for Account Data Synchronisation ─────────────────────────────
@@ -517,34 +479,40 @@ export const TallyModule = () => {
               <p className="text-xs text-slate-500">Client ने एकदाच भरलेली अधिकृत माहिती (उदा. Sanmati Constructions – 2026-27)</p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle2 size={13} /> Active &amp; Ready
+          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${
+            activeCompany 
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+              : 'bg-slate-100 text-slate-600 border border-slate-200'
+          }`}>
+            {activeCompany ? <><CheckCircle2 size={13} /> Active &amp; Ready</> : 'No Company Registered'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Company Name</span>
-            <span className="text-sm font-black text-slate-800 block mt-1">{activeCompany?.name}</span>
-            <span className="text-[11px] text-slate-500 block mt-0.5">GSTIN: {activeCompany?.gstin}</span>
+            <span className="text-sm font-black text-slate-800 block mt-1">{activeCompany?.name || 'कोणतीही कंपनी नाही'}</span>
+            <span className="text-[11px] text-slate-500 block mt-0.5">GSTIN: {activeCompany?.gstin || '-'}</span>
           </div>
 
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Financial Year</span>
-            <span className="text-sm font-black text-blue-700 block mt-1">{activeCompany?.fy}</span>
+            <span className="text-sm font-black text-blue-700 block mt-1">{activeCompany?.fy || '-'}</span>
             <span className="text-[11px] text-slate-500 block mt-0.5">01-Apr-2026 to 31-Mar-2027</span>
           </div>
 
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tally Company Details</span>
-            <span className="text-xs font-bold text-slate-800 block mt-1">{activeCompany?.tallyDetails}</span>
-            <span className="text-[11px] text-emerald-600 font-bold block mt-0.5">Status: Connected ✓</span>
+            <span className="text-xs font-bold text-slate-800 block mt-1">{activeCompany?.tallyDetails || '-'}</span>
+            <span className="text-[11px] text-emerald-600 font-bold block mt-0.5">
+              {activeCompany ? 'Status: Connected ✓' : 'Status: Not Connected'}
+            </span>
           </div>
 
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Uploaded Data File</span>
-            <span className="text-xs font-mono font-bold text-[#002046] truncate block mt-1">{activeCompany?.dataFile}</span>
-            <span className="text-[11px] text-slate-500 block mt-0.5">{activeCompany?.importedRecords} Records Ready</span>
+            <span className="text-xs font-mono font-bold text-[#002046] truncate block mt-1">{activeCompany?.dataFile || 'फाईल अपलोड नाही'}</span>
+            <span className="text-[11px] text-slate-500 block mt-0.5">{activeCompany ? `${activeCompany.importedRecords || 0} Records Ready` : '0 Records'}</span>
           </div>
         </div>
       </div>
@@ -559,7 +527,11 @@ export const TallyModule = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {companies.map(c => {
+          {companies.length === 0 ? (
+            <div className="col-span-3 p-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
+              कोणतीही Tally Company नोंदणीकृत नाही. कृपया वरील '+ Add Company' बटण वापरून नवीन कंपनी जोडा.
+            </div>
+          ) : companies.map(c => {
             const isSelected = c.id === activeCompanyId;
             return (
               <div
@@ -890,7 +862,13 @@ export const TallyModule = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredLedgers.map(item => {
+                {filteredLedgers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-slate-400 font-semibold">
+                      कोणतेही Ledger सापडले नाहीत. कृपया XML फाईल Import करा किंवा नवीन Ledger जोडा.
+                    </td>
+                  </tr>
+                ) : filteredLedgers.map(item => {
                   const isNotFound = item.status === 'Not Found';
                   const isMatched = item.status === 'Matched';
                   const isDiff = item.status === 'Different Info';
@@ -1695,9 +1673,17 @@ export const TallyModule = () => {
               </p>
             </div>
             <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-              totalDiff > 0 ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800'
+              verificationData.length === 0
+                ? 'bg-slate-100 text-slate-600 border border-slate-200'
+                : totalDiff > 0
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                  : 'bg-emerald-100 text-emerald-800'
             }`}>
-              {totalDiff > 0 ? `Net Difference: ${formatCurrency(totalDiff)}` : 'All Balances Matched ✓'}
+              {verificationData.length === 0
+                ? 'No Records to Compare'
+                : totalDiff > 0
+                  ? `Net Difference: ${formatCurrency(totalDiff)}`
+                  : 'All Balances Matched ✓'}
             </span>
           </div>
 
@@ -1714,7 +1700,13 @@ export const TallyModule = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredVerification.map(item => {
+                {filteredVerification.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-slate-400 font-semibold">
+                      कोणतेही Verification Records उपलब्ध नाहीत. कृपया प्रथम डेटा Import करा किंवा Compare Data वर क्लिक करा.
+                    </td>
+                  </tr>
+                ) : filteredVerification.map(item => {
                   const hasDiff = item.diff !== 0;
 
                   return (
