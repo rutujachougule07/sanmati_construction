@@ -1,16 +1,5 @@
 // SANMATI CONSTRUCTIONS ERP - Simplified Executive Management Reports View
 import React, { useState } from 'react';
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from 'recharts';
 import { Building2, TrendingUp, CheckCircle2, Clock, ShieldAlert } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import MISTable from './MISTable';
@@ -31,7 +20,6 @@ const ManagementMISView = ({ data }) => {
     departmentPerformance = [],
     employeePerformance = [],
     pendingApprovals = [],
-    growthTrends = [],
     risks = [],
     insights = []
   } = data || {};
@@ -178,56 +166,28 @@ const ManagementMISView = ({ data }) => {
         })}
       </div>
 
-      {/* Business Growth Chart & Key Risks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-          <h3 className="text-sm font-bold text-[#002046] mb-3">Business Performance Trend</h3>
-          {growthTrends.length === 0 ? (
-            <div className="h-56 flex items-center justify-center text-xs text-slate-400 bg-slate-50 rounded-lg">
-              No monthly trend data for selected dates.
-            </div>
-          ) : (
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={growthTrends} margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#475569' }} />
-                  <YAxis tick={{ fontSize: 11, fill: '#475569' }} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />
-                  <Tooltip formatter={(val) => formatCurrency(val)} />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
-                  <Bar dataKey="earnedRevenue" name="Revenue" fill="#002046" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#64748b" radius={[4, 4, 0, 0]} />
-                  <Line type="monotone" dataKey="netProfit" name="Net Profit" stroke="#059669" strokeWidth={2.5} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
-
+      {/* Key Risks & Insights */}
+      {(risks.length > 0 || insights.length > 0) && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-3">
           <h3 className="text-sm font-bold text-[#002046] inline-flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-rose-600" aria-hidden="true" />
             Key Risks &amp; Insights
           </h3>
-          {risks.length === 0 && insights.length === 0 ? (
-            <p className="text-xs text-slate-500">No active risks flagged for this period.</p>
-          ) : (
-            <ul className="space-y-2 text-xs">
-              {risks.slice(0, 3).map((r) => (
-                <li key={r.id} className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-rose-900">
-                  <strong className="block">{r.title}</strong>
-                  <span className="text-[11px] opacity-85">{r.detail}</span>
-                </li>
-              ))}
-              {insights.slice(0, 2).map((txt, idx) => (
-                <li key={idx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
-                  {txt}
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            {risks.slice(0, 4).map((r) => (
+              <li key={r.id} className="p-2.5 rounded-lg bg-rose-50/70 border border-rose-200 text-rose-900">
+                <strong className="block">{r.title}</strong>
+                <span className="text-[11px] opacity-85">{r.detail}</span>
+              </li>
+            ))}
+            {insights.slice(0, 2).map((txt, idx) => (
+              <li key={idx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
+                {txt}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
 
       {/* Unified Executive Table */}
       <MISTable {...tableProps} headerRight={viewToggle} />

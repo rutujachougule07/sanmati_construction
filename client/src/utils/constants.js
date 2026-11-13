@@ -229,3 +229,25 @@ export const APPROVAL_STATUS = {
   APPROVED: "Approved",
   REJECTED: "Rejected"
 };
+
+export const isDummyLead = (lead) => {
+  if (!lead || typeof lead !== 'object') return false;
+  const dummyIds = ['LEAD-001', 'LEAD-002', 'LEAD-003', 'LEAD-004'];
+  if (dummyIds.includes(lead.id)) return true;
+  const name = String(lead.customerName || lead.clientName || '').toLowerCase();
+  if (name.includes('cherrylee') || name.includes('rishabh') || name.includes('suhas patil') || name.includes('arvind kulkarni')) return true;
+  const title = String(lead.leadTitle || '').toLowerCase();
+  if (title.includes('technical inquiry for sangli') || title.includes('query regarding sangli') || title.includes('kmc drainage') || title.includes('tarabai park')) return true;
+  const proj = String(lead.projectName || '').toLowerCase();
+  if (proj.includes('sangli regional') || proj.includes('sangli high-street') || proj.includes('kmc underground') || proj.includes('kulkarni heritage')) return true;
+  return false;
+};
+
+export const isDummyFollowUp = (f) => {
+  if (!f || typeof f !== 'object') return false;
+  const dummyLeadIds = ['LEAD-001', 'LEAD-002', 'LEAD-003', 'LEAD-004'];
+  if (dummyLeadIds.includes(f.leadId)) return true;
+  const name = String(f.customerName || f.clientName || '').toLowerCase();
+  if (name.includes('cherrylee') || name.includes('rishabh') || name.includes('suhas patil') || name.includes('arvind kulkarni')) return true;
+  return false;
+};

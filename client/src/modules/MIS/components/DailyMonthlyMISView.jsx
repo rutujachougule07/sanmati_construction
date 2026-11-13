@@ -1,21 +1,11 @@
 // SANMATI CONSTRUCTIONS ERP - Simplified Daily & Monthly Reports View
 import React from 'react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from 'recharts';
 import { TrendingUp, TrendingDown, Wallet, Users } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import MISTable from './MISTable';
 
 const DailyMonthlyMISView = ({ data, reportType, onReportTypeChange }) => {
-  const { rows = [], totals = {}, chartData = [] } = data || {};
+  const { rows = [], totals = {} } = data || {};
   const netCash = (totals.paymentsReceived || 0) - (totals.paymentsMade || 0);
 
   const cards = [
@@ -166,26 +156,6 @@ const DailyMonthlyMISView = ({ data, reportType, onReportTypeChange }) => {
           );
         })}
       </div>
-
-      {/* Income vs Expenses Chart */}
-      {chartData.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
-          <h3 className="text-sm font-bold text-[#002046] mb-3">Income vs Expenses Overview</h3>
-          <div className="h-60 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#475569' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#475569' }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(val) => formatCurrency(val)} />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Bar dataKey="income" name="Income" fill="#002046" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" name="Expenses" fill="#0b449b" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
 
       {/* Clean Data Table */}
       <MISTable

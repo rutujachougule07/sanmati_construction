@@ -15,6 +15,7 @@ import { StatusBadge } from '../../components/StatusBadge';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { exportToExcel, generatePDFReport } from '../../services/exportService';
 import { EditableSelect } from '../../components/EditableSelect';
+import { isDummyLead, isDummyFollowUp } from '../../utils/constants';
 
 export const CONSTRUCTION_WORK_TYPES = [
   'Residential Bungalow Construction',
@@ -105,7 +106,9 @@ export const CRMModule = () => {
     clients, 
     projects = [],
     leads = [],
+    setLeads,
     followUps = [],
+    setFollowUps,
     customerActivities = [],
     hrmsEmployees = [],
     addCustomer,
@@ -219,14 +222,24 @@ export const CRMModule = () => {
     handleRemoveOption('sanmati_crm_custom_employees', setCustomEmployeesList, customEmployeesList, opt);
   };
 
-  // Clean any dummy employee 'Er. Rajesh Kulkarni' from existing leads in state
+  // Live purge of any dummy leads and followups
   useEffect(() => {
-    leads.forEach(l => {
-      if (l.assignedEmployee === 'Er. Rajesh Kulkarni') {
-        updateLead(l.id, { assignedEmployee: '' });
+    if (typeof setLeads === 'function') {
+      const hasDummyLead = (leads || []).some(isDummyLead);
+      if (hasDummyLead) {
+        setLeads(prev => (prev || []).filter(l => !isDummyLead(l)));
       }
-    });
-  }, [leads, updateLead]);
+    }
+  }, [leads, setLeads]);
+
+  useEffect(() => {
+    if (typeof setFollowUps === 'function') {
+      const hasDummyFollowUp = (followUps || []).some(isDummyFollowUp);
+      if (hasDummyFollowUp) {
+        setFollowUps(prev => (prev || []).filter(f => !isDummyFollowUp(f)));
+      }
+    }
+  }, [followUps, setFollowUps]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -848,8 +861,10 @@ export const CRMModule = () => {
     }
   };
 
+  const cleanLeads = useMemo(() => (leads || []).filter(l => !isDummyLead(l)), [leads]);
+
   const filteredLeads = useMemo(() => {
-    return leads.filter(l => {
+    return cleanLeads.filter(l => {
       if (leadStatusFilter !== 'All' && l.status !== leadStatusFilter) return false;
       if (leadSourceFilter !== 'All' && l.leadSource !== leadSourceFilter) return false;
       if (leadProjectTypeFilter !== 'All' && (l.projectType || l.enquiryType) !== leadProjectTypeFilter) return false;
@@ -861,29 +876,29 @@ export const CRMModule = () => {
       }
       return true;
     });
-  }, [leads, leadStatusFilter, leadSourceFilter, leadProjectTypeFilter, leadEmployeeFilter, leadPriorityFilter, leadDateFilter]);
+  }, [cleanLeads, leadStatusFilter, leadSourceFilter, leadProjectTypeFilter, leadEmployeeFilter, leadPriorityFilter, leadDateFilter]);
 
   // Dashboard KPI 2: Total Pipeline Value - Sum of estimated budgets of active leads (excluding Lost or Converted)
   const totalPipelineValue = useMemo(() => {
-    return leads
+    return cleanLeads
       .filter(l => l.status !== 'Lost' && l.status !== 'Converted')
       .reduce((acc, l) => acc + (Number(l.estimatedBudget) || 0), 0);
-  }, [leads]);
+  }, [cleanLeads]);
 
   // Dashboard KPI 3: Conversion Rate - (Converted Leads / Total Leads) * 100
   const convertedLeadsCount = useMemo(() => {
-    return leads.filter(l => l.status === 'Converted').length;
-  }, [leads]);
+    return cleanLeads.filter(l => l.status === 'Converted').length;
+  }, [cleanLeads]);
 
   const leadConversionRate = useMemo(() => {
-    if (leads.length === 0) return '0.0%';
-    return `${((convertedLeadsCount / leads.length) * 100).toFixed(1)}%`;
-  }, [leads, convertedLeadsCount]);
+    if (cleanLeads.length === 0) return '0.0%';
+    return `${((convertedLeadsCount / cleanLeads.length) * 100).toFixed(1)}%`;
+  }, [cleanLeads, convertedLeadsCount]);
 
   // Dashboard KPI 4: Active Negotiations - Count of leads currently in Negotiation status
   const activeNegotiationsCount = useMemo(() => {
-    return leads.filter(l => l.status === 'Negotiation').length;
-  }, [leads]);
+    return cleanLeads.filter(l => l.status === 'Negotiation').length;
+  }, [cleanLeads]);
 
   const leadColumns = [
     { 
@@ -1395,7 +1410,7 @@ export const CRMModule = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">
               <span className="text-slate-500 text-xs">Total Inquiries</span>
-              <div className="text-lg font-bold text-slate-900 mt-1">{leads.length} Leads</div>
+              <div className="text-lg font-bold text-slate-900 mt-1">{cleanLeads.length} Leads</div>
               <span className="text-[11px] text-slate-400 font-medium">All registered construction inquiries</span>
             </div>
             <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm">

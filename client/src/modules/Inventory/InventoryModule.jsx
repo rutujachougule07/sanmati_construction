@@ -75,6 +75,7 @@ export const InventoryModule = () => {
     category: 'Cement & Concrete',
     unit: 'Bag',
     openingStock: '',
+    currentStock: '',
     minimumThreshold: '',
     unitPrice: '',
     supplierId: '',
@@ -142,6 +143,7 @@ export const InventoryModule = () => {
       category: 'Cement & Concrete',
       unit: 'Bag',
       openingStock: '',
+      currentStock: '',
       minimumThreshold: '',
       unitPrice: '',
       supplierId: vendors[0]?.id || '',
@@ -159,6 +161,7 @@ export const InventoryModule = () => {
       category: mat.category || 'Cement & Concrete',
       unit: mat.unit || 'Bag',
       openingStock: String(mat.openingStock ?? mat.currentStock ?? 0),
+      currentStock: String(mat.currentStock ?? mat.openingStock ?? 0),
       minimumThreshold: String(mat.minimumThreshold ?? 0),
       unitPrice: String(mat.unitPrice ?? 0),
       supplierId: mat.supplierId || '',
@@ -227,6 +230,7 @@ export const InventoryModule = () => {
         name: materialForm.name.trim(),
         category: materialForm.category,
         unit: materialForm.unit,
+        currentStock: Number(materialForm.currentStock) >= 0 ? Number(materialForm.currentStock) : (editingMaterial.currentStock || 0),
         minimumThreshold: Number(materialForm.minimumThreshold) || 0,
         unitPrice: Number(materialForm.unitPrice) || 0,
         supplierId: materialForm.supplierId,
@@ -350,24 +354,6 @@ export const InventoryModule = () => {
             <Plus className="w-4 h-4" />
             <span>Add Material</span>
           </button>
-          <button
-            type="button"
-            onClick={() => openStockInModal('')}
-            disabled={inventory.length === 0}
-            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs cursor-pointer transition-colors"
-          >
-            <ArrowDownRight className="w-4 h-4" />
-            <span>Stock-In</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => openStockOutModal('')}
-            disabled={inventory.length === 0}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-800 border border-slate-200 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <ArrowUpRight className="w-4 h-4 text-amber-600" />
-            <span>Stock-Out / Issue</span>
-          </button>
         </div>
       </div>
 
@@ -447,8 +433,6 @@ export const InventoryModule = () => {
           onOpenAddMaterial={openAddMaterial}
           onOpenEditMaterial={openEditMaterial}
           onDeleteMaterial={deleteMaterialItem}
-          onOpenStockIn={openStockInModal}
-          onOpenStockOut={openStockOutModal}
         />
       )}
 
@@ -552,12 +536,16 @@ export const InventoryModule = () => {
               </div>
             ) : (
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Current Stock (Via Ledger)</label>
+                <label className="block text-slate-700 font-bold mb-1">Available / Current Stock *</label>
                 <input
-                  type="text"
-                  disabled
-                  value={`${editingMaterial.currentStock} ${editingMaterial.unit}`}
-                  className="erp-input bg-slate-100 text-slate-500 font-mono font-bold"
+                  type="number"
+                  required
+                  min="0"
+                  step="any"
+                  placeholder="e.g. 150"
+                  value={materialForm.currentStock}
+                  onChange={(e) => setMaterialForm({ ...materialForm, currentStock: e.target.value })}
+                  className="erp-input font-mono font-bold text-slate-900"
                 />
               </div>
             )}

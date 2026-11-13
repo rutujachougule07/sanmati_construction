@@ -1,5 +1,5 @@
 // SANMATI CONSTRUCTIONS ERP - Business Intelligence Dashboard
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
@@ -7,8 +7,6 @@ import {
   CheckCircle2,
   Database,
   BarChart3,
-  Calendar,
-  ChevronDown,
   FileText,
   Wallet,
   TrendingUp,
@@ -40,8 +38,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   buildPeriodPresets,
   computeDashboardAnalytics,
-  formatCompactINR,
-  getCustomRangeLabel
+  formatCompactINR
 } from '../utils/dashboardAnalytics';
 import dashboardHeroBanner from '../assets/dashboard-hero-banner.jpg';
 
@@ -163,27 +160,7 @@ export const Dashboard = () => {
   const { currentUser } = useAuth();
   const erpData = useERPData();
 
-  const periodPresets = useMemo(() => buildPeriodPresets(), []);
-  const [selectedPeriodId, setSelectedPeriodId] = useState(periodPresets[0].id);
-  const [customStart, setCustomStart] = useState(periodPresets[0].start);
-  const [customEnd, setCustomEnd] = useState(periodPresets[4].end);
-  const [isPeriodMenuOpen, setIsPeriodMenuOpen] = useState(false);
-  const periodWrapperRef = useRef(null);
-
-  const activePreset = useMemo(() => {
-    const found = periodPresets.find((p) => p.id === selectedPeriodId) || periodPresets[0];
-    if (found.id === 'custom') {
-      const normalizedStart = customStart && customEnd && customStart > customEnd ? customEnd : customStart;
-      const normalizedEnd = customStart && customEnd && customStart > customEnd ? customStart : customEnd;
-      return {
-        ...found,
-        start: normalizedStart || null,
-        end: normalizedEnd || null,
-        label: getCustomRangeLabel(normalizedStart, normalizedEnd)
-      };
-    }
-    return found;
-  }, [periodPresets, selectedPeriodId, customStart, customEnd]);
+  const activePreset = useMemo(() => buildPeriodPresets()[0], []);
 
   const analytics = useMemo(
     () => computeDashboardAnalytics(erpData, activePreset),
@@ -199,25 +176,6 @@ export const Dashboard = () => {
       activePreset
     ]
   );
-
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (periodWrapperRef.current && !periodWrapperRef.current.contains(event.target)) {
-        setIsPeriodMenuOpen(false);
-      }
-    };
-    const handleEscapeKey = (event) => {
-      if (event.key === 'Escape') {
-        setIsPeriodMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, []);
 
   const { kpis, monthlySeries, revenueBreakdown, projectRows, projectStatus } = analytics;
   const visibleProjectRows = projectRows.slice(0, 6);
@@ -365,79 +323,6 @@ export const Dashboard = () => {
             <p className="text-[11px] sm:text-xs md:text-[13px] text-slate-500 font-medium mt-1">
               Real-time business performance, project insights and financial analysis
             </p>
-          </div>
-
-          {/* Date Range Filter Control */}
-          <div className="relative self-start md:self-center shrink-0" ref={periodWrapperRef}>
-            <button
-              type="button"
-              onClick={() => setIsPeriodMenuOpen((prev) => !prev)}
-              aria-expanded={isPeriodMenuOpen}
-              className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white/95 hover:bg-white border border-slate-200/90 shadow-2xs text-xs sm:text-[13px] font-semibold text-slate-700 transition-all cursor-pointer"
-            >
-              <Calendar className="w-4 h-4 text-[#0b449b] shrink-0" />
-              <span className="whitespace-nowrap">{activePreset.label}</span>
-              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isPeriodMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isPeriodMenuOpen && (
-              <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl bg-white border border-slate-200 shadow-xl p-1.5 z-30">
-                {periodPresets.map((option) => {
-                  const isActive = option.id === selectedPeriodId;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedPeriodId(option.id);
-                        if (option.id !== 'custom') {
-                          setIsPeriodMenuOpen(false);
-                        }
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                        isActive
-                          ? 'bg-[#eef4ff] text-[#0b449b] font-bold'
-                          : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-
-                {selectedPeriodId === 'custom' && (
-                  <div className="mt-1.5 pt-2 px-2 pb-1.5 border-t border-slate-100 space-y-2">
-                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-2">
-                      <label className="block">
-                        <span className="block text-[10px] font-semibold text-slate-500 mb-0.5">From</span>
-                        <input
-                          type="date"
-                          value={customStart || ''}
-                          onChange={(e) => setCustomStart(e.target.value)}
-                          className="w-full px-2 py-1 text-[11px] font-medium text-slate-800 border border-slate-200 rounded-md focus:outline-none focus:border-[#0b449b]"
-                        />
-                      </label>
-                      <label className="block">
-                        <span className="block text-[10px] font-semibold text-slate-500 mb-0.5">To</span>
-                        <input
-                          type="date"
-                          value={customEnd || ''}
-                          onChange={(e) => setCustomEnd(e.target.value)}
-                          className="w-full px-2 py-1 text-[11px] font-medium text-slate-800 border border-slate-200 rounded-md focus:outline-none focus:border-[#0b449b]"
-                        />
-                      </label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsPeriodMenuOpen(false)}
-                      className="w-full py-1.5 rounded-lg bg-[#0b449b] hover:bg-[#09367d] text-white text-[11px] font-bold transition-colors cursor-pointer"
-                    >
-                      Apply Range
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </section>

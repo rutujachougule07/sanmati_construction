@@ -25,12 +25,13 @@ import {
   saveModuleRecord, 
   removeModuleRecord 
 } from '../services/firebaseSync';
+import { isDummyLead, isDummyFollowUp } from '../utils/constants';
 
 const ERPDataContext = createContext(null);
 
 export const ERPDataProvider = ({ children }) => {
   // Clear any existing cached dummy records in localStorage so all modules start completely blank
-  const DATA_VERSION = 'v11_zero_dummy_all_sections_strictly_empty';
+  const DATA_VERSION = 'v12_strictly_purge_all_dummy_leads_and_crm';
   if (typeof window !== 'undefined' && localStorage.getItem('sanmati_data_version') !== DATA_VERSION) {
     const keys = [
       'clients', 'leads', 'followUps', 'customerActivities', 'heroBanners',
@@ -111,11 +112,11 @@ export const ERPDataProvider = ({ children }) => {
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'leads' && Array.isArray(parsed)) {
-            parsed = parsed.map(l => l.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...l, assignedEmployee: '' } : l);
+            parsed = parsed.filter(l => !isDummyLead(l)).map(l => l.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...l, assignedEmployee: '' } : l);
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'followUps' && Array.isArray(parsed)) {
-            parsed = parsed.map(f => f.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...f, assignedEmployee: '' } : f);
+            parsed = parsed.filter(f => !isDummyFollowUp(f)).map(f => f.assignedEmployee === 'Er. Rajesh Kulkarni' ? { ...f, assignedEmployee: '' } : f);
             localStorage.setItem(`sanmati_${key}`, JSON.stringify(parsed));
           }
           if (key === 'customerActivities' && Array.isArray(parsed)) {
@@ -168,6 +169,35 @@ export const ERPDataProvider = ({ children }) => {
   const [followUps, setFollowUps] = usePersistedState('followUps', []);
   const [customerActivities, setCustomerActivities] = usePersistedState('customerActivities', []);
 
+  // Live CRM leads & follow-ups guarantee: ensure dummy leads are never displayed or preserved
+  useEffect(() => {
+    setLeads(prev => {
+      const filtered = (prev || []).filter(l => !isDummyLead(l));
+      if (filtered.length !== (prev || []).length) {
+        localStorage.setItem('sanmati_leads', JSON.stringify(filtered));
+        (prev || []).filter(isDummyLead).forEach(l => {
+          try { removeModuleRecord('leads', l.id); } catch (e) {}
+        });
+        return filtered;
+      }
+      return prev;
+    });
+  }, [setLeads]);
+
+  useEffect(() => {
+    setFollowUps(prev => {
+      const filtered = (prev || []).filter(f => !isDummyFollowUp(f));
+      if (filtered.length !== (prev || []).length) {
+        localStorage.setItem('sanmati_followUps', JSON.stringify(filtered));
+        (prev || []).filter(isDummyFollowUp).forEach(f => {
+          try { removeModuleRecord('followUps', f.id); } catch (e) {}
+        });
+        return filtered;
+      }
+      return prev;
+    });
+  }, [setFollowUps]);
+
   // Account Management Dedicated States
   const [incomeRecords, setIncomeRecords] = usePersistedState('incomeRecords', []);
   const [expenseRecords, setExpenseRecords] = usePersistedState('expenseRecords', []);
@@ -189,10 +219,22 @@ export const ERPDataProvider = ({ children }) => {
         if (data && data.length > 0) setClients(data);
       }),
       subscribeToModuleCollection('leads', (data) => {
-        if (data && data.length > 0) setLeads(data);
+        if (data && data.length > 0) {
+          const filtered = data.filter(l => !isDummyLead(l));
+          setLeads(filtered);
+          data.filter(isDummyLead).forEach(l => {
+            try { removeModuleRecord('leads', l.id); } catch (e) {}
+          });
+        }
       }),
       subscribeToModuleCollection('followUps', (data) => {
-        if (data && data.length > 0) setFollowUps(data);
+        if (data && data.length > 0) {
+          const filtered = data.filter(f => !isDummyFollowUp(f));
+          setFollowUps(filtered);
+          data.filter(isDummyFollowUp).forEach(f => {
+            try { removeModuleRecord('followUps', f.id); } catch (e) {}
+          });
+        }
       }),
       subscribeToModuleCollection('customerActivities', (data) => {
         if (data && data.length > 0) setCustomerActivities(data);
